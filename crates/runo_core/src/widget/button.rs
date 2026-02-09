@@ -30,13 +30,19 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
         }
     }
 
-    pub fn width(mut self, width: f64) -> Self {
-        self.width = width;
+    pub fn width(mut self, px: u32) -> Self {
+        self.width = px as f64;
         self
     }
 
-    pub fn height(mut self, height: f64) -> Self {
-        self.height = height;
+    pub fn height(mut self, px: u32) -> Self {
+        self.height = px as f64;
+        self
+    }
+
+    pub fn size(mut self, width: u32, height: u32) -> Self {
+        self.width = width as f64;
+        self.height = height as f64;
         self
     }
 

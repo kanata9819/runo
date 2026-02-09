@@ -27,8 +27,8 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         self
     }
 
-    pub fn size(mut self, size: f32) -> Self {
-        self.font_size = size;
+    pub fn size(mut self, px: u32) -> Self {
+        self.font_size = px as f32;
         self
     }
 

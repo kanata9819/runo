@@ -10,7 +10,7 @@ use winit::dpi::LogicalSize;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use crate::app::Application;
+use crate::app::{Application, RunOptions};
 use crate::font::load_default_font;
 use crate::hooks::effect::EffectStore;
 use crate::input::InputState;
@@ -29,10 +29,13 @@ pub(crate) struct AppRunner<A: Application + 'static> {
     pub(super) effects: EffectStore,
     pub(super) retained: RetainedState,
     pub(super) built: bool,
+    window_options: RunOptions,
 }
 
 impl<A: Application + 'static> AppRunner<A> {
-    pub(super) fn new(user_app: A) -> Self {
+    pub(super) fn new(user_app: A, mut window_options: RunOptions) -> Self {
+        window_options.window_width = window_options.window_width.max(1);
+        window_options.window_height = window_options.window_height.max(1);
         Self {
             user_app,
             window: None,
@@ -46,13 +49,17 @@ impl<A: Application + 'static> AppRunner<A> {
             effects: EffectStore::new(),
             retained: RetainedState::new(),
             built: false,
+            window_options,
         }
     }
 
     pub(super) fn init_window_and_gpu(&mut self, event_loop: &ActiveEventLoop) {
         let attributes: WindowAttributes = Window::default_attributes()
-            .with_title("runo example")
-            .with_inner_size(LogicalSize::new(640.0, 480.0));
+            .with_title(self.window_options.window_title.clone())
+            .with_inner_size(LogicalSize::new(
+                self.window_options.window_width as f64,
+                self.window_options.window_height as f64,
+            ));
 
         let window = Arc::new(
             event_loop

@@ -7,7 +7,7 @@ mod retained;
 mod ui;
 mod widget;
 
-pub use app::{Application, run};
+pub use app::{Application, RunOptions, run};
 pub use hooks::effect::EffectCleanup;
 pub use ui::Ui;
 pub use vello::peniko::Color;

@@ -1,13 +1,11 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
-use skrifa::instance::{LocationRef, Size};
-use skrifa::{FontRef, MetadataProvider};
-use vello::kurbo::{Affine, Rect, RoundedRect, Vec2};
+use vello::kurbo::{Affine, Rect, RoundedRect};
 use vello::peniko::{Color, Fill};
-use vello::Glyph;
 
 use crate::Ui;
+use crate::widget::text::{draw_text_run, layout_text};
 
 #[derive(Clone, Copy)]
 pub struct ButtonResponse {
@@ -85,7 +83,15 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
             .fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
 
         if let Some(text) = self.text {
-            draw_button_text(self.ui, &text, x, y, self.width, self.height, self.text_color);
+            draw_button_text(
+                self.ui,
+                &text,
+                x,
+                y,
+                self.width,
+                self.height,
+                self.text_color,
+            );
         }
 
         ButtonResponse {
@@ -96,51 +102,17 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
     }
 }
 
-fn draw_button_text(
-    ui: &mut Ui<'_>,
-    text: &str,
-    x: f64,
-    y: f64,
-    w: f64,
-    h: f64,
-    color: Color,
-) {
+fn draw_button_text(ui: &mut Ui<'_>, text: &str, x: f64, y: f64, w: f64, h: f64, color: Color) {
     let Some(font) = ui.font.as_ref() else {
         return;
     };
-    let Ok(font_ref) = FontRef::from_index(font.data.as_ref(), font.index) else {
+    let font_size = 18.0_f32;
+    let Some((glyphs, total_advance)) = layout_text(font, text, font_size) else {
         return;
     };
-    let charmap = font_ref.charmap();
-    let glyph_metrics = font_ref.glyph_metrics(Size::new(18.0), LocationRef::default());
-
-    let font_size = 18.0_f32;
-    let mut total_advance = 0.0_f32;
-    let mut runs = Vec::new();
-    for ch in text.chars() {
-        let Some(glyph_id) = charmap.map(ch) else {
-            continue;
-        };
-        let advance = glyph_metrics
-            .advance_width(glyph_id)
-            .unwrap_or(font_size * 0.56);
-        runs.push((glyph_id.to_u32(), total_advance));
-        total_advance += advance;
-    }
-
     let text_x = x + (w - total_advance as f64) * 0.5;
     let text_y = y + h * 0.5 + font_size as f64 * 0.35;
-
-    let glyphs = runs
-        .into_iter()
-        .map(|(id, x)| Glyph { id, x, y: 0.0 });
-
-    ui.scene
-        .draw_glyphs(font)
-        .font_size(font_size)
-        .transform(Affine::translate(Vec2::new(text_x, text_y)))
-        .brush(color)
-        .draw(Fill::NonZero, glyphs);
+    draw_text_run(ui.scene, font, glyphs, text_x, text_y, font_size, color);
 }
 
 fn contains(rect: Rect, x: f64, y: f64) -> bool {

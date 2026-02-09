@@ -1,12 +1,13 @@
+use vello::Scene;
 use vello::kurbo::{Affine, Rect};
 use vello::peniko::{Fill, FontData};
-use vello::Scene;
 
+use crate::Color;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::input::InputFrame;
 use crate::layout::{LayoutDirection, LayoutNode};
 use crate::widget::button::ButtonBuilder;
-use crate::Color;
+use crate::widget::label::LabelBuilder;
 
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
@@ -32,7 +33,11 @@ impl<'a> Ui<'a> {
             active_button,
             font,
             effects,
-            layout_stack: vec![LayoutNode::new((24.0, 24.0), LayoutDirection::Vertical, 12.0)],
+            layout_stack: vec![LayoutNode::new(
+                (24.0, 24.0),
+                LayoutDirection::Vertical,
+                12.0,
+            )],
             auto_id_counter: 0,
         }
     }
@@ -45,6 +50,10 @@ impl<'a> Ui<'a> {
 
     pub fn button_id<'ui>(&'ui mut self, id: impl Into<String>) -> ButtonBuilder<'ui, 'a> {
         ButtonBuilder::new(self, id.into())
+    }
+
+    pub fn label<'ui>(&'ui mut self, text: impl Into<String>) -> LabelBuilder<'ui, 'a> {
+        LabelBuilder::new(self, text.into())
     }
 
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {

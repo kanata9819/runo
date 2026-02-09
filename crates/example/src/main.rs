@@ -13,6 +13,8 @@ impl Application for MyApp {
         });
 
         ui.vertical(|ui| {
+            ui.label("runo example").size(22.0).show();
+
             let button = ui
                 .button_id("main.toggle")
                 .width(220.0)

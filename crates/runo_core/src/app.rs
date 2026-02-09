@@ -12,11 +12,11 @@ use winit::event::{MouseButton, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::{Window, WindowAttributes, WindowId};
 
+use crate::Color;
 use crate::font::load_default_font;
 use crate::hooks::effect::EffectStore;
 use crate::input::InputState;
 use crate::ui::Ui;
-use crate::Color;
 
 pub trait Application {
     fn update(&mut self, ui: &mut Ui<'_>);
@@ -108,6 +108,14 @@ impl<A: Application + 'static> AppRunner<A> {
     }
 
     fn render(&mut self) {
+        let Some(surface_for_size) = self.surface.as_ref() else {
+            return;
+        };
+        let width = surface_for_size.config.width;
+        let height = surface_for_size.config.height;
+        self.build_scene(width, height);
+        self.run_ui_frame();
+
         let Some(surface) = self.surface.as_mut() else {
             return;
         };
@@ -115,13 +123,29 @@ impl<A: Application + 'static> AppRunner<A> {
             return;
         };
 
-        self.scene.reset();
-        let bg = Rect::new(
-            0.0,
-            0.0,
-            surface.config.width as f64,
-            surface.config.height as f64,
+        let dev_id = surface.dev_id;
+        let Some(surface_texture) = Self::acquire_surface_texture(&mut self.render_cx, surface)
+        else {
+            return;
+        };
+        let device = &self.render_cx.devices[dev_id].device;
+        let queue = &self.render_cx.devices[dev_id].queue;
+
+        Self::render_scene_to_target(
+            renderer,
+            device,
+            queue,
+            &self.scene,
+            &surface.target_view,
+            width,
+            height,
         );
+        Self::blit_to_surface(surface, device, queue, surface_texture);
+    }
+
+    fn build_scene(&mut self, width: u32, height: u32) {
+        self.scene.reset();
+        let bg = Rect::new(0.0, 0.0, width as f64, height as f64);
         self.scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -129,7 +153,9 @@ impl<A: Application + 'static> AppRunner<A> {
             None,
             &bg,
         );
+    }
 
+    fn run_ui_frame(&mut self) {
         self.effects.begin_frame();
 
         let frame_input = self.input.frame();
@@ -149,40 +175,56 @@ impl<A: Application + 'static> AppRunner<A> {
         if frame_input.mouse_released {
             self.active_button = None;
         }
-
         self.input.end_frame();
+    }
 
-        let dev_id = surface.dev_id;
-        let device = &self.render_cx.devices[dev_id].device;
-        let queue = &self.render_cx.devices[dev_id].queue;
-
-        let surface_texture = match surface.surface.get_current_texture() {
-            Ok(frame) => frame,
+    fn acquire_surface_texture(
+        render_cx: &mut RenderContext,
+        surface: &mut RenderSurface<'static>,
+    ) -> Option<wgpu::SurfaceTexture> {
+        match surface.surface.get_current_texture() {
+            Ok(frame) => Some(frame),
             Err(wgpu::SurfaceError::Outdated | wgpu::SurfaceError::Lost) => {
-                self.render_cx
-                    .resize_surface(surface, surface.config.width, surface.config.height);
-                return;
+                render_cx.resize_surface(surface, surface.config.width, surface.config.height);
+                None
             }
-            Err(wgpu::SurfaceError::Timeout) => return,
+            Err(wgpu::SurfaceError::Timeout) => None,
             Err(wgpu::SurfaceError::OutOfMemory) => panic!("out of memory"),
-            Err(wgpu::SurfaceError::Other) => return,
-        };
+            Err(wgpu::SurfaceError::Other) => None,
+        }
+    }
 
+    fn render_scene_to_target(
+        renderer: &mut Renderer,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        scene: &Scene,
+        target_view: &wgpu::TextureView,
+        width: u32,
+        height: u32,
+    ) {
         renderer
             .render_to_texture(
                 device,
                 queue,
-                &self.scene,
-                &surface.target_view,
+                scene,
+                target_view,
                 &RenderParams {
                     base_color: Color::from_rgb8(0, 0, 0),
-                    width: surface.config.width,
-                    height: surface.config.height,
+                    width,
+                    height,
                     antialiasing_method: AaConfig::Msaa16,
                 },
             )
             .expect("render failed");
+    }
 
+    fn blit_to_surface(
+        surface: &RenderSurface<'static>,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        surface_texture: wgpu::SurfaceTexture,
+    ) {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("runo surface blit"),
         });

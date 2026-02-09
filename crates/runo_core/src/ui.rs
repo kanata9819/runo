@@ -5,7 +5,8 @@ use vello::peniko::{Fill, FontData};
 use crate::ButtonResponse;
 use crate::Color;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
-use crate::layout::{LayoutDirection, LayoutNode};
+use crate::layout::LayoutDirection;
+use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
 use crate::widget::button::ButtonBuilder;
 use crate::widget::label::LabelBuilder;
@@ -15,7 +16,7 @@ pub struct Ui<'a> {
     pub(crate) font: Option<FontData>,
     effects: &'a mut EffectStore,
     retained: &'a mut RetainedState,
-    layout_stack: Vec<LayoutNode>,
+    layout_stack: LayoutStack,
     auto_id_counter: u64,
 }
 
@@ -31,11 +32,7 @@ impl<'a> Ui<'a> {
             font,
             effects,
             retained,
-            layout_stack: vec![LayoutNode::new(
-                (24.0, 24.0),
-                LayoutDirection::Vertical,
-                12.0,
-            )],
+            layout_stack: LayoutStack::new((24.0, 24.0), LayoutDirection::Vertical, 12.0),
             auto_id_counter: 0,
         }
     }
@@ -124,31 +121,13 @@ impl<'a> Ui<'a> {
         spacing: f64,
         f: impl FnOnce(&mut Ui<'a>) -> R,
     ) -> R {
-        let origin = {
-            let parent = self.layout_stack.last().expect("layout stack is empty");
-            parent.place(0.0, 0.0)
-        };
-        self.layout_stack
-            .push(LayoutNode::new(origin, direction, spacing));
+        self.layout_stack.push_layout(direction, spacing);
         let result = f(self);
-        let child = self.layout_stack.pop().expect("layout stack underflow");
-        let (cw, ch) = child.consumed_size();
-        self.advance_layout(cw, ch);
+        self.layout_stack.pop_layout_and_advance_parent();
         result
     }
 
     pub(crate) fn allocate_rect(&mut self, width: f64, height: f64) -> (f64, f64) {
-        let pos = {
-            let layout = self.layout_stack.last().expect("layout stack is empty");
-            layout.place(width, height)
-        };
-        self.advance_layout(width, height);
-        pos
-    }
-
-    fn advance_layout(&mut self, width: f64, height: f64) {
-        if let Some(layout) = self.layout_stack.last_mut() {
-            layout.advance(width, height);
-        }
+        self.layout_stack.allocate_rect(width, height)
     }
 }

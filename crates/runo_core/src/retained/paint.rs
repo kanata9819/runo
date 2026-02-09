@@ -42,7 +42,15 @@ fn render_button(scene: &mut Scene, font: Option<&FontData>, button: &ButtonNode
 
     let text_x = button.rect.x0 + (button.rect.width() - total_advance as f64) * 0.5;
     let text_y = button.rect.y0 + button.rect.height() * 0.5 + font_size as f64 * 0.35;
-    draw_text_run(scene, font, glyphs, text_x, text_y, font_size, button.text_color);
+    draw_text_run(
+        scene,
+        font,
+        glyphs,
+        text_x,
+        text_y,
+        font_size,
+        button.text_color,
+    );
 }
 
 fn render_label(scene: &mut Scene, font: Option<&FontData>, label: &LabelNode) {

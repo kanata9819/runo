@@ -2,8 +2,8 @@ use vello::util::{RenderContext, RenderSurface};
 use vello::wgpu;
 use vello::{AaConfig, RenderParams, Renderer, Scene};
 
-use crate::app::{AppRunner, Application};
 use crate::Color;
+use crate::app::{AppRunner, Application};
 
 impl<A: Application + 'static> AppRunner<A> {
     pub(super) fn acquire_surface_texture(

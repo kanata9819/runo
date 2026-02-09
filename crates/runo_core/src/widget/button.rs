@@ -51,12 +51,7 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> ButtonResponse {
-        self.ui.show_button(
-            self.id,
-            self.width,
-            self.height,
-            self.text,
-            self.text_color,
-        )
+        self.ui
+            .show_button(self.id, self.width, self.height, self.text, self.text_color)
     }
 }

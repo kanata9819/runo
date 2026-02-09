@@ -2,19 +2,19 @@ use vello::Scene;
 use vello::kurbo::{Affine, Rect};
 use vello::peniko::{Fill, FontData};
 
+use crate::ButtonResponse;
 use crate::Color;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
-use crate::input::InputFrame;
 use crate::layout::{LayoutDirection, LayoutNode};
+use crate::retained::RetainedState;
 use crate::widget::button::ButtonBuilder;
 use crate::widget::label::LabelBuilder;
 
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
-    pub(crate) input: InputFrame,
-    pub(crate) active_button: &'a mut Option<u64>,
     pub(crate) font: Option<FontData>,
     effects: &'a mut EffectStore,
+    retained: &'a mut RetainedState,
     layout_stack: Vec<LayoutNode>,
     auto_id_counter: u64,
 }
@@ -22,17 +22,15 @@ pub struct Ui<'a> {
 impl<'a> Ui<'a> {
     pub(crate) fn new(
         scene: &'a mut Scene,
-        input: InputFrame,
-        active_button: &'a mut Option<u64>,
         font: Option<FontData>,
         effects: &'a mut EffectStore,
+        retained: &'a mut RetainedState,
     ) -> Self {
         Self {
             scene,
-            input,
-            active_button,
             font,
             effects,
+            retained,
             layout_stack: vec![LayoutNode::new(
                 (24.0, 24.0),
                 LayoutDirection::Vertical,
@@ -53,7 +51,9 @@ impl<'a> Ui<'a> {
     }
 
     pub fn label<'ui>(&'ui mut self, text: impl Into<String>) -> LabelBuilder<'ui, 'a> {
-        LabelBuilder::new(self, text.into())
+        let id = format!("__auto_label_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        LabelBuilder::new(self, id, text.into())
     }
 
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
@@ -76,6 +76,46 @@ impl<'a> Ui<'a> {
         F: FnOnce() -> Option<EffectCleanup>,
     {
         self.effects.use_effect(id, deps, effect);
+    }
+
+    pub fn button_state(&self, id: &str) -> ButtonResponse {
+        self.retained.button_response(id)
+    }
+
+    pub fn button_clicked(&self, id: &str) -> bool {
+        self.button_state(id).clicked
+    }
+
+    pub fn set_button_text(&mut self, id: &str, text: impl Into<String>) {
+        self.retained.set_button_text(id, Some(text.into()));
+    }
+
+    pub(crate) fn show_button(
+        &mut self,
+        id: String,
+        width: f64,
+        height: f64,
+        text: Option<String>,
+        text_color: Color,
+    ) -> ButtonResponse {
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained.upsert_button(id, rect, text, text_color)
+    }
+
+    pub(crate) fn show_label(
+        &mut self,
+        id: String,
+        width: f64,
+        height: f64,
+        text: String,
+        font_size: f32,
+        text_color: Color,
+    ) {
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained
+            .upsert_label(id, rect, text, font_size, text_color);
     }
 
     fn with_layout<R>(

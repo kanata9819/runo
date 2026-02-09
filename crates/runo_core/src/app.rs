@@ -16,10 +16,12 @@ use crate::Color;
 use crate::font::load_default_font;
 use crate::hooks::effect::EffectStore;
 use crate::input::InputState;
+use crate::retained::RetainedState;
 use crate::ui::Ui;
 
 pub trait Application {
-    fn update(&mut self, ui: &mut Ui<'_>);
+    fn build(&mut self, _ui: &mut Ui<'_>) {}
+    fn update(&mut self, _ui: &mut Ui<'_>) {}
 }
 
 pub fn run<A: Application + 'static>(application: A) {
@@ -37,9 +39,10 @@ struct AppRunner<A: Application + 'static> {
     renderer: Option<Renderer>,
     scene: Scene,
     input: InputState,
-    active_button: Option<u64>,
     font: Option<FontData>,
     effects: EffectStore,
+    retained: RetainedState,
+    built: bool,
 }
 
 impl<A: Application + 'static> AppRunner<A> {
@@ -53,9 +56,10 @@ impl<A: Application + 'static> AppRunner<A> {
             renderer: None,
             scene: Scene::new(),
             input: InputState::default(),
-            active_button: None,
             font: load_default_font(),
             effects: EffectStore::new(),
+            retained: RetainedState::new(),
+            built: false,
         }
     }
 
@@ -115,6 +119,7 @@ impl<A: Application + 'static> AppRunner<A> {
         let height = surface_for_size.config.height;
         self.build_scene(width, height);
         self.run_ui_frame();
+        self.retained.render(&mut self.scene, self.font.as_ref());
 
         let Some(surface) = self.surface.as_mut() else {
             return;
@@ -158,23 +163,31 @@ impl<A: Application + 'static> AppRunner<A> {
     fn run_ui_frame(&mut self) {
         self.effects.begin_frame();
 
-        let frame_input = self.input.frame();
+        if !self.built {
+            {
+                let mut ui = Ui::new(
+                    &mut self.scene,
+                    self.font.clone(),
+                    &mut self.effects,
+                    &mut self.retained,
+                );
+                self.user_app.build(&mut ui);
+            }
+            self.built = true;
+        }
+
+        self.retained.begin_frame_input(self.input.frame());
         {
             let mut ui = Ui::new(
                 &mut self.scene,
-                frame_input,
-                &mut self.active_button,
                 self.font.clone(),
                 &mut self.effects,
+                &mut self.retained,
             );
             self.user_app.update(&mut ui);
         }
 
         self.effects.end_frame();
-
-        if frame_input.mouse_released {
-            self.active_button = None;
-        }
         self.input.end_frame();
     }
 

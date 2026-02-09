@@ -6,6 +6,12 @@ struct MyApp {
 
 impl Application for MyApp {
     fn update(&mut self, ui: &mut Ui<'_>) {
+        let toggled = self.toggled;
+        ui.use_effect("toggle_effect", toggled, move || {
+            println!("toggled changed: {}", toggled);
+            None
+        });
+
         ui.vertical(|ui| {
             let button = ui
                 .button_id("main.toggle")
@@ -13,6 +19,7 @@ impl Application for MyApp {
                 .height(64.0)
                 .text("Toggle")
                 .show();
+
             if button.clicked {
                 self.toggled = !self.toggled;
             }

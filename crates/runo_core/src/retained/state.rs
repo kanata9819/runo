@@ -103,8 +103,8 @@ impl RetainedState {
         );
     }
 
-    pub(crate) fn button_response(&self, id: &str) -> ButtonResponse {
-        let Some(WidgetNode::Button(button)) = self.widgets.get(id) else {
+    pub(crate) fn button_response(&self, id: impl AsRef<str>) -> ButtonResponse {
+        let Some(WidgetNode::Button(button)) = self.widgets.get(id.as_ref()) else {
             return ButtonResponse::default();
         };
         ButtonResponse {
@@ -114,8 +114,8 @@ impl RetainedState {
         }
     }
 
-    pub(crate) fn set_button_text(&mut self, id: &str, text: Option<String>) {
-        let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id) else {
+    pub(crate) fn set_button_text(&mut self, id: impl AsRef<str>, text: Option<String>) {
+        let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
         button.text = text;

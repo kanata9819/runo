@@ -8,7 +8,7 @@ impl Application for MyApp {
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
             ui.label("runo example").size(22.0).show();
-            ui.button_id("main.toggle")
+            ui.button_id("btnToggle")
                 .width(220.0)
                 .height(64.0)
                 .text("Toggle: OFF")
@@ -17,14 +17,14 @@ impl Application for MyApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        if ui.button_clicked("main.toggle") {
+        if ui.button_clicked("btnToggle") {
             self.toggled = !self.toggled;
             let next_text = if self.toggled {
                 "Toggle: ON"
             } else {
                 "Toggle: OFF"
             };
-            ui.set_button_text("main.toggle", next_text);
+            ui.set_button_text("btnToggle", next_text);
         }
 
         let toggled = self.toggled;

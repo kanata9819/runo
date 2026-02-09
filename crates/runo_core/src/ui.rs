@@ -78,15 +78,15 @@ impl<'a> Ui<'a> {
         self.effects.use_effect(id, deps, effect);
     }
 
-    pub fn button_state(&self, id: &str) -> ButtonResponse {
+    pub fn button_state(&self, id: impl AsRef<str>) -> ButtonResponse {
         self.retained.button_response(id)
     }
 
-    pub fn button_clicked(&self, id: &str) -> bool {
+    pub fn button_clicked(&self, id: impl AsRef<str>) -> bool {
         self.button_state(id).clicked
     }
 
-    pub fn set_button_text(&mut self, id: &str, text: impl Into<String>) {
+    pub fn set_button_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
         self.retained.set_button_text(id, Some(text.into()));
     }
 

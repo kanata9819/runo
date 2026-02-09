@@ -16,6 +16,4 @@
 
 ## 詳細ドキュメント
 
-詳しいアーキテクチャ解説は以下を参照してください。
-
-- `crates/runo_core/docs/architecture.md`
+- `crates/runo_core/docs/README.md`

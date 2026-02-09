@@ -1,0 +1,10 @@
+[package]
+name = "runo_core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+vello = "0.7"
+winit = "0.30"
+pollster = "0.4"
+skrifa = "0.40"

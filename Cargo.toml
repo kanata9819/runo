@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/runo_core", "crates/example"]
+resolver = "2"

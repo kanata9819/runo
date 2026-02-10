@@ -1,6 +1,7 @@
 use vello::peniko::Color;
 
 use crate::Ui;
+use crate::ui::ShowTextBoxArgs;
 
 #[derive(Clone, Debug, Default)]
 pub struct TextBoxResponse {
@@ -86,16 +87,16 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> TextBoxResponse {
-        self.ui.show_text_box(
-            self.id,
-            self.width,
-            self.height,
-            self.text,
-            self.placeholder,
-            self.font_size,
-            self.text_color,
-            self.bg_color,
-            self.border_color,
-        )
+        self.ui.show_text_box(ShowTextBoxArgs {
+            id: self.id,
+            width: self.width,
+            height: self.height,
+            text: self.text,
+            placeholder: self.placeholder,
+            font_size: self.font_size,
+            text_color: self.text_color,
+            bg_color: self.bg_color,
+            border_color: self.border_color,
+        })
     }
 }

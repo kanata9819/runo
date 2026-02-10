@@ -1,6 +1,7 @@
 use vello::peniko::Color;
 
 use crate::Ui;
+use crate::ui::ShowButtonArgs;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ButtonResponse {
@@ -57,7 +58,12 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> ButtonResponse {
-        self.ui
-            .show_button(self.id, self.width, self.height, self.text, self.text_color)
+        self.ui.show_button(ShowButtonArgs {
+            id: self.id,
+            width: self.width,
+            height: self.height,
+            text: self.text,
+            text_color: self.text_color,
+        })
     }
 }

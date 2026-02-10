@@ -12,6 +12,35 @@ use crate::widget::button::ButtonBuilder;
 use crate::widget::label::LabelBuilder;
 use crate::widget::text_box::{TextBoxBuilder, TextBoxResponse};
 
+pub(crate) struct ShowButtonArgs {
+    pub(crate) id: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) text: Option<String>,
+    pub(crate) text_color: Color,
+}
+
+pub(crate) struct ShowLabelArgs {
+    pub(crate) id: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) text: String,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+}
+
+pub(crate) struct ShowTextBoxArgs {
+    pub(crate) id: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) text: Option<String>,
+    pub(crate) placeholder: Option<String>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) bg_color: Color,
+    pub(crate) border_color: Color,
+}
+
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
     pub(crate) font: Option<FontData>,
@@ -110,47 +139,46 @@ impl<'a> Ui<'a> {
         self.retained.set_text_box_text(id, text);
     }
 
-    pub(crate) fn show_button(
-        &mut self,
-        id: String,
-        width: f64,
-        height: f64,
-        text: Option<String>,
-        text_color: Color,
-    ) -> ButtonResponse {
+    pub(crate) fn show_button(&mut self, args: ShowButtonArgs) -> ButtonResponse {
+        let ShowButtonArgs {
+            id,
+            width,
+            height,
+            text,
+            text_color,
+        } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained.upsert_button(id, rect, text, text_color)
     }
 
-    pub(crate) fn show_label(
-        &mut self,
-        id: String,
-        width: f64,
-        height: f64,
-        text: String,
-        font_size: f32,
-        text_color: Color,
-    ) {
+    pub(crate) fn show_label(&mut self, args: ShowLabelArgs) {
+        let ShowLabelArgs {
+            id,
+            width,
+            height,
+            text,
+            font_size,
+            text_color,
+        } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained
             .upsert_label(id, rect, text, font_size, text_color);
     }
 
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn show_text_box(
-        &mut self,
-        id: String,
-        width: f64,
-        height: f64,
-        text: Option<String>,
-        placeholder: Option<String>,
-        font_size: f32,
-        text_color: Color,
-        bg_color: Color,
-        border_color: Color,
-    ) -> TextBoxResponse {
+    pub(crate) fn show_text_box(&mut self, args: ShowTextBoxArgs) -> TextBoxResponse {
+        let ShowTextBoxArgs {
+            id,
+            width,
+            height,
+            text,
+            placeholder,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+        } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained.upsert_text_box(

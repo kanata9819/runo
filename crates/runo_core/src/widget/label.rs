@@ -1,6 +1,7 @@
 use vello::peniko::Color;
 
 use crate::Ui;
+use crate::ui::ShowLabelArgs;
 use crate::widget::text::{estimate_text_width, layout_text};
 
 pub struct LabelBuilder<'ui, 'a> {
@@ -47,13 +48,13 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
             estimate_text_width(&self.text, self.font_size)
         };
 
-        self.ui.show_label(
-            self.id,
-            width as f64,
+        self.ui.show_label(ShowLabelArgs {
+            id: self.id,
+            width: width as f64,
             height,
-            self.text,
-            self.font_size,
-            self.text_color,
-        );
+            text: self.text,
+            font_size: self.font_size,
+            text_color: self.text_color,
+        });
     }
 }

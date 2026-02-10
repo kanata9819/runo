@@ -66,6 +66,7 @@ impl<A: Application + 'static> AppRunner<A> {
                 .create_window(attributes)
                 .expect("failed to create window"),
         );
+        window.set_ime_allowed(true);
         let size = window.inner_size();
 
         let surface = pollster::block_on(self.render_cx.create_surface(

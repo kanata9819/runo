@@ -10,6 +10,7 @@ use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
 use crate::widget::button::ButtonBuilder;
 use crate::widget::label::LabelBuilder;
+use crate::widget::text_box::{TextBoxBuilder, TextBoxResponse};
 
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
@@ -53,6 +54,16 @@ impl<'a> Ui<'a> {
         LabelBuilder::new(self, id, text.into())
     }
 
+    pub fn text_box<'ui>(&'ui mut self) -> TextBoxBuilder<'ui, 'a> {
+        let id = format!("__auto_text_box_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        TextBoxBuilder::new(self, id)
+    }
+
+    pub fn text_box_id<'ui>(&'ui mut self, id: impl Into<String>) -> TextBoxBuilder<'ui, 'a> {
+        TextBoxBuilder::new(self, id.into())
+    }
+
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
         self.with_layout(LayoutDirection::Vertical, 12.0, f)
     }
@@ -87,6 +98,18 @@ impl<'a> Ui<'a> {
         self.retained.set_button_text(id, Some(text.into()));
     }
 
+    pub fn text_box_state(&self, id: impl AsRef<str>) -> TextBoxResponse {
+        self.retained.text_box_response(id)
+    }
+
+    pub fn text_box_text(&self, id: impl AsRef<str>) -> String {
+        self.text_box_state(id).text
+    }
+
+    pub fn set_text_box_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
+        self.retained.set_text_box_text(id, text);
+    }
+
     pub(crate) fn show_button(
         &mut self,
         id: String,
@@ -113,6 +136,33 @@ impl<'a> Ui<'a> {
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained
             .upsert_label(id, rect, text, font_size, text_color);
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn show_text_box(
+        &mut self,
+        id: String,
+        width: f64,
+        height: f64,
+        text: Option<String>,
+        placeholder: Option<String>,
+        font_size: f32,
+        text_color: Color,
+        bg_color: Color,
+        border_color: Color,
+    ) -> TextBoxResponse {
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained.upsert_text_box(
+            id,
+            rect,
+            text,
+            placeholder,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+        )
     }
 
     fn with_layout<R>(

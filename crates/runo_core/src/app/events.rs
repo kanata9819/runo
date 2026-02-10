@@ -1,6 +1,7 @@
 use winit::application::ApplicationHandler;
-use winit::event::{MouseButton, WindowEvent};
+use winit::event::{Ime, MouseButton, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
+use winit::keyboard::{Key, NamedKey};
 use winit::window::WindowId;
 
 use crate::app::{AppRunner, Application};
@@ -39,6 +40,29 @@ impl<A: Application + 'static> ApplicationHandler for AppRunner<A> {
                 ..
             } => {
                 self.input.on_mouse_input(state);
+                self.request_redraw();
+            }
+            WindowEvent::KeyboardInput { event, .. } => {
+                if event.state.is_pressed() {
+                    if !self.input.ime_active()
+                        && let Some(text) = event.text.as_ref()
+                    {
+                        self.input.push_text_input(text);
+                    }
+                    if matches!(event.logical_key, Key::Named(NamedKey::Backspace)) {
+                        self.input.on_backspace_pressed();
+                    }
+                    self.request_redraw();
+                }
+            }
+            WindowEvent::Ime(Ime::Enabled) => {
+                self.input.set_ime_active(true);
+            }
+            WindowEvent::Ime(Ime::Disabled) => {
+                self.input.set_ime_active(false);
+            }
+            WindowEvent::Ime(Ime::Commit(text)) => {
+                self.input.push_text_input(&text);
                 self.request_redraw();
             }
             WindowEvent::RedrawRequested => self.render(),

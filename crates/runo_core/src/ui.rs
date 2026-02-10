@@ -4,6 +4,7 @@ use vello::peniko::{Fill, FontData};
 
 use crate::ButtonResponse;
 use crate::Color;
+use crate::UiEvent;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
@@ -137,6 +138,14 @@ impl<'a> Ui<'a> {
 
     pub fn set_text_box_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
         self.retained.set_text_box_text(id, text);
+    }
+
+    pub fn next_event(&mut self) -> Option<UiEvent> {
+        self.retained.pop_event()
+    }
+
+    pub fn drain_events(&mut self) -> Vec<UiEvent> {
+        self.retained.drain_events()
     }
 
     pub(crate) fn show_button(&mut self, args: ShowButtonArgs) -> ButtonResponse {

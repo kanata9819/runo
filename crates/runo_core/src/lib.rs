@@ -1,4 +1,5 @@
 mod app;
+mod event;
 mod font;
 mod hooks;
 mod input;
@@ -8,6 +9,7 @@ mod ui;
 mod widget;
 
 pub use app::{Application, RunOptions, run};
+pub use event::UiEvent;
 pub use hooks::effect::EffectCleanup;
 pub use ui::Ui;
 pub use vello::peniko::Color;

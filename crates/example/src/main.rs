@@ -1,7 +1,8 @@
-use runo_core::{Application, RunOptions, Ui, run};
+use runo_core::{Application, RunOptions, Ui, UiEvent, run};
 
 struct MyApp {
     toggled: bool,
+    input_text: String,
 }
 
 impl Application for MyApp {
@@ -29,31 +30,36 @@ impl Application for MyApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        let input_text = ui.text_box_text("input.name");
-
-        if ui.button_clicked("btnToggle") {
-            self.toggled = !self.toggled;
-            let next_text = if self.toggled {
-                "Toggle: ON"
-            } else {
-                "Toggle: OFF"
-            };
-            ui.set_button_text("btnToggle", next_text);
-        }
-
-        if !input_text.is_empty() {
-            ui.set_button_text(
-                "btnToggle",
-                format!(
-                    "{} ({})",
-                    if self.toggled {
+        for event in ui.drain_events() {
+            match event {
+                UiEvent::ButtonClicked { id } if id == "btnToggle" => {
+                    self.toggled = !self.toggled;
+                    let label = if self.toggled {
                         "Toggle: ON"
                     } else {
                         "Toggle: OFF"
-                    },
-                    input_text
-                ),
-            );
+                    };
+                    if self.input_text.is_empty() {
+                        ui.set_button_text("btnToggle", label);
+                    } else {
+                        ui.set_button_text("btnToggle", format!("{} ({})", label, self.input_text));
+                    }
+                }
+                UiEvent::TextBoxChanged { id, text } if id == "input.name" => {
+                    self.input_text = text;
+                    let label = if self.toggled {
+                        "Toggle: ON"
+                    } else {
+                        "Toggle: OFF"
+                    };
+                    if self.input_text.is_empty() {
+                        ui.set_button_text("btnToggle", label);
+                    } else {
+                        ui.set_button_text("btnToggle", format!("{} ({})", label, self.input_text));
+                    }
+                }
+                _ => {}
+            }
         }
 
         let toggled = self.toggled;
@@ -65,5 +71,8 @@ impl Application for MyApp {
 }
 
 fn main() {
-    run(MyApp { toggled: false });
+    run(MyApp {
+        toggled: false,
+        input_text: String::new(),
+    });
 }

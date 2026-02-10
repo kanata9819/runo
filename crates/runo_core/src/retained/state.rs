@@ -1,9 +1,10 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::ButtonResponse;
+use crate::event::UiEvent;
 use crate::retained::node::{ButtonNode, LabelNode, TextBoxNode, WidgetNode};
 use crate::widget::text_box::TextBoxResponse;
 
@@ -12,6 +13,7 @@ pub(crate) struct RetainedState {
     pub(super) order: Vec<String>,
     pub(super) active_button: Option<String>,
     pub(super) focused_text_box: Option<String>,
+    pub(super) events: VecDeque<UiEvent>,
 }
 
 impl RetainedState {
@@ -21,6 +23,7 @@ impl RetainedState {
             order: Vec::new(),
             active_button: None,
             focused_text_box: None,
+            events: VecDeque::new(),
         }
     }
 
@@ -210,5 +213,17 @@ impl RetainedState {
         };
         text_box.text = text.into();
         text_box.changed = true;
+    }
+
+    pub(crate) fn pop_event(&mut self) -> Option<UiEvent> {
+        self.events.pop_front()
+    }
+
+    pub(crate) fn drain_events(&mut self) -> Vec<UiEvent> {
+        self.events.drain(..).collect()
+    }
+
+    pub(super) fn push_event(&mut self, event: UiEvent) {
+        self.events.push_back(event);
     }
 }

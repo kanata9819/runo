@@ -1,5 +1,6 @@
 use vello::kurbo::Rect;
 
+use crate::event::UiEvent;
 use crate::input::InputFrame;
 use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
@@ -56,6 +57,7 @@ impl RetainedState {
     }
 
     fn update_button_states(&mut self, mouse_down: bool, mouse_released: bool) {
+        let mut clicked_ids = Vec::new();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::Button(button) = node {
                 button.pressed = mouse_down
@@ -73,8 +75,13 @@ impl RetainedState {
                         .unwrap_or(false)
                 {
                     button.clicked = true;
+                    clicked_ids.push(id.clone());
                 }
             }
+        }
+
+        for id in clicked_ids {
+            self.push_event(UiEvent::ButtonClicked { id });
         }
 
         if mouse_released {
@@ -91,6 +98,7 @@ impl RetainedState {
     }
 
     fn apply_text_input(&mut self, input: &InputFrame) {
+        let mut pending_event: Option<UiEvent> = None;
         if let Some(id) = self.focused_text_box.clone()
             && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
         {
@@ -110,6 +118,17 @@ impl RetainedState {
                     }
                 }
             }
+
+            if text_box.changed {
+                pending_event = Some(UiEvent::TextBoxChanged {
+                    id,
+                    text: text_box.text.clone(),
+                });
+            }
+        }
+
+        if let Some(event) = pending_event {
+            self.push_event(event);
         }
     }
 }

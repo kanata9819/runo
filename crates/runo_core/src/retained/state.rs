@@ -47,6 +47,7 @@ impl RetainedState {
                 WidgetNode::Button(ButtonNode {
                     rect,
                     text,
+                    text_overridden: false,
                     font_size,
                     text_color,
                     enabled,
@@ -62,7 +63,9 @@ impl RetainedState {
         match entry {
             WidgetNode::Button(button) => {
                 button.rect = rect;
-                button.text = text;
+                if !button.text_overridden {
+                    button.text = text;
+                }
                 button.font_size = font_size;
                 button.text_color = text_color;
                 button.enabled = enabled;
@@ -76,6 +79,7 @@ impl RetainedState {
                 *entry = WidgetNode::Button(ButtonNode {
                     rect,
                     text,
+                    text_overridden: false,
                     font_size,
                     text_color,
                     enabled,
@@ -317,6 +321,7 @@ impl RetainedState {
             return;
         };
         button.text = text;
+        button.text_overridden = true;
     }
 
     pub(crate) fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {

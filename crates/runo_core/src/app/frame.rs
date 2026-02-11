@@ -79,7 +79,8 @@ impl<A: Application + 'static> AppRunner<A> {
             self.user_app.build(&mut ui);
         }
 
-        self.retained.begin_frame_input(self.input.frame());
+        self.retained
+            .begin_frame_input(self.input.frame(), self.font.as_ref());
         {
             let mut ui = Ui::new(
                 &mut self.scene,

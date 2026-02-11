@@ -10,9 +10,9 @@ use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
 
 impl RetainedState {
-    pub(crate) fn render(&self, scene: &mut Scene, font: Option<&FontData>) {
+    pub(crate) fn render(&mut self, scene: &mut Scene, font: Option<&FontData>) {
         for id in &self.order {
-            let Some(node) = self.widgets.get(id) else {
+            let Some(node) = self.widgets.get_mut(id) else {
                 continue;
             };
             match node {
@@ -24,7 +24,7 @@ impl RetainedState {
         }
 
         for id in &self.order {
-            let Some(node) = self.widgets.get(id) else {
+            let Some(node) = self.widgets.get_mut(id) else {
                 continue;
             };
             match node {

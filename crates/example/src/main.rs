@@ -29,7 +29,7 @@ impl MyApp {
             .height(44)
             .font_size(20)
             .placeholder("Type here...")
-            .overflow_x(runo_core::Overflow::Scroll)
+            .overflow_x(runo_core::Overflow::Auto)
             .show();
     }
 

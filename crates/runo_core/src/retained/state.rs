@@ -7,6 +7,7 @@ use crate::ButtonResponse;
 use crate::ComboBoxResponse;
 use crate::event::UiEvent;
 use crate::retained::node::{ButtonNode, ComboBoxNode, LabelNode, TextBoxNode, WidgetNode};
+use crate::widget::text::estimate_text_width;
 use crate::widget::text_box::Overflow;
 use crate::widget::text_box::TextBoxResponse;
 
@@ -15,6 +16,7 @@ pub(crate) struct RetainedState {
     pub(super) order: Vec<String>,
     pub(super) active_button: Option<String>,
     pub(super) active_combo_box: Option<String>,
+    pub(super) active_text_box_scrollbar: Option<String>,
     pub(super) focused_text_box: Option<String>,
     pub(super) events: VecDeque<UiEvent>,
 }
@@ -26,6 +28,7 @@ impl RetainedState {
             order: Vec::new(),
             active_button: None,
             active_combo_box: None,
+            active_text_box_scrollbar: None,
             focused_text_box: None,
             events: VecDeque::new(),
         }
@@ -143,12 +146,14 @@ impl RetainedState {
         overflow_y: Overflow,
     ) -> TextBoxResponse {
         if !self.widgets.contains_key(&id) {
+            let text = text.unwrap_or_default();
+            let text_advance = estimate_text_width(&text, font_size) as f64;
             self.order.push(id.clone());
             self.widgets.insert(
                 id.clone(),
                 WidgetNode::TextBox(TextBoxNode {
                     rect,
-                    text: text.unwrap_or_default(),
+                    text,
                     placeholder,
                     font_size,
                     text_color,
@@ -157,6 +162,7 @@ impl RetainedState {
                     enabled,
                     overflow_x,
                     overflow_y,
+                    text_advance,
                     scroll_x: 0.0,
                     scroll_y: 0.0,
                     hovered: false,
@@ -173,9 +179,16 @@ impl RetainedState {
                 text_box.rect = rect;
                 if let Some(next_text) = text {
                     text_box.text = next_text;
+                    text_box.text_advance =
+                        estimate_text_width(&text_box.text, text_box.font_size) as f64;
                 }
                 text_box.placeholder = placeholder;
-                text_box.font_size = font_size;
+                if (text_box.font_size - font_size).abs() > f32::EPSILON {
+                    text_box.font_size = font_size;
+                    // Re-measure on next paint; keep an estimate for current frame logic.
+                    text_box.text_advance =
+                        estimate_text_width(&text_box.text, text_box.font_size) as f64;
+                }
                 text_box.text_color = text_color;
                 text_box.bg_color = bg_color;
                 text_box.border_color = border_color;
@@ -190,9 +203,11 @@ impl RetainedState {
                 }
             }
             _ => {
+                let text = text.unwrap_or_default();
+                let text_advance = estimate_text_width(&text, font_size) as f64;
                 *entry = WidgetNode::TextBox(TextBoxNode {
                     rect,
-                    text: text.unwrap_or_default(),
+                    text,
                     placeholder,
                     font_size,
                     text_color,
@@ -201,6 +216,7 @@ impl RetainedState {
                     enabled,
                     overflow_x,
                     overflow_y,
+                    text_advance,
                     scroll_x: 0.0,
                     scroll_y: 0.0,
                     hovered: false,
@@ -357,6 +373,7 @@ impl RetainedState {
             return;
         };
         text_box.text = text.into();
+        text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
         text_box.changed = true;
     }
 
@@ -372,6 +389,9 @@ impl RetainedState {
             text_box.changed = false;
             if self.focused_text_box.as_deref() == Some(id_ref) {
                 self.focused_text_box = None;
+            }
+            if self.active_text_box_scrollbar.as_deref() == Some(id_ref) {
+                self.active_text_box_scrollbar = None;
             }
         }
     }

@@ -1,20 +1,27 @@
 use vello::kurbo::Rect;
+use vello::peniko::FontData;
 
 use crate::event::UiEvent;
 use crate::input::InputFrame;
 use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
-use crate::widget::text::estimate_text_width;
+use crate::widget::text::{estimate_text_width, layout_text};
 
 impl RetainedState {
-    pub(crate) fn begin_frame_input(&mut self, input: InputFrame) {
+    pub(crate) fn begin_frame_input(&mut self, input: InputFrame, font: Option<&FontData>) {
         self.update_hover_flags(input.cursor_pos);
         self.handle_mouse_press(input.mouse_pressed);
+        self.handle_text_box_scrollbar_input(
+            input.mouse_pressed,
+            input.mouse_down,
+            input.mouse_released,
+            input.cursor_pos,
+        );
         self.update_button_states(input.mouse_down, input.mouse_released);
         self.update_combo_box_states(input.mouse_down, input.mouse_released);
         self.update_text_box_focus();
         self.apply_text_box_scroll(&input);
-        self.apply_text_input(&input);
+        self.apply_text_input(&input, font);
     }
 
     fn update_hover_flags(&mut self, cursor_pos: (f64, f64)) {
@@ -109,6 +116,46 @@ impl RetainedState {
                     None
                 }
             });
+        }
+    }
+
+    fn handle_text_box_scrollbar_input(
+        &mut self,
+        mouse_pressed: bool,
+        mouse_down: bool,
+        mouse_released: bool,
+        cursor_pos: (f64, f64),
+    ) {
+        if mouse_pressed {
+            let scrollbar_id = self.order.iter().rev().find_map(|id| {
+                let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
+                    return None;
+                };
+                if text_box.enabled
+                    && text_box.overflow_x.allows_scroll()
+                    && text_box_max_scroll_x(text_box) > 0.0
+                    && text_box_scrollbar_track_contains(text_box, cursor_pos.0, cursor_pos.1)
+                {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            });
+            self.active_text_box_scrollbar = scrollbar_id;
+        }
+
+        if mouse_down
+            && let Some(id) = self.active_text_box_scrollbar.clone()
+            && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
+            && text_box.enabled
+            && text_box.overflow_x.allows_scroll()
+            && text_box_max_scroll_x(text_box) > 0.0
+        {
+            set_scroll_from_scrollbar_cursor(text_box, cursor_pos.0);
+        }
+
+        if mouse_released {
+            self.active_text_box_scrollbar = None;
         }
     }
 
@@ -227,7 +274,7 @@ impl RetainedState {
         }
     }
 
-    fn apply_text_input(&mut self, input: &InputFrame) {
+    fn apply_text_input(&mut self, input: &InputFrame, font: Option<&FontData>) {
         let mut pending_event: Option<UiEvent> = None;
         if let Some(id) = self.focused_text_box.clone()
             && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
@@ -249,6 +296,7 @@ impl RetainedState {
                 }
 
                 if text_box.changed {
+                    sync_text_box_text_advance(text_box, font);
                     Self::keep_text_box_end_visible(text_box);
                     pending_event = Some(UiEvent::TextBoxChanged {
                         id,
@@ -287,14 +335,19 @@ impl RetainedState {
         };
 
         if text_box.overflow_x.allows_scroll() {
-            // Single-line textbox: fall back to vertical wheel when horizontal delta is absent.
-            let wheel_x = if input.scroll_x != 0.0 {
-                input.scroll_x
+            if self.active_text_box_scrollbar.as_deref() != Some(target_id.as_str()) {
+                // Prefer real horizontal wheel when dominant; otherwise map vertical wheel
+                // to horizontal for single-line textbox scrolling.
+                let wheel_x = if input.scroll_x.abs() > input.scroll_y.abs() * 0.5 {
+                    -input.scroll_x
+                } else {
+                    input.scroll_y
+                };
+                text_box.scroll_x =
+                    (text_box.scroll_x + wheel_x).clamp(0.0, Self::max_scroll_x(text_box));
             } else {
-                -input.scroll_y
-            };
-            text_box.scroll_x =
-                (text_box.scroll_x + wheel_x).clamp(0.0, Self::max_scroll_x(text_box));
+                text_box.scroll_x = text_box.scroll_x.clamp(0.0, Self::max_scroll_x(text_box));
+            }
         } else {
             text_box.scroll_x = 0.0;
         }
@@ -308,21 +361,16 @@ impl RetainedState {
     }
 
     fn keep_text_box_end_visible(text_box: &mut crate::retained::node::TextBoxNode) {
-        if !text_box.overflow_x.allows_scroll() {
-            text_box.scroll_x = 0.0;
+        // `Scroll` is manual scrolling. Only `Auto` should follow the text end.
+        if !matches!(text_box.overflow_x, crate::widget::text_box::Overflow::Auto) {
+            text_box.scroll_x = text_box.scroll_x.clamp(0.0, Self::max_scroll_x(text_box));
             return;
         }
-
-        let inner_width = (text_box.rect.width() - 24.0).max(1.0);
-        let content_width = estimate_text_width(&text_box.text, text_box.font_size) as f64;
-        let max_scroll = (content_width - inner_width).max(0.0);
-        text_box.scroll_x = max_scroll;
+        text_box.scroll_x = Self::max_scroll_x(text_box);
     }
 
     fn max_scroll_x(text_box: &crate::retained::node::TextBoxNode) -> f64 {
-        let inner_width = (text_box.rect.width() - 24.0).max(1.0);
-        let content_width = estimate_text_width(&text_box.text, text_box.font_size) as f64;
-        (content_width - inner_width).max(0.0)
+        text_box_max_scroll_x(text_box)
     }
 
     fn max_scroll_y(_text_box: &crate::retained::node::TextBoxNode) -> f64 {
@@ -362,4 +410,68 @@ fn combo_expanded_contains(
         return true;
     }
     combo_item_index_at(combo_box, x, y).is_some()
+}
+
+fn text_box_max_scroll_x(text_box: &crate::retained::node::TextBoxNode) -> f64 {
+    let inner_width = (text_box.rect.width() - 24.0).max(1.0);
+    let content_width = text_box_content_width(text_box);
+    (content_width - inner_width).max(0.0)
+}
+
+fn text_box_scrollbar_track_contains(
+    text_box: &crate::retained::node::TextBoxNode,
+    x: f64,
+    y: f64,
+) -> bool {
+    let inner_left = text_box.rect.x0 + 12.0;
+    let inner_right = text_box.rect.x1 - 12.0;
+    // Keep the visual bar thin, but use a wider hit area for usability.
+    let hit_height = 12.0;
+    let hit_bottom = text_box.rect.y1 - 2.0;
+    let hit_top = (hit_bottom - hit_height).max(text_box.rect.y0);
+    let hit = Rect::new(inner_left, hit_top, inner_right, hit_bottom);
+    contains(hit, x, y)
+}
+
+fn set_scroll_from_scrollbar_cursor(
+    text_box: &mut crate::retained::node::TextBoxNode,
+    cursor_x: f64,
+) {
+    let inner_left = text_box.rect.x0 + 12.0;
+    let inner_right = text_box.rect.x1 - 12.0;
+    let inner_width = (inner_right - inner_left).max(1.0);
+    let content_width = text_box_content_width(text_box);
+    let max_scroll = text_box_max_scroll_x(text_box);
+    if max_scroll <= 0.0 {
+        text_box.scroll_x = 0.0;
+        return;
+    }
+
+    let thumb_w = ((inner_width / content_width) * inner_width)
+        .clamp(18.0, inner_width)
+        .min(inner_width);
+    let den = (inner_width - thumb_w).max(1.0);
+    let ratio = ((cursor_x - inner_left - thumb_w * 0.5) / den).clamp(0.0, 1.0);
+    text_box.scroll_x = ratio * max_scroll;
+}
+
+fn text_box_content_width(text_box: &crate::retained::node::TextBoxNode) -> f64 {
+    if text_box.text_advance > 0.0 {
+        text_box.text_advance
+    } else {
+        estimate_text_width(&text_box.text, text_box.font_size) as f64
+    }
+}
+
+fn sync_text_box_text_advance(
+    text_box: &mut crate::retained::node::TextBoxNode,
+    font: Option<&FontData>,
+) {
+    if let Some(font) = font
+        && let Some((_, advance)) = layout_text(font, &text_box.text, text_box.font_size)
+    {
+        text_box.text_advance = advance as f64;
+        return;
+    }
+    text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
 }

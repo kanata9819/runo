@@ -22,6 +22,7 @@ pub(crate) struct ShowButtonArgs {
     pub(crate) text: Option<String>,
     pub(crate) font_size: f32,
     pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
 }
 
 pub(crate) struct ShowLabelArgs {
@@ -31,6 +32,7 @@ pub(crate) struct ShowLabelArgs {
     pub(crate) text: String,
     pub(crate) font_size: f32,
     pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
 }
 
 pub(crate) struct ShowTextBoxArgs {
@@ -43,6 +45,7 @@ pub(crate) struct ShowTextBoxArgs {
     pub(crate) text_color: Color,
     pub(crate) bg_color: Color,
     pub(crate) border_color: Color,
+    pub(crate) enabled: bool,
 }
 
 pub(crate) struct ShowComboBoxArgs {
@@ -55,6 +58,7 @@ pub(crate) struct ShowComboBoxArgs {
     pub(crate) text_color: Color,
     pub(crate) bg_color: Color,
     pub(crate) border_color: Color,
+    pub(crate) enabled: bool,
 }
 
 pub struct Ui<'a> {
@@ -141,6 +145,10 @@ impl<'a> Ui<'a> {
         self.retained.set_button_text(id, Some(text.into()));
     }
 
+    pub fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.retained.set_button_enabled(id, enabled);
+    }
+
     pub fn text_box_state(&self, id: impl AsRef<str>) -> TextBoxResponse {
         self.retained.text_box_response(id)
     }
@@ -153,6 +161,10 @@ impl<'a> Ui<'a> {
         self.retained.set_text_box_text(id, text);
     }
 
+    pub fn set_text_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.retained.set_text_box_enabled(id, enabled);
+    }
+
     pub fn combo_box_state(&self, id: impl AsRef<str>) -> ComboBoxResponse {
         self.retained.combo_box_response(id)
     }
@@ -163,6 +175,14 @@ impl<'a> Ui<'a> {
 
     pub fn set_combo_box_selected_index(&mut self, id: impl AsRef<str>, index: usize) {
         self.retained.set_combo_box_selected_index(id, index);
+    }
+
+    pub fn set_combo_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.retained.set_combo_box_enabled(id, enabled);
+    }
+
+    pub fn set_label_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.retained.set_label_enabled(id, enabled);
     }
 
     pub fn next_event(&mut self) -> Option<UiEvent> {
@@ -181,11 +201,12 @@ impl<'a> Ui<'a> {
             text,
             font_size,
             text_color,
+            enabled,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained
-            .upsert_button(id, rect, text, font_size, text_color)
+            .upsert_button(id, rect, text, font_size, text_color, enabled)
     }
 
     pub(crate) fn show_label(&mut self, args: ShowLabelArgs) {
@@ -196,11 +217,12 @@ impl<'a> Ui<'a> {
             text,
             font_size,
             text_color,
+            enabled,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained
-            .upsert_label(id, rect, text, font_size, text_color);
+            .upsert_label(id, rect, text, font_size, text_color, enabled);
     }
 
     pub(crate) fn show_text_box(&mut self, args: ShowTextBoxArgs) -> TextBoxResponse {
@@ -214,6 +236,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
+            enabled,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
@@ -226,6 +249,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
+            enabled,
         )
     }
 
@@ -240,6 +264,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
+            enabled,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
@@ -252,6 +277,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
+            enabled,
         )
     }
 

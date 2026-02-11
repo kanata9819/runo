@@ -18,6 +18,7 @@ pub struct ButtonBuilder<'ui, 'a> {
     text: Option<String>,
     font_size: f32,
     text_color: Color,
+    enabled: bool,
 }
 
 impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
@@ -30,6 +31,7 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
             text: None,
             font_size: 18.0,
             text_color: Color::from_rgb8(245, 248, 252),
+            enabled: true,
         }
     }
 
@@ -69,6 +71,11 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
         self
     }
 
+    pub fn enabled(mut self, value: bool) -> Self {
+        self.enabled = value;
+        self
+    }
+
     pub fn show(self) -> ButtonResponse {
         self.ui.show_button(ShowButtonArgs {
             id: self.id,
@@ -77,6 +84,7 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
             text: self.text,
             font_size: self.font_size,
             text_color: self.text_color,
+            enabled: self.enabled,
         })
     }
 }

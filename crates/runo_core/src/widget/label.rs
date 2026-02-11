@@ -12,6 +12,7 @@ pub struct LabelBuilder<'ui, 'a> {
     height: Option<f64>,
     font_size: f32,
     text_color: Color,
+    enabled: bool,
 }
 
 impl<'ui, 'a> LabelBuilder<'ui, 'a> {
@@ -24,6 +25,7 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
             height: None,
             font_size: 18.0,
             text_color: Color::from_rgb8(245, 248, 252),
+            enabled: true,
         }
     }
 
@@ -57,6 +59,11 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         self
     }
 
+    pub fn enabled(mut self, value: bool) -> Self {
+        self.enabled = value;
+        self
+    }
+
     pub fn show(self) {
         let intrinsic_height = self.font_size as f64 * 1.35;
         let intrinsic_width = if let Some(font) = self.ui.font.as_ref() {
@@ -76,6 +83,7 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
             text: self.text,
             font_size: self.font_size,
             text_color: self.text_color,
+            enabled: self.enabled,
         });
     }
 }

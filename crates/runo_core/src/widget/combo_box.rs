@@ -24,6 +24,7 @@ pub struct ComboBoxBuilder<'ui, 'a> {
     text_color: Color,
     bg_color: Color,
     border_color: Color,
+    enabled: bool,
 }
 
 impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
@@ -39,6 +40,7 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
             text_color: Color::from_rgb8(236, 241, 247),
             bg_color: Color::from_rgb8(33, 38, 46),
             border_color: Color::from_rgb8(78, 89, 104),
+            enabled: true,
         }
     }
 
@@ -91,6 +93,11 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
         self
     }
 
+    pub fn enabled(mut self, value: bool) -> Self {
+        self.enabled = value;
+        self
+    }
+
     pub fn show(self) -> ComboBoxResponse {
         self.ui.show_combo_box(ShowComboBoxArgs {
             id: self.id,
@@ -102,6 +109,7 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
             text_color: self.text_color,
             bg_color: self.bg_color,
             border_color: self.border_color,
+            enabled: self.enabled,
         })
     }
 }

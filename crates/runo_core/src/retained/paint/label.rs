@@ -1,4 +1,5 @@
 use vello::Scene;
+use vello::peniko::Color;
 use vello::peniko::FontData;
 
 use crate::retained::node::LabelNode;
@@ -19,6 +20,10 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNo
         label.rect.x0,
         baseline_y,
         label.font_size,
-        label.text_color,
+        if label.enabled {
+            label.text_color
+        } else {
+            Color::from_rgb8(142, 148, 156)
+        },
     );
 }

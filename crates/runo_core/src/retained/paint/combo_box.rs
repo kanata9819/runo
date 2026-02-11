@@ -10,12 +10,18 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
-        combo_box.bg_color,
+        if combo_box.enabled {
+            combo_box.bg_color
+        } else {
+            Color::from_rgb8(45, 49, 55)
+        },
         None,
         &bg,
     );
 
-    let border_color = if combo_box.pressed {
+    let border_color = if !combo_box.enabled {
+        Color::from_rgb8(86, 92, 101)
+    } else if combo_box.pressed {
         Color::from_rgb8(89, 176, 255)
     } else if combo_box.hovered {
         Color::from_rgb8(124, 177, 230)
@@ -51,7 +57,11 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
             text_x,
             baseline_y,
             combo_box.font_size,
-            combo_box.text_color,
+            if combo_box.enabled {
+                combo_box.text_color
+            } else {
+                Color::from_rgb8(147, 153, 161)
+            },
         );
     }
 
@@ -68,13 +78,17 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
             arrow_x,
             arrow_y,
             combo_box.font_size * 0.85,
-            Color::from_rgb8(186, 196, 210),
+            if combo_box.enabled {
+                Color::from_rgb8(186, 196, 210)
+            } else {
+                Color::from_rgb8(141, 147, 154)
+            },
         );
     }
 }
 
 pub(super) fn render_overlay(scene: &mut Scene, font: Option<&FontData>, combo_box: &ComboBoxNode) {
-    if !combo_box.is_open || combo_box.items.is_empty() {
+    if !combo_box.enabled || !combo_box.is_open || combo_box.items.is_empty() {
         return;
     }
     let Some(font) = font else {

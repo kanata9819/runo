@@ -6,7 +6,9 @@ use crate::retained::node::ButtonNode;
 use crate::widget::text::{draw_text_run, layout_text};
 
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &ButtonNode) {
-    let color = if button.pressed {
+    let color = if !button.enabled {
+        Color::from_rgb8(83, 90, 100)
+    } else if button.pressed {
         Color::from_rgb8(31, 122, 205)
     } else if button.hovered {
         Color::from_rgb8(69, 160, 242)
@@ -33,6 +35,10 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &Button
         text_x,
         text_y,
         button.font_size,
-        button.text_color,
+        if button.enabled {
+            button.text_color
+        } else {
+            Color::from_rgb8(178, 184, 192)
+        },
     );
 }

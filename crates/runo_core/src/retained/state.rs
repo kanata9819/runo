@@ -37,6 +37,7 @@ impl RetainedState {
         text: Option<String>,
         font_size: f32,
         text_color: Color,
+        enabled: bool,
     ) -> ButtonResponse {
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
@@ -47,6 +48,7 @@ impl RetainedState {
                     text,
                     font_size,
                     text_color,
+                    enabled,
                     hovered: false,
                     pressed: false,
                     clicked: false,
@@ -62,6 +64,7 @@ impl RetainedState {
                 button.text = text;
                 button.font_size = font_size;
                 button.text_color = text_color;
+                button.enabled = enabled;
                 ButtonResponse {
                     hovered: button.hovered,
                     pressed: button.pressed,
@@ -74,6 +77,7 @@ impl RetainedState {
                     text,
                     font_size,
                     text_color,
+                    enabled,
                     hovered: false,
                     pressed: false,
                     clicked: false,
@@ -90,6 +94,7 @@ impl RetainedState {
         text: String,
         font_size: f32,
         text_color: Color,
+        enabled: bool,
     ) {
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
@@ -100,6 +105,7 @@ impl RetainedState {
                     text,
                     font_size,
                     text_color,
+                    enabled,
                 }),
             );
             return;
@@ -112,6 +118,7 @@ impl RetainedState {
                 text,
                 font_size,
                 text_color,
+                enabled,
             }),
         );
     }
@@ -126,6 +133,7 @@ impl RetainedState {
         text_color: Color,
         bg_color: Color,
         border_color: Color,
+        enabled: bool,
     ) -> TextBoxResponse {
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
@@ -139,6 +147,7 @@ impl RetainedState {
                     text_color,
                     bg_color,
                     border_color,
+                    enabled,
                     hovered: false,
                     focused: false,
                     changed: false,
@@ -159,6 +168,7 @@ impl RetainedState {
                 text_box.text_color = text_color;
                 text_box.bg_color = bg_color;
                 text_box.border_color = border_color;
+                text_box.enabled = enabled;
                 TextBoxResponse {
                     text: text_box.text.clone(),
                     hovered: text_box.hovered,
@@ -175,6 +185,7 @@ impl RetainedState {
                     text_color,
                     bg_color,
                     border_color,
+                    enabled,
                     hovered: false,
                     focused: false,
                     changed: false,
@@ -194,6 +205,7 @@ impl RetainedState {
         text_color: Color,
         bg_color: Color,
         border_color: Color,
+        enabled: bool,
     ) -> ComboBoxResponse {
         let selected_index_override = selected_index;
         let initial_selected_index = if items.is_empty() {
@@ -214,6 +226,7 @@ impl RetainedState {
                     text_color,
                     bg_color,
                     border_color,
+                    enabled,
                     hovered: false,
                     hovered_item: None,
                     pressed: false,
@@ -240,6 +253,7 @@ impl RetainedState {
                 combo_box.text_color = text_color;
                 combo_box.bg_color = bg_color;
                 combo_box.border_color = border_color;
+                combo_box.enabled = enabled;
                 ComboBoxResponse {
                     selected_index: combo_box.selected_index,
                     selected_text: combo_box
@@ -262,6 +276,7 @@ impl RetainedState {
                     text_color,
                     bg_color,
                     border_color,
+                    enabled,
                     hovered: false,
                     hovered_item: None,
                     pressed: false,
@@ -291,6 +306,22 @@ impl RetainedState {
         button.text = text;
     }
 
+    pub(crate) fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let id_ref = id.as_ref();
+        let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id.as_ref()) else {
+            return;
+        };
+        button.enabled = enabled;
+        if !enabled {
+            button.hovered = false;
+            button.pressed = false;
+            button.clicked = false;
+            if self.active_button.as_deref() == Some(id_ref) {
+                self.active_button = None;
+            }
+        }
+    }
+
     pub(crate) fn text_box_response(&self, id: impl AsRef<str>) -> TextBoxResponse {
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get(id.as_ref()) else {
             return TextBoxResponse::default();
@@ -309,6 +340,22 @@ impl RetainedState {
         };
         text_box.text = text.into();
         text_box.changed = true;
+    }
+
+    pub(crate) fn set_text_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let id_ref = id.as_ref();
+        let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(id_ref) else {
+            return;
+        };
+        text_box.enabled = enabled;
+        if !enabled {
+            text_box.hovered = false;
+            text_box.focused = false;
+            text_box.changed = false;
+            if self.focused_text_box.as_deref() == Some(id_ref) {
+                self.focused_text_box = None;
+            }
+        }
     }
 
     pub(crate) fn combo_box_response(&self, id: impl AsRef<str>) -> ComboBoxResponse {
@@ -341,6 +388,31 @@ impl RetainedState {
         let next_index = index.min(combo_box.items.len() - 1);
         combo_box.changed = combo_box.selected_index != next_index;
         combo_box.selected_index = next_index;
+    }
+
+    pub(crate) fn set_combo_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let id_ref = id.as_ref();
+        let Some(WidgetNode::ComboBox(combo_box)) = self.widgets.get_mut(id_ref) else {
+            return;
+        };
+        combo_box.enabled = enabled;
+        if !enabled {
+            combo_box.hovered = false;
+            combo_box.hovered_item = None;
+            combo_box.pressed = false;
+            combo_box.changed = false;
+            combo_box.is_open = false;
+            if self.active_combo_box.as_deref() == Some(id_ref) {
+                self.active_combo_box = None;
+            }
+        }
+    }
+
+    pub(crate) fn set_label_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let Some(WidgetNode::Label(label)) = self.widgets.get_mut(id.as_ref()) else {
+            return;
+        };
+        label.enabled = enabled;
     }
 
     pub(crate) fn pop_event(&mut self) -> Option<UiEvent> {

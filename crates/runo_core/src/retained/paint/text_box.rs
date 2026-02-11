@@ -10,12 +10,18 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &Text
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
-        text_box.bg_color,
+        if text_box.enabled {
+            text_box.bg_color
+        } else {
+            Color::from_rgb8(45, 49, 55)
+        },
         None,
         &bg,
     );
 
-    let border_color = if text_box.focused {
+    let border_color = if !text_box.enabled {
+        Color::from_rgb8(86, 92, 101)
+    } else if text_box.focused {
         Color::from_rgb8(89, 176, 255)
     } else {
         text_box.border_color
@@ -38,7 +44,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &Text
         text_box.text.as_str()
     };
 
-    let text_color = if text_box.text.is_empty() {
+    let text_color = if !text_box.enabled {
+        Color::from_rgb8(147, 153, 161)
+    } else if text_box.text.is_empty() {
         Color::from_rgb8(142, 151, 163)
     } else {
         text_box.text_color
@@ -61,7 +69,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &Text
         text_color,
     );
 
-    if text_box.focused {
+    if text_box.focused && text_box.enabled {
         let caret_x = if text_box.text.is_empty() {
             text_x
         } else {

@@ -20,7 +20,10 @@ impl RetainedState {
             let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
                 return None;
             };
-            if combo_box.is_open && combo_expanded_contains(combo_box, cursor_pos.0, cursor_pos.1) {
+            if combo_box.enabled
+                && combo_box.is_open
+                && combo_expanded_contains(combo_box, cursor_pos.0, cursor_pos.1)
+            {
                 Some(id.clone())
             } else {
                 None
@@ -31,7 +34,7 @@ impl RetainedState {
             match node {
                 WidgetNode::Button(button) => {
                     button.clicked = false;
-                    button.hovered = if open_overlay_id.is_some() {
+                    button.hovered = if !button.enabled || open_overlay_id.is_some() {
                         false
                     } else {
                         contains(button.rect, cursor_pos.0, cursor_pos.1)
@@ -39,7 +42,7 @@ impl RetainedState {
                 }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
-                    text_box.hovered = if open_overlay_id.is_some() {
+                    text_box.hovered = if !text_box.enabled || open_overlay_id.is_some() {
                         false
                     } else {
                         contains(text_box.rect, cursor_pos.0, cursor_pos.1)
@@ -47,6 +50,13 @@ impl RetainedState {
                 }
                 WidgetNode::ComboBox(combo_box) => {
                     combo_box.changed = false;
+                    if !combo_box.enabled {
+                        combo_box.hovered = false;
+                        combo_box.hovered_item = None;
+                        combo_box.pressed = false;
+                        combo_box.is_open = false;
+                        continue;
+                    }
                     combo_box.hovered = contains(combo_box.rect, cursor_pos.0, cursor_pos.1);
                     combo_box.hovered_item = if open_overlay_id
                         .as_ref()
@@ -69,7 +79,7 @@ impl RetainedState {
                 let WidgetNode::Button(button) = self.widgets.get(id)? else {
                     return None;
                 };
-                if button.hovered {
+                if button.enabled && button.hovered {
                     Some(id.clone())
                 } else {
                     None
@@ -80,7 +90,7 @@ impl RetainedState {
                 let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
                     return None;
                 };
-                if text_box.hovered {
+                if text_box.enabled && text_box.hovered {
                     Some(id.clone())
                 } else {
                     None
@@ -91,7 +101,7 @@ impl RetainedState {
                 let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
                     return None;
                 };
-                if combo_box.hovered || combo_box.hovered_item.is_some() {
+                if combo_box.enabled && (combo_box.hovered || combo_box.hovered_item.is_some()) {
                     Some(id.clone())
                 } else {
                     None
@@ -104,6 +114,11 @@ impl RetainedState {
         let mut clicked_ids = Vec::new();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::Button(button) = node {
+                if !button.enabled {
+                    button.pressed = false;
+                    button.clicked = false;
+                    continue;
+                }
                 button.pressed = mouse_down
                     && self
                         .active_button
@@ -138,6 +153,14 @@ impl RetainedState {
         let active_combo_box = self.active_combo_box.clone();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::ComboBox(combo_box) = node {
+                if !combo_box.enabled {
+                    combo_box.hovered = false;
+                    combo_box.hovered_item = None;
+                    combo_box.pressed = false;
+                    combo_box.changed = false;
+                    combo_box.is_open = false;
+                    continue;
+                }
                 combo_box.pressed = mouse_down
                     && active_combo_box
                         .as_ref()
@@ -207,28 +230,28 @@ impl RetainedState {
         if let Some(id) = self.focused_text_box.clone()
             && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
         {
-            text_box.focused = true;
+            if text_box.enabled {
+                text_box.focused = true;
 
-            if input.backspace_pressed {
-                if text_box.text.pop().is_some() {
+                if input.backspace_pressed && text_box.text.pop().is_some() {
                     text_box.changed = true;
                 }
-            }
 
-            if !input.text_input.is_empty() {
-                for ch in input.text_input.chars() {
-                    if !ch.is_control() {
-                        text_box.text.push(ch);
-                        text_box.changed = true;
+                if !input.text_input.is_empty() {
+                    for ch in input.text_input.chars() {
+                        if !ch.is_control() {
+                            text_box.text.push(ch);
+                            text_box.changed = true;
+                        }
                     }
                 }
-            }
 
-            if text_box.changed {
-                pending_event = Some(UiEvent::TextBoxChanged {
-                    id,
-                    text: text_box.text.clone(),
-                });
+                if text_box.changed {
+                    pending_event = Some(UiEvent::TextBoxChanged {
+                        id,
+                        text: text_box.text.clone(),
+                    });
+                }
             }
         }
 

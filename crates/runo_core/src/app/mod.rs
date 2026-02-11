@@ -35,5 +35,6 @@ pub fn run<A: Application + 'static>(application: A) {
     let options = application.options();
     let event_loop = winit::event_loop::EventLoop::new().expect("failed to create event loop");
     let mut app = AppRunner::new(application, options);
+
     event_loop.run_app(&mut app).expect("event loop failed");
 }

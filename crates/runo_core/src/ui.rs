@@ -87,35 +87,35 @@ impl<'a> Ui<'a> {
         }
     }
 
-    pub fn button<'ui>(&'ui mut self) -> ButtonBuilder<'ui, 'a> {
+    pub fn button(&mut self) -> ButtonBuilder<'_, 'a> {
         let id = format!("__auto_button_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         ButtonBuilder::new(self, id)
     }
 
-    pub fn label<'ui>(&'ui mut self) -> LabelBuilder<'ui, 'a> {
+    pub fn label(&mut self) -> LabelBuilder<'_, 'a> {
         let id = format!("__auto_label_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         LabelBuilder::new(self, id)
     }
 
-    pub fn text_box<'ui>(&'ui mut self) -> TextBoxBuilder<'ui, 'a> {
+    pub fn text_box(&mut self) -> TextBoxBuilder<'_, 'a> {
         let id = format!("__auto_text_box_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         TextBoxBuilder::new(self, id)
     }
 
-    pub fn combo_box<'ui>(&'ui mut self) -> ComboBoxBuilder<'ui, 'a> {
+    pub fn combo_box(&mut self) -> ComboBoxBuilder<'_, 'a> {
         let id = format!("__auto_combo_box_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         ComboBoxBuilder::new(self, id)
     }
 
-    pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
+    pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> R {
         self.with_layout(LayoutDirection::Vertical, 12.0, f)
     }
 
-    pub fn horizontal<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
+    pub fn horizontal<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> R {
         self.with_layout(LayoutDirection::Horizontal, 12.0, f)
     }
 
@@ -285,7 +285,7 @@ impl<'a> Ui<'a> {
         &mut self,
         direction: LayoutDirection,
         spacing: f64,
-        f: impl FnOnce(&mut Ui<'a>) -> R,
+        f: impl FnOnce(&mut Self) -> R,
     ) -> R {
         self.layout_stack.push_layout(direction, spacing);
         let result = f(self);

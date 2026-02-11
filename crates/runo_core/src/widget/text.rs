@@ -5,35 +5,39 @@ use vello::Scene;
 use vello::kurbo::{Affine, Vec2};
 use vello::peniko::{Color, Fill, FontData};
 
+use crate::cache::text_layout;
+
 pub(crate) fn layout_text(
     font: &FontData,
     text: &str,
     font_size: f32,
 ) -> Option<(Vec<Glyph>, f32)> {
-    let Ok(font_ref) = FontRef::from_index(font.data.as_ref(), font.index) else {
-        return None;
-    };
-    let charmap = font_ref.charmap();
-    let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
-
-    let mut total_advance = 0.0_f32;
-    let mut glyphs = Vec::new();
-    for ch in text.chars() {
-        let Some(glyph_id) = charmap.map(ch) else {
-            continue;
+    text_layout::get_or_insert_layout(font, text, font_size, || {
+        let Ok(font_ref) = FontRef::from_index(font.data.as_ref(), font.index) else {
+            return None;
         };
-        let advance = glyph_metrics
-            .advance_width(glyph_id)
-            .unwrap_or(font_size * 0.56);
-        glyphs.push(Glyph {
-            id: glyph_id.to_u32(),
-            x: total_advance,
-            y: 0.0,
-        });
-        total_advance += advance;
-    }
+        let charmap = font_ref.charmap();
+        let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
 
-    Some((glyphs, total_advance))
+        let mut total_advance = 0.0_f32;
+        let mut glyphs = Vec::new();
+        for ch in text.chars() {
+            let Some(glyph_id) = charmap.map(ch) else {
+                continue;
+            };
+            let advance = glyph_metrics
+                .advance_width(glyph_id)
+                .unwrap_or(font_size * 0.56);
+            glyphs.push(Glyph {
+                id: glyph_id.to_u32(),
+                x: total_advance,
+                y: 0.0,
+            });
+            total_advance += advance;
+        }
+
+        Some((glyphs, total_advance))
+    })
 }
 
 pub(crate) fn draw_text_run(

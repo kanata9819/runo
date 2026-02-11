@@ -1,3 +1,11 @@
+mod events;
+mod state;
+mod widgets;
+
+pub use events::UiEvents;
+pub use state::{UiButtonState, UiComboBoxState, UiLabelState, UiState, UiTextBoxState};
+pub use widgets::UiWidgets;
+
 use vello::Scene;
 use vello::kurbo::{Affine, Rect, RoundedRect, Stroke};
 use vello::peniko::{Fill, FontData};
@@ -5,16 +13,11 @@ use vello::peniko::{Fill, FontData};
 use crate::ButtonResponse;
 use crate::Color;
 use crate::ComboBoxResponse;
-use crate::UiEvent;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
-use crate::layout::div::DivBuilder;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
-use crate::widget::button::ButtonBuilder;
-use crate::widget::combo_box::ComboBoxBuilder;
-use crate::widget::label::LabelBuilder;
-use crate::widget::text_box::{Overflow, TextBoxBuilder, TextBoxResponse};
+use crate::widget::text_box::{Overflow, TextBoxResponse};
 
 pub(crate) struct ShowButtonArgs {
     pub(crate) id: String,
@@ -106,34 +109,16 @@ impl<'a> Ui<'a> {
         }
     }
 
-    pub fn button(&mut self) -> ButtonBuilder<'_, 'a> {
-        let id = format!("__auto_button_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
-        ButtonBuilder::new(self, id)
+    pub fn widgets(&mut self) -> UiWidgets<'_, 'a> {
+        UiWidgets { ui: self }
     }
 
-    pub fn label(&mut self) -> LabelBuilder<'_, 'a> {
-        let id = format!("__auto_label_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
-        LabelBuilder::new(self, id)
+    pub fn state(&mut self) -> UiState<'_, 'a> {
+        UiState { ui: self }
     }
 
-    pub fn text_box(&mut self) -> TextBoxBuilder<'_, 'a> {
-        let id = format!("__auto_text_box_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
-        TextBoxBuilder::new(self, id)
-    }
-
-    pub fn combo_box(&mut self) -> ComboBoxBuilder<'_, 'a> {
-        let id = format!("__auto_combo_box_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
-        ComboBoxBuilder::new(self, id)
-    }
-
-    pub fn div(&mut self) -> DivBuilder<'_, 'a> {
-        let id = format!("__auto_div_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
-        DivBuilder::new(self, id)
+    pub fn events(&mut self) -> UiEvents<'_, 'a> {
+        UiEvents { ui: self }
     }
 
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> R {
@@ -158,64 +143,34 @@ impl<'a> Ui<'a> {
         self.effects.use_effect(id, deps, effect);
     }
 
-    pub fn button_state(&self, id: impl AsRef<str>) -> ButtonResponse {
-        self.retained.button_response(id)
+    pub(crate) fn button(&mut self) -> crate::widget::button::ButtonBuilder<'_, 'a> {
+        let id = format!("__auto_button_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::button::ButtonBuilder::new(self, id)
     }
 
-    pub fn button_clicked(&self, id: impl AsRef<str>) -> bool {
-        self.button_state(id).clicked
+    pub(crate) fn label(&mut self) -> crate::widget::label::LabelBuilder<'_, 'a> {
+        let id = format!("__auto_label_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::label::LabelBuilder::new(self, id)
     }
 
-    pub fn set_button_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
-        self.retained.set_button_text(id, Some(text.into()));
+    pub(crate) fn text_box(&mut self) -> crate::widget::text_box::TextBoxBuilder<'_, 'a> {
+        let id = format!("__auto_text_box_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::text_box::TextBoxBuilder::new(self, id)
     }
 
-    pub fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        self.retained.set_button_enabled(id, enabled);
+    pub(crate) fn combo_box(&mut self) -> crate::widget::combo_box::ComboBoxBuilder<'_, 'a> {
+        let id = format!("__auto_combo_box_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::combo_box::ComboBoxBuilder::new(self, id)
     }
 
-    pub fn text_box_state(&self, id: impl AsRef<str>) -> TextBoxResponse {
-        self.retained.text_box_response(id)
-    }
-
-    pub fn text_box_text(&self, id: impl AsRef<str>) -> String {
-        self.text_box_state(id).text
-    }
-
-    pub fn set_text_box_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
-        self.retained.set_text_box_text(id, text);
-    }
-
-    pub fn set_text_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        self.retained.set_text_box_enabled(id, enabled);
-    }
-
-    pub fn combo_box_state(&self, id: impl AsRef<str>) -> ComboBoxResponse {
-        self.retained.combo_box_response(id)
-    }
-
-    pub fn combo_box_selected_text(&self, id: impl AsRef<str>) -> String {
-        self.combo_box_state(id).selected_text
-    }
-
-    pub fn set_combo_box_selected_index(&mut self, id: impl AsRef<str>, index: usize) {
-        self.retained.set_combo_box_selected_index(id, index);
-    }
-
-    pub fn set_combo_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        self.retained.set_combo_box_enabled(id, enabled);
-    }
-
-    pub fn set_label_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        self.retained.set_label_enabled(id, enabled);
-    }
-
-    pub fn next_event(&mut self) -> Option<UiEvent> {
-        self.retained.pop_event()
-    }
-
-    pub fn drain_events(&mut self) -> Vec<UiEvent> {
-        self.retained.drain_events()
+    pub(crate) fn div(&mut self) -> crate::layout::div::DivBuilder<'_, 'a> {
+        let id = format!("__auto_div_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::layout::div::DivBuilder::new(self, id)
     }
 
     pub(crate) fn show_button(&mut self, args: ShowButtonArgs) -> ButtonResponse {

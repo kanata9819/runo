@@ -13,7 +13,8 @@ struct MyApp {
 
 impl MyApp {
     fn build_title(ui: &mut Ui<'_>) {
-        ui.label()
+        ui.widgets()
+            .label()
             .id(TITLE_ID)
             .text("runo example")
             .font_size(22)
@@ -21,7 +22,8 @@ impl MyApp {
     }
 
     fn build_name_input(ui: &mut Ui<'_>) {
-        ui.text_box()
+        ui.widgets()
+            .text_box()
             .id(INPUT_NAME_ID)
             .width(320)
             .height(44)
@@ -32,7 +34,8 @@ impl MyApp {
     }
 
     fn build_role_combo(ui: &mut Ui<'_>) {
-        ui.combo_box()
+        ui.widgets()
+            .combo_box()
             .id(COMBO_ROLE_ID)
             .width(320)
             .height(44)
@@ -42,7 +45,8 @@ impl MyApp {
     }
 
     fn build_toggle_button(ui: &mut Ui<'_>) {
-        ui.button()
+        ui.widgets()
+            .button()
             .id(TOGGLE_BUTTON_ID)
             .width(220)
             .height(64)
@@ -64,7 +68,8 @@ impl Application for MyApp {
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
             Self::build_title(ui);
-            ui.div()
+            ui.widgets()
+                .div()
                 .id("main.panel")
                 .width(380)
                 .padding(16)
@@ -81,7 +86,7 @@ impl Application for MyApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        for event in ui.drain_events() {
+        for event in ui.events().drain_events() {
             match event {
                 UiEvent::ButtonClicked { id } if id == TOGGLE_BUTTON_ID => {
                     self.toggled = !self.toggled;
@@ -91,12 +96,11 @@ impl Application for MyApp {
                         "Toggle: OFF"
                     };
                     if self.input_text.is_empty() {
-                        ui.set_button_text(TOGGLE_BUTTON_ID, label);
+                        ui.state().button().set_text(TOGGLE_BUTTON_ID, label);
                     } else {
-                        ui.set_button_text(
-                            TOGGLE_BUTTON_ID,
-                            format!("{} ({})", label, self.input_text),
-                        );
+                        ui.state()
+                            .button()
+                            .set_text(TOGGLE_BUTTON_ID, format!("{} ({})", label, self.input_text));
                     }
                 }
                 UiEvent::TextBoxChanged { id, text } if id == INPUT_NAME_ID => {
@@ -107,12 +111,11 @@ impl Application for MyApp {
                         "Toggle: OFF"
                     };
                     if self.input_text.is_empty() {
-                        ui.set_button_text(TOGGLE_BUTTON_ID, label);
+                        ui.state().button().set_text(TOGGLE_BUTTON_ID, label);
                     } else {
-                        ui.set_button_text(
-                            TOGGLE_BUTTON_ID,
-                            format!("{} ({})", label, self.input_text),
-                        );
+                        ui.state()
+                            .button()
+                            .set_text(TOGGLE_BUTTON_ID, format!("{} ({})", label, self.input_text));
                     }
                 }
                 UiEvent::ComboBoxChanged {
@@ -125,12 +128,13 @@ impl Application for MyApp {
                         "Toggle: OFF"
                     };
                     if self.input_text.is_empty() {
-                        ui.set_button_text(
+                        ui.state().button().set_text(
                             TOGGLE_BUTTON_ID,
                             format!("{} [{}]", label, self.selected_role),
                         );
+                        println!("{}", ui.state().combo_box().selected_index(COMBO_ROLE_ID));
                     } else {
-                        ui.set_button_text(
+                        ui.state().button().set_text(
                             TOGGLE_BUTTON_ID,
                             format!("{} ({}) [{}]", label, self.input_text, self.selected_role),
                         );

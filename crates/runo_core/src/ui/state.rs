@@ -1,0 +1,105 @@
+use super::Ui;
+use crate::widget::text_box::TextBoxResponse;
+use crate::{ButtonResponse, ComboBoxResponse};
+
+pub struct UiState<'ui, 'a> {
+    pub(super) ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiButtonState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiTextBoxState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiComboBoxState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiLabelState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+impl<'ui, 'a> UiState<'ui, 'a> {
+    pub fn button(&mut self) -> UiButtonState<'_, 'a> {
+        UiButtonState { ui: &mut *self.ui }
+    }
+
+    pub fn text_box(&mut self) -> UiTextBoxState<'_, 'a> {
+        UiTextBoxState { ui: &mut *self.ui }
+    }
+
+    pub fn combo_box(&mut self) -> UiComboBoxState<'_, 'a> {
+        UiComboBoxState { ui: &mut *self.ui }
+    }
+
+    pub fn label(&mut self) -> UiLabelState<'_, 'a> {
+        UiLabelState { ui: &mut *self.ui }
+    }
+}
+
+impl<'ui, 'a> UiButtonState<'ui, 'a> {
+    pub fn response(&self, id: impl AsRef<str>) -> ButtonResponse {
+        self.ui.retained.button_response(id)
+    }
+
+    pub fn clicked(&self, id: impl AsRef<str>) -> bool {
+        self.response(id).clicked
+    }
+
+    pub fn set_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
+        self.ui.retained.set_button_text(id, Some(text.into()));
+    }
+
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_button_enabled(id, enabled);
+    }
+}
+
+impl<'ui, 'a> UiTextBoxState<'ui, 'a> {
+    pub fn response(&self, id: impl AsRef<str>) -> TextBoxResponse {
+        self.ui.retained.text_box_response(id)
+    }
+
+    pub fn text(&self, id: impl AsRef<str>) -> String {
+        self.response(id).text
+    }
+
+    pub fn set_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
+        self.ui.retained.set_text_box_text(id, text);
+    }
+
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_text_box_enabled(id, enabled);
+    }
+}
+
+impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
+    pub fn response(&self, id: impl AsRef<str>) -> ComboBoxResponse {
+        self.ui.retained.combo_box_response(id)
+    }
+
+    pub fn selected_text(&self, id: impl AsRef<str>) -> String {
+        self.response(id).selected_text
+    }
+
+    pub fn selected_index(&self, id: impl AsRef<str>) -> usize {
+        self.response(id).selected_index
+    }
+
+    pub fn set_selected_index(&mut self, id: impl AsRef<str>, index: usize) {
+        self.ui.retained.set_combo_box_selected_index(id, index);
+    }
+
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_combo_box_enabled(id, enabled);
+    }
+}
+
+impl<'ui, 'a> UiLabelState<'ui, 'a> {
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_label_enabled(id, enabled);
+    }
+}

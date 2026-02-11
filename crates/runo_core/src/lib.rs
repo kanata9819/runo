@@ -12,7 +12,9 @@ mod widget;
 pub use app::{Application, RunOptions, run};
 pub use event::UiEvent;
 pub use hooks::effect::EffectCleanup;
-pub use ui::Ui;
+pub use ui::{
+    Ui, UiButtonState, UiComboBoxState, UiEvents, UiLabelState, UiState, UiTextBoxState, UiWidgets,
+};
 pub use vello::peniko::Color;
 pub use widget::button::ButtonResponse;
 pub use widget::combo_box::ComboBoxResponse;

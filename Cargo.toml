@@ -1,3 +1,7 @@
 [workspace]
 members = ["crates/runo_core", "crates/example"]
-resolver = "2"
+resolver = "3"
+
+[profile.dev]
+debug = true
+opt-level = 0

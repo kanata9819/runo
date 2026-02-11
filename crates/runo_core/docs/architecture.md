@@ -79,7 +79,7 @@ pub trait Application {
 
 ユーザー向け API。
 
-1. `button_id`, `label`, `vertical`, `horizontal`
+1. `button`, `label`, `text_box`, `vertical`, `horizontal`
 2. `button_clicked`, `button_state`, `set_button_text`
 3. `use_effect`
 

@@ -16,14 +16,23 @@ impl Application for MyApp {
 
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
-            ui.label("runo example").size(22).show();
-            ui.text_box_id("input.name")
-                .size(320, 44)
+            ui.label()
+                .id("title")
+                .text("runo example")
+                .font_size(10)
+                .show();
+            ui.text_box()
+                .id("input.name")
+                .width(320)
+                .height(44)
+                .font_size(20)
                 .placeholder("Type here...")
                 .show();
-            ui.button_id("btnToggle")
+            ui.button()
+                .id("btnToggle")
                 .width(220)
                 .height(64)
+                .font_size(22)
                 .text("Toggle: OFF")
                 .show();
         });

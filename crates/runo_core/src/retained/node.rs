@@ -10,6 +10,7 @@ pub(super) enum WidgetNode {
 pub(super) struct ButtonNode {
     pub(super) rect: Rect,
     pub(super) text: Option<String>,
+    pub(super) font_size: f32,
     pub(super) text_color: Color,
     pub(super) hovered: bool,
     pub(super) pressed: bool,

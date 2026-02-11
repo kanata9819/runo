@@ -32,6 +32,7 @@ impl RetainedState {
         id: String,
         rect: Rect,
         text: Option<String>,
+        font_size: f32,
         text_color: Color,
     ) -> ButtonResponse {
         if !self.widgets.contains_key(&id) {
@@ -41,6 +42,7 @@ impl RetainedState {
                 WidgetNode::Button(ButtonNode {
                     rect,
                     text,
+                    font_size,
                     text_color,
                     hovered: false,
                     pressed: false,
@@ -55,6 +57,7 @@ impl RetainedState {
             WidgetNode::Button(button) => {
                 button.rect = rect;
                 button.text = text;
+                button.font_size = font_size;
                 button.text_color = text_color;
                 ButtonResponse {
                     hovered: button.hovered,
@@ -66,6 +69,7 @@ impl RetainedState {
                 *entry = WidgetNode::Button(ButtonNode {
                     rect,
                     text,
+                    font_size,
                     text_color,
                     hovered: false,
                     pressed: false,

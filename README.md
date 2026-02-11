@@ -41,10 +41,15 @@ struct MyApp {
 impl Application for MyApp {
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
-            ui.label("runo example").size(22.0).show();
-            ui.button_id("btnToggle")
-                .width(220.0)
-                .height(64.0)
+            ui.label()
+                .id("title")
+                .text("runo example")
+                .font_size(22)
+                .show();
+            ui.button()
+                .id("btnToggle")
+                .width(220)
+                .height(64)
                 .text("Toggle: OFF")
                 .show();
         });

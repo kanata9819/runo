@@ -20,20 +20,19 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &Button
     let (Some(font), Some(text)) = (font, button.text.as_deref()) else {
         return;
     };
-    let font_size = 18.0_f32;
-    let Some((glyphs, total_advance)) = layout_text(font, text, font_size) else {
+    let Some((glyphs, total_advance)) = layout_text(font, text, button.font_size) else {
         return;
     };
 
     let text_x = button.rect.x0 + (button.rect.width() - total_advance as f64) * 0.5;
-    let text_y = button.rect.y0 + button.rect.height() * 0.5 + font_size as f64 * 0.35;
+    let text_y = button.rect.y0 + button.rect.height() * 0.5 + button.font_size as f64 * 0.35;
     draw_text_run(
         scene,
         font,
         glyphs,
         text_x,
         text_y,
-        font_size,
+        button.font_size,
         button.text_color,
     );
 }

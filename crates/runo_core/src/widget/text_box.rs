@@ -45,14 +45,13 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
         self
     }
 
-    pub fn height(mut self, px: u32) -> Self {
-        self.height = px as f64;
+    pub fn id(mut self, id: impl Into<String>) -> Self {
+        self.id = id.into();
         self
     }
 
-    pub fn size(mut self, width: u32, height: u32) -> Self {
-        self.width = width as f64;
-        self.height = height as f64;
+    pub fn height(mut self, px: u32) -> Self {
+        self.height = px as f64;
         self
     }
 

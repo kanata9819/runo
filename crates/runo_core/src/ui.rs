@@ -18,6 +18,7 @@ pub(crate) struct ShowButtonArgs {
     pub(crate) width: f64,
     pub(crate) height: f64,
     pub(crate) text: Option<String>,
+    pub(crate) font_size: f32,
     pub(crate) text_color: Color,
 }
 
@@ -74,24 +75,16 @@ impl<'a> Ui<'a> {
         ButtonBuilder::new(self, id)
     }
 
-    pub fn button_id<'ui>(&'ui mut self, id: impl Into<String>) -> ButtonBuilder<'ui, 'a> {
-        ButtonBuilder::new(self, id.into())
-    }
-
-    pub fn label<'ui>(&'ui mut self, text: impl Into<String>) -> LabelBuilder<'ui, 'a> {
+    pub fn label<'ui>(&'ui mut self) -> LabelBuilder<'ui, 'a> {
         let id = format!("__auto_label_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
-        LabelBuilder::new(self, id, text.into())
+        LabelBuilder::new(self, id)
     }
 
     pub fn text_box<'ui>(&'ui mut self) -> TextBoxBuilder<'ui, 'a> {
         let id = format!("__auto_text_box_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         TextBoxBuilder::new(self, id)
-    }
-
-    pub fn text_box_id<'ui>(&'ui mut self, id: impl Into<String>) -> TextBoxBuilder<'ui, 'a> {
-        TextBoxBuilder::new(self, id.into())
     }
 
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
@@ -154,11 +147,13 @@ impl<'a> Ui<'a> {
             width,
             height,
             text,
+            font_size,
             text_color,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_button(id, rect, text, text_color)
+        self.retained
+            .upsert_button(id, rect, text, font_size, text_color)
     }
 
     pub(crate) fn show_label(&mut self, args: ShowLabelArgs) {

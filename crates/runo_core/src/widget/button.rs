@@ -16,6 +16,7 @@ pub struct ButtonBuilder<'ui, 'a> {
     width: f64,
     height: f64,
     text: Option<String>,
+    font_size: f32,
     text_color: Color,
 }
 
@@ -27,12 +28,18 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
             width: 180.0,
             height: 56.0,
             text: None,
+            font_size: 18.0,
             text_color: Color::from_rgb8(245, 248, 252),
         }
     }
 
     pub fn width(mut self, px: u32) -> Self {
         self.width = px as f64;
+        self
+    }
+
+    pub fn id(mut self, id: impl Into<String>) -> Self {
+        self.id = id.into();
         self
     }
 
@@ -52,6 +59,11 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
         self
     }
 
+    pub fn font_size(mut self, px: u32) -> Self {
+        self.font_size = px as f32;
+        self
+    }
+
     pub fn text_color(mut self, color: Color) -> Self {
         self.text_color = color;
         self
@@ -63,6 +75,7 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
             width: self.width,
             height: self.height,
             text: self.text,
+            font_size: self.font_size,
             text_color: self.text_color,
         })
     }

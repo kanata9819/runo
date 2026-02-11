@@ -14,4 +14,5 @@ pub use hooks::effect::EffectCleanup;
 pub use ui::Ui;
 pub use vello::peniko::Color;
 pub use widget::button::ButtonResponse;
+pub use widget::combo_box::ComboBoxResponse;
 pub use widget::text_box::TextBoxResponse;

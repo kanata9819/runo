@@ -4,12 +4,14 @@ use vello::peniko::{Fill, FontData};
 
 use crate::ButtonResponse;
 use crate::Color;
+use crate::ComboBoxResponse;
 use crate::UiEvent;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
 use crate::widget::button::ButtonBuilder;
+use crate::widget::combo_box::ComboBoxBuilder;
 use crate::widget::label::LabelBuilder;
 use crate::widget::text_box::{TextBoxBuilder, TextBoxResponse};
 
@@ -37,6 +39,18 @@ pub(crate) struct ShowTextBoxArgs {
     pub(crate) height: f64,
     pub(crate) text: Option<String>,
     pub(crate) placeholder: Option<String>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) bg_color: Color,
+    pub(crate) border_color: Color,
+}
+
+pub(crate) struct ShowComboBoxArgs {
+    pub(crate) id: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) items: Vec<String>,
+    pub(crate) selected_index: Option<usize>,
     pub(crate) font_size: f32,
     pub(crate) text_color: Color,
     pub(crate) bg_color: Color,
@@ -87,6 +101,12 @@ impl<'a> Ui<'a> {
         TextBoxBuilder::new(self, id)
     }
 
+    pub fn combo_box<'ui>(&'ui mut self) -> ComboBoxBuilder<'ui, 'a> {
+        let id = format!("__auto_combo_box_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        ComboBoxBuilder::new(self, id)
+    }
+
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
         self.with_layout(LayoutDirection::Vertical, 12.0, f)
     }
@@ -131,6 +151,18 @@ impl<'a> Ui<'a> {
 
     pub fn set_text_box_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
         self.retained.set_text_box_text(id, text);
+    }
+
+    pub fn combo_box_state(&self, id: impl AsRef<str>) -> ComboBoxResponse {
+        self.retained.combo_box_response(id)
+    }
+
+    pub fn combo_box_selected_text(&self, id: impl AsRef<str>) -> String {
+        self.combo_box_state(id).selected_text
+    }
+
+    pub fn set_combo_box_selected_index(&mut self, id: impl AsRef<str>, index: usize) {
+        self.retained.set_combo_box_selected_index(id, index);
     }
 
     pub fn next_event(&mut self) -> Option<UiEvent> {
@@ -190,6 +222,32 @@ impl<'a> Ui<'a> {
             rect,
             text,
             placeholder,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+        )
+    }
+
+    pub(crate) fn show_combo_box(&mut self, args: ShowComboBoxArgs) -> ComboBoxResponse {
+        let ShowComboBoxArgs {
+            id,
+            width,
+            height,
+            items,
+            selected_index,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+        } = args;
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained.upsert_combo_box(
+            id,
+            rect,
+            items,
+            selected_index,
             font_size,
             text_color,
             bg_color,

@@ -10,20 +10,53 @@ impl RetainedState {
         self.update_hover_flags(input.cursor_pos);
         self.handle_mouse_press(input.mouse_pressed);
         self.update_button_states(input.mouse_down, input.mouse_released);
+        self.update_combo_box_states(input.mouse_down, input.mouse_released);
         self.update_text_box_focus();
         self.apply_text_input(&input);
     }
 
     fn update_hover_flags(&mut self, cursor_pos: (f64, f64)) {
-        for node in self.widgets.values_mut() {
+        let open_overlay_id = self.order.iter().rev().find_map(|id| {
+            let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
+                return None;
+            };
+            if combo_box.is_open && combo_expanded_contains(combo_box, cursor_pos.0, cursor_pos.1) {
+                Some(id.clone())
+            } else {
+                None
+            }
+        });
+
+        for (id, node) in &mut self.widgets {
             match node {
                 WidgetNode::Button(button) => {
                     button.clicked = false;
-                    button.hovered = contains(button.rect, cursor_pos.0, cursor_pos.1);
+                    button.hovered = if open_overlay_id.is_some() {
+                        false
+                    } else {
+                        contains(button.rect, cursor_pos.0, cursor_pos.1)
+                    };
                 }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
-                    text_box.hovered = contains(text_box.rect, cursor_pos.0, cursor_pos.1);
+                    text_box.hovered = if open_overlay_id.is_some() {
+                        false
+                    } else {
+                        contains(text_box.rect, cursor_pos.0, cursor_pos.1)
+                    };
+                }
+                WidgetNode::ComboBox(combo_box) => {
+                    combo_box.changed = false;
+                    combo_box.hovered = contains(combo_box.rect, cursor_pos.0, cursor_pos.1);
+                    combo_box.hovered_item = if open_overlay_id
+                        .as_ref()
+                        .map(|active| active == id)
+                        .unwrap_or(false)
+                    {
+                        combo_item_index_at(combo_box, cursor_pos.0, cursor_pos.1)
+                    } else {
+                        None
+                    };
                 }
                 WidgetNode::Label(_) => {}
             }
@@ -48,6 +81,17 @@ impl RetainedState {
                     return None;
                 };
                 if text_box.hovered {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            });
+
+            self.active_combo_box = self.order.iter().rev().find_map(|id| {
+                let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
+                    return None;
+                };
+                if combo_box.hovered || combo_box.hovered_item.is_some() {
                     Some(id.clone())
                 } else {
                     None
@@ -86,6 +130,67 @@ impl RetainedState {
 
         if mouse_released {
             self.active_button = None;
+        }
+    }
+
+    fn update_combo_box_states(&mut self, mouse_down: bool, mouse_released: bool) {
+        let mut changed = Vec::new();
+        let active_combo_box = self.active_combo_box.clone();
+        for (id, node) in &mut self.widgets {
+            if let WidgetNode::ComboBox(combo_box) = node {
+                combo_box.pressed = mouse_down
+                    && active_combo_box
+                        .as_ref()
+                        .map(|active| active == id)
+                        .unwrap_or(false);
+
+                if !mouse_released {
+                    continue;
+                }
+
+                if active_combo_box
+                    .as_ref()
+                    .map(|active| active == id)
+                    .unwrap_or(false)
+                {
+                    if combo_box.is_open {
+                        if let Some(index) = combo_box.hovered_item
+                            && index < combo_box.items.len()
+                        {
+                            combo_box.changed = combo_box.selected_index != index;
+                            combo_box.selected_index = index;
+                            if combo_box.changed {
+                                changed.push((
+                                    id.clone(),
+                                    combo_box.selected_index,
+                                    combo_box.items[combo_box.selected_index].clone(),
+                                ));
+                            }
+                            combo_box.is_open = false;
+                        } else if combo_box.hovered {
+                            combo_box.is_open = false;
+                        } else {
+                            combo_box.is_open = false;
+                        }
+                    } else if combo_box.hovered {
+                        combo_box.is_open = true;
+                    }
+                } else {
+                    combo_box.is_open = false;
+                }
+            }
+        }
+
+        for (id, selected_index, selected_text) in changed {
+            self.push_event(UiEvent::ComboBoxChanged {
+                id,
+                selected_index,
+                selected_text,
+            });
+        }
+
+        if mouse_released {
+            self.active_combo_box = None;
         }
     }
 
@@ -135,4 +240,34 @@ impl RetainedState {
 
 fn contains(rect: Rect, x: f64, y: f64) -> bool {
     x >= rect.x0 && x <= rect.x1 && y >= rect.y0 && y <= rect.y1
+}
+
+fn combo_item_index_at(
+    combo_box: &crate::retained::node::ComboBoxNode,
+    x: f64,
+    y: f64,
+) -> Option<usize> {
+    if !combo_box.is_open || combo_box.items.is_empty() {
+        return None;
+    }
+    let item_height = combo_box.rect.height();
+    for index in 0..combo_box.items.len() {
+        let top = combo_box.rect.y1 + item_height * index as f64;
+        let rect = Rect::new(combo_box.rect.x0, top, combo_box.rect.x1, top + item_height);
+        if contains(rect, x, y) {
+            return Some(index);
+        }
+    }
+    None
+}
+
+fn combo_expanded_contains(
+    combo_box: &crate::retained::node::ComboBoxNode,
+    x: f64,
+    y: f64,
+) -> bool {
+    if contains(combo_box.rect, x, y) {
+        return true;
+    }
+    combo_item_index_at(combo_box, x, y).is_some()
 }

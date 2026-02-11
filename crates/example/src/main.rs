@@ -3,6 +3,7 @@ use runo_core::{Application, RunOptions, Ui, UiEvent, run};
 struct MyApp {
     toggled: bool,
     input_text: String,
+    selected_role: String,
 }
 
 impl Application for MyApp {
@@ -19,7 +20,7 @@ impl Application for MyApp {
             ui.label()
                 .id("title")
                 .text("runo example")
-                .font_size(10)
+                .font_size(22)
                 .show();
             ui.text_box()
                 .id("input.name")
@@ -28,11 +29,18 @@ impl Application for MyApp {
                 .font_size(20)
                 .placeholder("Type here...")
                 .show();
+            ui.combo_box()
+                .id("combo.role")
+                .width(320)
+                .height(44)
+                .font_size(18)
+                .items(["Designer", "Engineer", "Manager"])
+                .show();
             ui.button()
                 .id("btnToggle")
                 .width(220)
                 .height(64)
-                .font_size(22)
+                .font_size(18)
                 .text("Toggle: OFF")
                 .show();
         });
@@ -67,6 +75,27 @@ impl Application for MyApp {
                         ui.set_button_text("btnToggle", format!("{} ({})", label, self.input_text));
                     }
                 }
+                UiEvent::ComboBoxChanged {
+                    id, selected_text, ..
+                } if id == "combo.role" => {
+                    self.selected_role = selected_text;
+                    let label = if self.toggled {
+                        "Toggle: ON"
+                    } else {
+                        "Toggle: OFF"
+                    };
+                    if self.input_text.is_empty() {
+                        ui.set_button_text(
+                            "btnToggle",
+                            format!("{} [{}]", label, self.selected_role),
+                        );
+                    } else {
+                        ui.set_button_text(
+                            "btnToggle",
+                            format!("{} ({}) [{}]", label, self.input_text, self.selected_role),
+                        );
+                    }
+                }
                 _ => {}
             }
         }
@@ -83,5 +112,6 @@ fn main() {
     run(MyApp {
         toggled: false,
         input_text: String::new(),
+        selected_role: "Designer".to_string(),
     });
 }

@@ -38,12 +38,6 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
         return;
     };
 
-    let draw_text = if text_box.text.is_empty() {
-        text_box.placeholder.as_deref().unwrap_or("")
-    } else {
-        text_box.text.as_str()
-    };
-
     let text_color = if !text_box.enabled {
         Color::from_rgb8(147, 153, 161)
     } else if text_box.text.is_empty() {
@@ -52,51 +46,77 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
         text_box.text_color
     };
 
-    let Some((glyphs, total_advance)) = layout_text(font, draw_text, text_box.font_size) else {
-        return;
-    };
-    text_box.text_advance = total_advance as f64;
-
     let text_x = text_box.rect.x0 + 12.0 - text_box.scroll_x;
-    let baseline_y =
-        text_box.rect.y0 + text_box.rect.height() * 0.5 + text_box.font_size as f64 * 0.35
-            - text_box.scroll_y;
+    let first_line_baseline =
+        text_box.rect.y0 + 12.0 + text_box.font_size as f64 - text_box.scroll_y;
+    let line_height = text_box.font_size as f64 * 1.35;
     let inner_left = text_box.rect.x0 + 12.0;
     let inner_right = text_box.rect.x1 - 12.0;
-    let visible_glyphs = if text_box.overflow_x.clips() {
-        clip_glyphs_horizontally(
-            glyphs,
-            total_advance as f64,
-            text_x,
-            inner_left,
-            inner_right,
-        )
+
+    if text_box.text.is_empty() {
+        let placeholder = text_box.placeholder.as_deref().unwrap_or("");
+        if let Some((glyphs, advance)) = layout_text(font, placeholder, text_box.font_size) {
+            let visible_glyphs = if text_box.overflow_x.clips() {
+                clip_glyphs_horizontally(glyphs, advance as f64, text_x, inner_left, inner_right)
+            } else {
+                glyphs
+            };
+            if !visible_glyphs.is_empty() {
+                draw_text_run(
+                    scene,
+                    font,
+                    visible_glyphs,
+                    text_x,
+                    first_line_baseline,
+                    text_box.font_size,
+                    text_color,
+                );
+            }
+        }
+        text_box.text_advance = 0.0;
     } else {
-        glyphs
-    };
-    if !visible_glyphs.is_empty() {
-        draw_text_run(
-            scene,
-            font,
-            visible_glyphs,
-            text_x,
-            baseline_y,
-            text_box.font_size,
-            text_color,
-        );
+        let mut max_advance = 0.0_f64;
+        for (line_index, line_text) in text_box.text.split('\n').enumerate() {
+            let baseline_y = first_line_baseline + line_index as f64 * line_height;
+            let Some((glyphs, advance)) = layout_text(font, line_text, text_box.font_size) else {
+                continue;
+            };
+            max_advance = max_advance.max(advance as f64);
+            let visible_glyphs = if text_box.overflow_x.clips() {
+                clip_glyphs_horizontally(glyphs, advance as f64, text_x, inner_left, inner_right)
+            } else {
+                glyphs
+            };
+            if !visible_glyphs.is_empty() {
+                draw_text_run(
+                    scene,
+                    font,
+                    visible_glyphs,
+                    text_x,
+                    baseline_y,
+                    text_box.font_size,
+                    text_color,
+                );
+            }
+        }
+        text_box.text_advance = max_advance;
     }
 
     if text_box.focused && text_box.enabled {
-        let caret_x = if text_box.text.is_empty() {
-            text_x
-        } else {
-            text_x + total_advance as f64 + 1.0
-        };
+        let (caret_line, caret_col) =
+            line_col_from_char_index(&text_box.text, text_box.caret_index);
+        let caret_line_text = text_box.text.split('\n').nth(caret_line).unwrap_or("");
+        let prefix: String = caret_line_text.chars().take(caret_col).collect();
+        let prefix_advance = layout_text(font, &prefix, text_box.font_size)
+            .map(|(_, advance)| advance as f64)
+            .unwrap_or(0.0);
+        let caret_x = text_x + prefix_advance + 1.0;
         let caret_x = if text_box.overflow_x.clips() {
             caret_x.clamp(inner_left, inner_right)
         } else {
             caret_x
         };
+        let baseline_y = first_line_baseline + caret_line as f64 * line_height;
         let caret_h = text_box.font_size as f64 * 1.1;
         let caret_y0 = baseline_y - text_box.font_size as f64 * 0.9;
         let caret = Rect::new(caret_x, caret_y0, caret_x + 1.5, caret_y0 + caret_h);
@@ -201,4 +221,21 @@ fn text_box_content_width(text_box: &TextBoxNode) -> f64 {
     } else {
         estimate_text_width(&text_box.text, text_box.font_size) as f64
     }
+}
+
+fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
+    let mut line = 0;
+    let mut col = 0;
+    for (i, ch) in text.chars().enumerate() {
+        if i == caret_index {
+            return (line, col);
+        }
+        if ch == '\n' {
+            line += 1;
+            col = 0;
+        } else {
+            col += 1;
+        }
+    }
+    (line, col)
 }

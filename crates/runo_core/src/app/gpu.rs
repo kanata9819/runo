@@ -3,9 +3,9 @@ use vello::wgpu;
 use vello::{AaConfig, RenderParams, Renderer, Scene};
 
 use crate::Color;
-use crate::app::{AppRunner, Application};
+use crate::app::{AppRunner, RunoApplication};
 
-impl<A: Application + 'static> AppRunner<A> {
+impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn acquire_surface_texture(
         render_cx: &mut RenderContext,
         surface: &mut RenderSurface<'static>,

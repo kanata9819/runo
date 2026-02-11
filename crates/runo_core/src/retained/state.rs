@@ -19,6 +19,10 @@ pub(crate) struct RetainedState {
     pub(super) active_text_box_scrollbar: Option<String>,
     pub(super) focused_text_box: Option<String>,
     pub(super) events: VecDeque<UiEvent>,
+    pub(super) text_clipboard: String,
+    pub(super) div_visible: HashMap<String, bool>,
+    pub(super) div_enabled: HashMap<String, bool>,
+    pub(super) div_background: HashMap<String, Color>,
 }
 
 impl RetainedState {
@@ -31,6 +35,10 @@ impl RetainedState {
             active_text_box_scrollbar: None,
             focused_text_box: None,
             events: VecDeque::new(),
+            text_clipboard: String::new(),
+            div_visible: HashMap::new(),
+            div_enabled: HashMap::new(),
+            div_background: HashMap::new(),
         }
     }
 
@@ -148,6 +156,7 @@ impl RetainedState {
         if !self.widgets.contains_key(&id) {
             let text = text.unwrap_or_default();
             let text_advance = estimate_text_width(&text, font_size) as f64;
+            let caret_index = text.chars().count();
             self.order.push(id.clone());
             self.widgets.insert(
                 id.clone(),
@@ -163,6 +172,7 @@ impl RetainedState {
                     overflow_x,
                     overflow_y,
                     text_advance,
+                    caret_index,
                     scroll_x: 0.0,
                     scroll_y: 0.0,
                     hovered: false,
@@ -181,6 +191,7 @@ impl RetainedState {
                     text_box.text = next_text;
                     text_box.text_advance =
                         estimate_text_width(&text_box.text, text_box.font_size) as f64;
+                    text_box.caret_index = text_box.text.chars().count();
                 }
                 text_box.placeholder = placeholder;
                 if (text_box.font_size - font_size).abs() > f32::EPSILON {
@@ -205,6 +216,7 @@ impl RetainedState {
             _ => {
                 let text = text.unwrap_or_default();
                 let text_advance = estimate_text_width(&text, font_size) as f64;
+                let caret_index = text.chars().count();
                 *entry = WidgetNode::TextBox(TextBoxNode {
                     rect,
                     text,
@@ -217,6 +229,7 @@ impl RetainedState {
                     overflow_x,
                     overflow_y,
                     text_advance,
+                    caret_index,
                     scroll_x: 0.0,
                     scroll_y: 0.0,
                     hovered: false,
@@ -374,6 +387,7 @@ impl RetainedState {
         };
         text_box.text = text.into();
         text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
+        text_box.caret_index = text_box.text.chars().count();
         text_box.changed = true;
     }
 
@@ -451,6 +465,34 @@ impl RetainedState {
             return;
         };
         label.enabled = enabled;
+    }
+
+    pub(crate) fn div_visible(&self, id: impl AsRef<str>) -> bool {
+        self.div_visible.get(id.as_ref()).copied().unwrap_or(true)
+    }
+
+    pub(crate) fn div_enabled(&self, id: impl AsRef<str>) -> bool {
+        self.div_enabled.get(id.as_ref()).copied().unwrap_or(true)
+    }
+
+    pub(crate) fn div_background(&self, id: impl AsRef<str>) -> Option<Color> {
+        self.div_background.get(id.as_ref()).copied()
+    }
+
+    pub(crate) fn set_div_visible(&mut self, id: impl Into<String>, visible: bool) {
+        self.div_visible.insert(id.into(), visible);
+    }
+
+    pub(crate) fn set_div_enabled(&mut self, id: impl Into<String>, enabled: bool) {
+        self.div_enabled.insert(id.into(), enabled);
+    }
+
+    pub(crate) fn set_div_background(&mut self, id: impl Into<String>, color: Color) {
+        self.div_background.insert(id.into(), color);
+    }
+
+    pub(crate) fn clear_div_background(&mut self, id: impl AsRef<str>) {
+        self.div_background.remove(id.as_ref());
     }
 
     pub(crate) fn pop_event(&mut self) -> Option<UiEvent> {

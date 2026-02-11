@@ -1,9 +1,12 @@
+pub mod colors;
 mod events;
 mod state;
 mod widgets;
 
 pub use events::UiEvents;
-pub use state::{UiButtonState, UiComboBoxState, UiLabelState, UiState, UiTextBoxState};
+pub use state::{
+    UiButtonState, UiComboBoxState, UiDivState, UiLabelState, UiState, UiTextBoxState,
+};
 pub use widgets::UiWidgets;
 
 use vello::Scene;
@@ -89,6 +92,7 @@ pub struct Ui<'a> {
     effects: &'a mut EffectStore,
     retained: &'a mut RetainedState,
     layout_stack: LayoutStack,
+    enabled_stack: Vec<bool>,
     auto_id_counter: u64,
 }
 
@@ -105,6 +109,7 @@ impl<'a> Ui<'a> {
             effects,
             retained,
             layout_stack: LayoutStack::new((24.0, 24.0), LayoutDirection::Vertical, 12.0),
+            enabled_stack: vec![true],
             auto_id_counter: 0,
         }
     }
@@ -185,8 +190,14 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained
-            .upsert_button(id, rect, text, font_size, text_color, enabled)
+        self.retained.upsert_button(
+            id,
+            rect,
+            text,
+            font_size,
+            text_color,
+            enabled && self.current_enabled(),
+        )
     }
 
     pub(crate) fn show_label(&mut self, args: ShowLabelArgs) {
@@ -201,8 +212,14 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained
-            .upsert_label(id, rect, text, font_size, text_color, enabled);
+        self.retained.upsert_label(
+            id,
+            rect,
+            text,
+            font_size,
+            text_color,
+            enabled && self.current_enabled(),
+        );
     }
 
     pub(crate) fn show_text_box(&mut self, args: ShowTextBoxArgs) -> TextBoxResponse {
@@ -216,7 +233,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
-            enabled,
+            enabled: enabled_arg,
             overflow_x,
             overflow_y,
         } = args;
@@ -231,7 +248,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
-            enabled,
+            enabled_arg && self.current_enabled(),
             overflow_x,
             overflow_y,
         )
@@ -248,7 +265,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
-            enabled,
+            enabled: enabled_arg,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
@@ -261,13 +278,13 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
-            enabled,
+            enabled_arg && self.current_enabled(),
         )
     }
 
     pub(crate) fn show_div<R>(&mut self, args: ShowDivArgs, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
         let ShowDivArgs {
-            id: _id,
+            id,
             direction,
             gap,
             width,
@@ -281,12 +298,18 @@ impl<'a> Ui<'a> {
             border_width,
             radius,
         } = args;
+        let div_visible = self.retained.div_visible(&id);
+        let div_enabled = self.retained.div_enabled(&id);
+        let bg_color = self.retained.div_background(&id).or(bg_color);
+        let effective_enabled = self.current_enabled() && div_enabled;
 
         let origin = self.layout_stack.peek_next_position();
         let content_origin = (origin.0 + padding_left, origin.1 + padding_top);
         self.layout_stack
             .push_layout_at(content_origin, direction, gap);
+        self.enabled_stack.push(effective_enabled);
         let result = f(self);
+        let _ = self.enabled_stack.pop();
         let (content_w, content_h) = self.layout_stack.pop_layout_consumed();
 
         let auto_w = content_w + padding_left + padding_right;
@@ -296,11 +319,11 @@ impl<'a> Ui<'a> {
 
         let rect = Rect::new(origin.0, origin.1, origin.0 + div_w, origin.1 + div_h);
         let rounded = RoundedRect::from_rect(rect, radius);
-        if let Some(color) = bg_color {
+        if div_visible && let Some(color) = bg_color {
             self.scene
                 .fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
         }
-        if let Some(color) = border_color {
+        if div_visible && let Some(color) = border_color {
             self.scene.stroke(
                 &Stroke::new(border_width.max(0.0)),
                 Affine::IDENTITY,
@@ -328,5 +351,9 @@ impl<'a> Ui<'a> {
 
     pub(crate) fn allocate_rect(&mut self, width: f64, height: f64) -> (f64, f64) {
         self.layout_stack.allocate_rect(width, height)
+    }
+
+    fn current_enabled(&self) -> bool {
+        self.enabled_stack.last().copied().unwrap_or(true)
     }
 }

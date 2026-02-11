@@ -22,6 +22,10 @@ pub struct UiLabelState<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
 }
 
+pub struct UiDivState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
 impl<'ui, 'a> UiState<'ui, 'a> {
     pub fn button(&mut self) -> UiButtonState<'_, 'a> {
         UiButtonState { ui: &mut *self.ui }
@@ -37,6 +41,10 @@ impl<'ui, 'a> UiState<'ui, 'a> {
 
     pub fn label(&mut self) -> UiLabelState<'_, 'a> {
         UiLabelState { ui: &mut *self.ui }
+    }
+
+    pub fn div(&mut self) -> UiDivState<'_, 'a> {
+        UiDivState { ui: &mut *self.ui }
     }
 }
 
@@ -101,5 +109,23 @@ impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
 impl<'ui, 'a> UiLabelState<'ui, 'a> {
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_label_enabled(id, enabled);
+    }
+}
+
+impl<'ui, 'a> UiDivState<'ui, 'a> {
+    pub fn set_visible(&mut self, id: impl Into<String>, visible: bool) {
+        self.ui.retained.set_div_visible(id, visible);
+    }
+
+    pub fn set_enabled(&mut self, id: impl Into<String>, enabled: bool) {
+        self.ui.retained.set_div_enabled(id, enabled);
+    }
+
+    pub fn set_background(&mut self, id: impl Into<String>, color: crate::Color) {
+        self.ui.retained.set_div_background(id, color);
+    }
+
+    pub fn clear_background(&mut self, id: impl AsRef<str>) {
+        self.ui.retained.clear_div_background(id);
     }
 }

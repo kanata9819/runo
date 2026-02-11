@@ -9,11 +9,13 @@ mod retained;
 mod ui;
 mod widget;
 
-pub use app::{Application, RunOptions, run};
+pub use app::{RunOptions, RunoApplication, run};
 pub use event::UiEvent;
 pub use hooks::effect::EffectCleanup;
+pub use ui::colors;
 pub use ui::{
-    Ui, UiButtonState, UiComboBoxState, UiEvents, UiLabelState, UiState, UiTextBoxState, UiWidgets,
+    Ui, UiButtonState, UiComboBoxState, UiDivState, UiEvents, UiLabelState, UiState,
+    UiTextBoxState, UiWidgets,
 };
 pub use vello::peniko::Color;
 pub use widget::button::ButtonResponse;

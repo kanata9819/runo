@@ -2,10 +2,10 @@ use vello::kurbo::{Affine, Rect};
 use vello::peniko::Fill;
 
 use crate::Color;
-use crate::app::{AppRunner, Application};
+use crate::app::{AppRunner, RunoApplication};
 use crate::ui::Ui;
 
-impl<A: Application + 'static> AppRunner<A> {
+impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn render(&mut self) {
         let Some((width, height)) = self.surface_size() else {
             return;

@@ -23,7 +23,7 @@ impl Default for RunOptions {
     }
 }
 
-pub trait Application {
+pub trait RunoApplication {
     fn build(&mut self, _ui: &mut Ui<'_>) {}
     fn update(&mut self, _ui: &mut Ui<'_>) {}
     fn options(&self) -> RunOptions {
@@ -31,7 +31,7 @@ pub trait Application {
     }
 }
 
-pub fn run<A: Application + 'static>(application: A) {
+pub fn run<A: RunoApplication + 'static>(application: A) {
     let options = application.options();
     let event_loop = winit::event_loop::EventLoop::new().expect("failed to create event loop");
     let mut app = AppRunner::new(application, options);

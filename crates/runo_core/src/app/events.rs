@@ -4,9 +4,9 @@ use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::WindowId;
 
-use crate::app::{AppRunner, Application};
+use crate::app::{AppRunner, RunoApplication};
 
-impl<A: Application + 'static> ApplicationHandler for AppRunner<A> {
+impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if self.window.is_none() {
             self.init_window_and_gpu(event_loop);
@@ -52,16 +52,28 @@ impl<A: Application + 'static> ApplicationHandler for AppRunner<A> {
             }
             WindowEvent::KeyboardInput { event, .. } => {
                 if event.state.is_pressed() {
+                    let ctrl = self.input.ctrl_pressed();
                     if !self.input.ime_active()
+                        && !ctrl
                         && let Some(text) = event.text.as_ref()
                     {
                         self.input.push_text_input(text);
                     }
-                    if matches!(event.logical_key, Key::Named(NamedKey::Backspace)) {
-                        self.input.on_backspace_pressed();
+                    if let Key::Named(named) = &event.logical_key {
+                        self.input.on_named_key_pressed(named.clone());
+                    }
+                    if ctrl && let Key::Character(text) = &event.logical_key {
+                        if text.eq_ignore_ascii_case("c") {
+                            self.input.on_copy_pressed();
+                        } else if text.eq_ignore_ascii_case("v") {
+                            self.input.on_paste_pressed();
+                        }
                     }
                     self.request_redraw();
                 }
+            }
+            WindowEvent::ModifiersChanged(modifiers) => {
+                self.input.set_ctrl_pressed(modifiers.state().control_key());
             }
             WindowEvent::Ime(Ime::Enabled) => {
                 self.input.set_ime_active(true);

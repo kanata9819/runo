@@ -10,13 +10,13 @@ use winit::dpi::LogicalSize;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use crate::app::{Application, RunOptions};
+use crate::app::{RunOptions, RunoApplication};
 use crate::font::load_default_font;
 use crate::hooks::effect::EffectStore;
 use crate::input::InputState;
 use crate::retained::RetainedState;
 
-pub(crate) struct AppRunner<A: Application + 'static> {
+pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) user_app: A,
     pub(super) window: Option<Arc<Window>>,
     pub(super) window_id: Option<WindowId>,
@@ -31,7 +31,7 @@ pub(crate) struct AppRunner<A: Application + 'static> {
     window_options: RunOptions,
 }
 
-impl<A: Application + 'static> AppRunner<A> {
+impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn new(user_app: A, mut window_options: RunOptions) -> Self {
         window_options.window_width = window_options.window_width.max(1);
         window_options.window_height = window_options.window_height.max(1);

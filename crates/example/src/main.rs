@@ -1,9 +1,10 @@
-use runo_core::{Application, Color, RunOptions, Ui, UiEvent, run};
+use runo_core::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
 
 const TITLE_ID: &str = "title";
 const INPUT_NAME_ID: &str = "input.name";
 const COMBO_ROLE_ID: &str = "combo.role";
 const TOGGLE_BUTTON_ID: &str = "btnToggle";
+const MAIN_PANEL_ID: &str = "main.panel";
 
 struct MyApp {
     toggled: bool,
@@ -56,7 +57,7 @@ impl MyApp {
     }
 }
 
-impl Application for MyApp {
+impl RunoApplication for MyApp {
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "runo example".to_string(),
@@ -70,12 +71,12 @@ impl Application for MyApp {
             Self::build_title(ui);
             ui.widgets()
                 .div()
-                .id("main.panel")
+                .id(MAIN_PANEL_ID)
                 .width(380)
                 .padding(16)
                 .gap(10)
-                .background(Color::from_rgb8(29, 34, 41))
-                .border(Color::from_rgb8(70, 80, 95), 1)
+                .background(colors::rgb(colors::PANEL_BG))
+                .border(colors::rgb(colors::PANEL_BORDER), 1)
                 .radius(12)
                 .show(|ui| {
                     Self::build_name_input(ui);
@@ -90,6 +91,12 @@ impl Application for MyApp {
             match event {
                 UiEvent::ButtonClicked { id } if id == TOGGLE_BUTTON_ID => {
                     self.toggled = !self.toggled;
+                    let panel_color = if self.toggled {
+                        colors::rgb(colors::PANEL_BG_ACTIVE)
+                    } else {
+                        colors::rgb(colors::PANEL_BG)
+                    };
+                    ui.state().div().set_background(MAIN_PANEL_ID, panel_color);
                     let label = if self.toggled {
                         "Toggle: ON"
                     } else {

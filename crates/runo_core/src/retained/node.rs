@@ -42,6 +42,7 @@ pub(super) struct TextBoxNode {
     pub(super) overflow_x: Overflow,
     pub(super) overflow_y: Overflow,
     pub(super) text_advance: f64,
+    pub(super) caret_index: usize,
     pub(super) scroll_x: f64,
     pub(super) scroll_y: f64,
     pub(super) hovered: bool,

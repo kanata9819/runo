@@ -2,6 +2,15 @@
 
 This section contains implementation-agnostic knowledge for building GUI libraries.
 
+## Current `runo_core` implementation notes
+
+1. Built-in widgets
+   `button`, `label`, `text_box`, `combo_box`
+2. Event model
+   `UiEvent` (`ButtonClicked`, `TextBoxChanged`, `ComboBoxChanged`)
+3. Enable/disable API
+   `set_*_enabled` and per-widget `enabled(...)`
+
 ## Documents
 
 1. `architecture.md`

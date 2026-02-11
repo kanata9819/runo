@@ -22,7 +22,7 @@ GUI フレームワークは主に次を行います。
 
 `Runo` は保持型（Retained Mode）寄りの設計です。
 
-1. ウィジェット（Button/Label）を内部状態に保持する
+1. ウィジェット（Button/Label/TextBox/ComboBox）を内部状態に保持する
 2. 入力でその状態を更新する
 3. 保持された状態を描画する
 
@@ -49,7 +49,7 @@ pub trait Application {
 2. `InputState` が入力状態を更新
 3. `render()` 開始
 4. 背景を描画
-5. `RetainedState::begin_frame_input()` で `hovered/pressed/clicked` を更新
+5. `RetainedState::begin_frame_input()` で `hovered/pressed/focused/open` などを更新
 6. `Application::update()` を実行
 7. `RetainedState::render()` で保持されたウィジェットを描画
 8. `wgpu` で swapchain に転送して表示
@@ -63,25 +63,27 @@ pub trait Application {
 1. `app/mod.rs`: `Application` と `run()`
 2. `app/runner.rs`: `AppRunner` と初期化状態保持
 3. `app/events.rs`: `winit::ApplicationHandler` 実装
-4. `app/frame.rs`: フレーム処理（UI 更新と描画準備）
+4. `app/frame.rs`: フレーム処理（`surface_size` / `compose_frame` / `submit_frame`）
 5. `app/gpu.rs`: GPU 描画・surface 転送処理
 
 ### `retained/`
 
 保持型 UI の中核。
 
-1. `retained/node.rs`: `ButtonNode` / `LabelNode` などノード定義
+1. `retained/node.rs`: `ButtonNode` / `LabelNode` / `TextBoxNode` / `ComboBoxNode`
 2. `retained/state.rs`: ノードの保持・更新 API（upsert）
-3. `retained/input.rs`: 入力からボタン状態を更新
+3. `retained/input.rs`: 入力から hover/click/focus/dropdown 状態を更新
 4. `retained/paint.rs`: 保持ノードの描画
 
 ### `ui.rs`
 
 ユーザー向け API。
 
-1. `button`, `label`, `text_box`, `vertical`, `horizontal`
-2. `button_clicked`, `button_state`, `set_button_text`
-3. `use_effect`
+1. `button`, `label`, `text_box`, `combo_box`, `vertical`, `horizontal`
+2. `drain_events`, `next_event`
+3. `set_button_text`, `set_text_box_text`, `set_combo_box_selected_index`
+4. `set_button_enabled`, `set_text_box_enabled`, `set_combo_box_enabled`, `set_label_enabled`
+5. `use_effect`
 
 ### `widget/`
 
@@ -89,7 +91,9 @@ pub trait Application {
 
 1. `widget/button.rs`: `ButtonBuilder`, `ButtonResponse`
 2. `widget/label.rs`: `LabelBuilder`
-3. `widget/text.rs`: テキスト計測と描画ヘルパー
+3. `widget/text_box.rs`: `TextBoxBuilder`, `TextBoxResponse`
+4. `widget/combo_box.rs`: `ComboBoxBuilder`, `ComboBoxResponse`
+5. `widget/text.rs`: テキスト計測と描画ヘルパー
 
 ### 補助モジュール
 
@@ -115,5 +119,5 @@ pub trait Application {
 2. 保持データを一元化し、描画と入力判定を安定させる
 3. アプリ側コードは「UI 構築」と「状態更新」に集中させる
 
-この構造により、今後 `TextField` / `Checkbox` / `Slider` を追加する場合も、
+この構造により、今後 `Checkbox` / `Slider` / `Radio` を追加する場合も、
 `node -> state -> input -> paint -> widget` の流れで拡張できます。

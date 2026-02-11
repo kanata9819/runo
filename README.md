@@ -6,8 +6,10 @@
 
 - Retained-mode oriented UI architecture
 - `Application` lifecycle with `build()` and `update()`
-- Simple widget API (`button`, `label`)
+- Widget API (`button`, `label`, `text_box`, `combo_box`)
 - Basic layout containers (`vertical`, `horizontal`)
+- Event-driven update model (`UiEvent`)
+- Per-control enable/disable API (`set_*_enabled`, `enabled(...)`)
 - Lightweight hook-like effect API (`use_effect`)
 
 ## Current Workspace
@@ -32,19 +34,42 @@ cargo run -p example
 ## Example Usage
 
 ```rust
-use runo_core::{Application, Ui, run};
+use runo_core::{Application, RunOptions, Ui, UiEvent, run};
 
 struct MyApp {
     toggled: bool,
+    input_text: String,
+    selected_role: String,
 }
 
 impl Application for MyApp {
+    fn options(&self) -> RunOptions {
+        RunOptions {
+            window_title: "runo example".to_string(),
+            window_width: 1200,
+            window_height: 700,
+        }
+    }
+
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
             ui.label()
                 .id("title")
                 .text("runo example")
                 .font_size(22)
+                .show();
+            ui.text_box()
+                .id("input.name")
+                .width(320)
+                .height(44)
+                .font_size(18)
+                .placeholder("Type here...")
+                .show();
+            ui.combo_box()
+                .id("combo.role")
+                .width(320)
+                .height(44)
+                .items(["Designer", "Engineer", "Manager"])
                 .show();
             ui.button()
                 .id("btnToggle")
@@ -56,18 +81,29 @@ impl Application for MyApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        if ui.button_clicked("btnToggle") {
-            self.toggled = !self.toggled;
-            ui.set_button_text(
-                "btnToggle",
-                if self.toggled { "Toggle: ON" } else { "Toggle: OFF" },
-            );
+        for event in ui.drain_events() {
+            match event {
+                UiEvent::ButtonClicked { id } if id == "btnToggle" => {
+                    self.toggled = !self.toggled;
+                }
+                UiEvent::TextBoxChanged { id, text } if id == "input.name" => {
+                    self.input_text = text;
+                }
+                UiEvent::ComboBoxChanged { id, selected_text, .. } if id == "combo.role" => {
+                    self.selected_role = selected_text;
+                }
+                _ => {}
+            }
         }
     }
 }
 
 fn main() {
-    run(MyApp { toggled: false });
+    run(MyApp {
+        toggled: false,
+        input_text: String::new(),
+        selected_role: "Designer".to_string(),
+    });
 }
 ```
 

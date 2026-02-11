@@ -101,10 +101,6 @@ impl InputState {
         self.text_input.push_str(text);
     }
 
-    pub(crate) fn on_backspace_pressed(&mut self) {
-        self.backspace_pressed = true;
-    }
-
     pub(crate) fn on_named_key_pressed(&mut self, key: NamedKey) {
         match key {
             NamedKey::Backspace => self.backspace_pressed = true,

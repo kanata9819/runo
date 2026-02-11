@@ -1,7 +1,7 @@
 use winit::application::ApplicationHandler;
 use winit::event::{Ime, MouseButton, MouseScrollDelta, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
-use winit::keyboard::{Key, NamedKey};
+use winit::keyboard::Key;
 use winit::window::WindowId;
 
 use crate::app::{AppRunner, RunoApplication};

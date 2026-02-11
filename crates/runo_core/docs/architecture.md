@@ -79,7 +79,7 @@ pub trait Application {
 
 ユーザー向け API。
 
-1. `button`, `label`, `text_box`, `combo_box`, `vertical`, `horizontal`
+1. `button`, `label`, `text_box`, `combo_box`, `div`, `vertical`, `horizontal`
 2. `drain_events`, `next_event`
 3. `set_button_text`, `set_text_box_text`, `set_combo_box_selected_index`
 4. `set_button_enabled`, `set_text_box_enabled`, `set_combo_box_enabled`, `set_label_enabled`

@@ -6,7 +6,7 @@
 
 - Retained-mode oriented UI architecture
 - `Application` lifecycle with `build()` and `update()`
-- Widget API (`button`, `label`, `text_box`, `combo_box`)
+- Widget API (`button`, `label`, `text_box`, `combo_box`, `div`)
 - Basic layout containers (`vertical`, `horizontal`)
 - Event-driven update model (`UiEvent`)
 - Per-control enable/disable API (`set_*_enabled`, `enabled(...)`)

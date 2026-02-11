@@ -1,5 +1,5 @@
 use vello::Scene;
-use vello::kurbo::{Affine, Rect};
+use vello::kurbo::{Affine, Rect, RoundedRect, Stroke};
 use vello::peniko::{Fill, FontData};
 
 use crate::ButtonResponse;
@@ -8,6 +8,7 @@ use crate::ComboBoxResponse;
 use crate::UiEvent;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
+use crate::layout::div::DivBuilder;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
 use crate::widget::button::ButtonBuilder;
@@ -61,6 +62,22 @@ pub(crate) struct ShowComboBoxArgs {
     pub(crate) enabled: bool,
 }
 
+pub(crate) struct ShowDivArgs {
+    pub(crate) id: String,
+    pub(crate) direction: LayoutDirection,
+    pub(crate) gap: f64,
+    pub(crate) width: Option<f64>,
+    pub(crate) height: Option<f64>,
+    pub(crate) padding_left: f64,
+    pub(crate) padding_top: f64,
+    pub(crate) padding_right: f64,
+    pub(crate) padding_bottom: f64,
+    pub(crate) bg_color: Option<Color>,
+    pub(crate) border_color: Option<Color>,
+    pub(crate) border_width: f64,
+    pub(crate) radius: f64,
+}
+
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
     pub(crate) font: Option<FontData>,
@@ -109,6 +126,12 @@ impl<'a> Ui<'a> {
         let id = format!("__auto_combo_box_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         ComboBoxBuilder::new(self, id)
+    }
+
+    pub fn div(&mut self) -> DivBuilder<'_, 'a> {
+        let id = format!("__auto_div_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        DivBuilder::new(self, id)
     }
 
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> R {
@@ -279,6 +302,55 @@ impl<'a> Ui<'a> {
             border_color,
             enabled,
         )
+    }
+
+    pub(crate) fn show_div<R>(&mut self, args: ShowDivArgs, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
+        let ShowDivArgs {
+            id: _id,
+            direction,
+            gap,
+            width,
+            height,
+            padding_left,
+            padding_top,
+            padding_right,
+            padding_bottom,
+            bg_color,
+            border_color,
+            border_width,
+            radius,
+        } = args;
+
+        let origin = self.layout_stack.peek_next_position();
+        let content_origin = (origin.0 + padding_left, origin.1 + padding_top);
+        self.layout_stack
+            .push_layout_at(content_origin, direction, gap);
+        let result = f(self);
+        let (content_w, content_h) = self.layout_stack.pop_layout_consumed();
+
+        let auto_w = content_w + padding_left + padding_right;
+        let auto_h = content_h + padding_top + padding_bottom;
+        let div_w = width.unwrap_or(auto_w);
+        let div_h = height.unwrap_or(auto_h);
+
+        let rect = Rect::new(origin.0, origin.1, origin.0 + div_w, origin.1 + div_h);
+        let rounded = RoundedRect::from_rect(rect, radius);
+        if let Some(color) = bg_color {
+            self.scene
+                .fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
+        }
+        if let Some(color) = border_color {
+            self.scene.stroke(
+                &Stroke::new(border_width.max(0.0)),
+                Affine::IDENTITY,
+                color,
+                None,
+                &rounded,
+            );
+        }
+
+        self.layout_stack.advance_current(div_w, div_h);
+        result
     }
 
     fn with_layout<R>(

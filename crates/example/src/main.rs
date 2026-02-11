@@ -1,4 +1,4 @@
-use runo_core::{Application, RunOptions, Ui, UiEvent, run};
+use runo_core::{Application, Color, RunOptions, Ui, UiEvent, run};
 
 const TITLE_ID: &str = "title";
 const INPUT_NAME_ID: &str = "input.name";
@@ -64,9 +64,19 @@ impl Application for MyApp {
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
             Self::build_title(ui);
-            Self::build_name_input(ui);
-            Self::build_role_combo(ui);
-            Self::build_toggle_button(ui);
+            ui.div()
+                .id("main.panel")
+                .width(380)
+                .padding(16)
+                .gap(10)
+                .background(Color::from_rgb8(29, 34, 41))
+                .border(Color::from_rgb8(70, 80, 95), 1)
+                .radius(12)
+                .show(|ui| {
+                    Self::build_name_input(ui);
+                    Self::build_role_combo(ui);
+                    Self::build_toggle_button(ui);
+                });
         });
     }
 

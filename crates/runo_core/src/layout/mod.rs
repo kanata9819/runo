@@ -1,3 +1,4 @@
+pub(crate) mod div;
 pub(crate) mod stack;
 
 #[derive(Clone, Copy)]

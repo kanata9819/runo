@@ -57,7 +57,7 @@ pub trait Application {
    `node.rs`, `state.rs`, `input.rs`, `paint.rs`
    includes interaction state, enabled/disabled state, and dropdown handling
 3. `ui.rs`: user-facing UI API
-   `button`, `label`, `text_box`, `combo_box`
+   `button`, `label`, `text_box`, `combo_box`, `div`
    `drain_events`, `next_event`
    `set_button_enabled`, `set_text_box_enabled`, `set_combo_box_enabled`, `set_label_enabled`
 4. `widget/`: builders (`button`, `label`, `text_box`, `combo_box`) and text helpers

@@ -7,16 +7,26 @@ use crate::ui::Ui;
 
 impl<A: Application + 'static> AppRunner<A> {
     pub(super) fn render(&mut self) {
-        let Some(surface_for_size) = self.surface.as_ref() else {
+        let Some((width, height)) = self.surface_size() else {
             return;
         };
-        let width = surface_for_size.config.width;
-        let height = surface_for_size.config.height;
 
+        self.compose_frame(width, height);
+        self.submit_frame(width, height);
+    }
+
+    fn surface_size(&self) -> Option<(u32, u32)> {
+        let surface = self.surface.as_ref()?;
+        Some((surface.config.width, surface.config.height))
+    }
+
+    fn compose_frame(&mut self, width: u32, height: u32) {
         self.build_scene(width, height);
         self.run_ui_frame();
         self.retained.render(&mut self.scene, self.font.as_ref());
+    }
 
+    fn submit_frame(&mut self, width: u32, height: u32) {
         let Some(surface) = self.surface.as_mut() else {
             return;
         };

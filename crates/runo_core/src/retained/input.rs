@@ -4,6 +4,7 @@ use crate::event::UiEvent;
 use crate::input::InputFrame;
 use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
+use crate::widget::text::estimate_text_width;
 
 impl RetainedState {
     pub(crate) fn begin_frame_input(&mut self, input: InputFrame) {
@@ -12,6 +13,7 @@ impl RetainedState {
         self.update_button_states(input.mouse_down, input.mouse_released);
         self.update_combo_box_states(input.mouse_down, input.mouse_released);
         self.update_text_box_focus();
+        self.apply_text_box_scroll(&input);
         self.apply_text_input(&input);
     }
 
@@ -247,6 +249,7 @@ impl RetainedState {
                 }
 
                 if text_box.changed {
+                    Self::keep_text_box_end_visible(text_box);
                     pending_event = Some(UiEvent::TextBoxChanged {
                         id,
                         text: text_box.text.clone(),
@@ -258,6 +261,72 @@ impl RetainedState {
         if let Some(event) = pending_event {
             self.push_event(event);
         }
+    }
+
+    fn apply_text_box_scroll(&mut self, input: &InputFrame) {
+        if input.scroll_x == 0.0 && input.scroll_y == 0.0 {
+            return;
+        }
+
+        let target_id = self.order.iter().rev().find_map(|id| {
+            let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
+                return None;
+            };
+            if text_box.enabled && (text_box.hovered || text_box.focused) {
+                Some(id.clone())
+            } else {
+                None
+            }
+        });
+
+        let Some(target_id) = target_id else {
+            return;
+        };
+        let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&target_id) else {
+            return;
+        };
+
+        if text_box.overflow_x.allows_scroll() {
+            // Single-line textbox: fall back to vertical wheel when horizontal delta is absent.
+            let wheel_x = if input.scroll_x != 0.0 {
+                input.scroll_x
+            } else {
+                -input.scroll_y
+            };
+            text_box.scroll_x =
+                (text_box.scroll_x + wheel_x).clamp(0.0, Self::max_scroll_x(text_box));
+        } else {
+            text_box.scroll_x = 0.0;
+        }
+
+        if text_box.overflow_y.allows_scroll() {
+            text_box.scroll_y =
+                (text_box.scroll_y - input.scroll_y).clamp(0.0, Self::max_scroll_y(text_box));
+        } else {
+            text_box.scroll_y = 0.0;
+        }
+    }
+
+    fn keep_text_box_end_visible(text_box: &mut crate::retained::node::TextBoxNode) {
+        if !text_box.overflow_x.allows_scroll() {
+            text_box.scroll_x = 0.0;
+            return;
+        }
+
+        let inner_width = (text_box.rect.width() - 24.0).max(1.0);
+        let content_width = estimate_text_width(&text_box.text, text_box.font_size) as f64;
+        let max_scroll = (content_width - inner_width).max(0.0);
+        text_box.scroll_x = max_scroll;
+    }
+
+    fn max_scroll_x(text_box: &crate::retained::node::TextBoxNode) -> f64 {
+        let inner_width = (text_box.rect.width() - 24.0).max(1.0);
+        let content_width = estimate_text_width(&text_box.text, text_box.font_size) as f64;
+        (content_width - inner_width).max(0.0)
+    }
+
+    fn max_scroll_y(_text_box: &crate::retained::node::TextBoxNode) -> f64 {
+        0.0
     }
 }
 

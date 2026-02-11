@@ -28,7 +28,6 @@ pub(crate) struct AppRunner<A: Application + 'static> {
     pub(super) font: Option<FontData>,
     pub(super) effects: EffectStore,
     pub(super) retained: RetainedState,
-    pub(super) built: bool,
     window_options: RunOptions,
 }
 
@@ -48,7 +47,6 @@ impl<A: Application + 'static> AppRunner<A> {
             font: load_default_font(),
             effects: EffectStore::new(),
             retained: RetainedState::new(),
-            built: false,
             window_options,
         }
     }

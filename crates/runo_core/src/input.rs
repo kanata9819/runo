@@ -8,6 +8,8 @@ pub(crate) struct InputFrame {
     pub(crate) mouse_released: bool,
     pub(crate) text_input: String,
     pub(crate) backspace_pressed: bool,
+    pub(crate) scroll_x: f64,
+    pub(crate) scroll_y: f64,
 }
 
 #[derive(Default)]
@@ -18,6 +20,8 @@ pub(crate) struct InputState {
     mouse_released: bool,
     text_input: String,
     backspace_pressed: bool,
+    scroll_x: f64,
+    scroll_y: f64,
     ime_active: bool,
 }
 
@@ -30,6 +34,8 @@ impl InputState {
             mouse_released: self.mouse_released,
             text_input: self.text_input.clone(),
             backspace_pressed: self.backspace_pressed,
+            scroll_x: self.scroll_x,
+            scroll_y: self.scroll_y,
         }
     }
 
@@ -38,6 +44,8 @@ impl InputState {
         self.mouse_released = false;
         self.text_input.clear();
         self.backspace_pressed = false;
+        self.scroll_x = 0.0;
+        self.scroll_y = 0.0;
     }
 
     pub(crate) fn on_mouse_input(&mut self, state: ElementState) {
@@ -61,6 +69,11 @@ impl InputState {
 
     pub(crate) fn on_backspace_pressed(&mut self) {
         self.backspace_pressed = true;
+    }
+
+    pub(crate) fn on_mouse_wheel(&mut self, dx: f64, dy: f64) {
+        self.scroll_x += dx;
+        self.scroll_y += dy;
     }
 
     pub(crate) fn set_ime_active(&mut self, active: bool) {

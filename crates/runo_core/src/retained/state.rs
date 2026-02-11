@@ -7,6 +7,7 @@ use crate::ButtonResponse;
 use crate::ComboBoxResponse;
 use crate::event::UiEvent;
 use crate::retained::node::{ButtonNode, ComboBoxNode, LabelNode, TextBoxNode, WidgetNode};
+use crate::widget::text_box::Overflow;
 use crate::widget::text_box::TextBoxResponse;
 
 pub(crate) struct RetainedState {
@@ -134,6 +135,8 @@ impl RetainedState {
         bg_color: Color,
         border_color: Color,
         enabled: bool,
+        overflow_x: Overflow,
+        overflow_y: Overflow,
     ) -> TextBoxResponse {
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
@@ -148,6 +151,10 @@ impl RetainedState {
                     bg_color,
                     border_color,
                     enabled,
+                    overflow_x,
+                    overflow_y,
+                    scroll_x: 0.0,
+                    scroll_y: 0.0,
                     hovered: false,
                     focused: false,
                     changed: false,
@@ -169,6 +176,8 @@ impl RetainedState {
                 text_box.bg_color = bg_color;
                 text_box.border_color = border_color;
                 text_box.enabled = enabled;
+                text_box.overflow_x = overflow_x;
+                text_box.overflow_y = overflow_y;
                 TextBoxResponse {
                     text: text_box.text.clone(),
                     hovered: text_box.hovered,
@@ -186,6 +195,10 @@ impl RetainedState {
                     bg_color,
                     border_color,
                     enabled,
+                    overflow_x,
+                    overflow_y,
+                    scroll_x: 0.0,
+                    scroll_y: 0.0,
                     hovered: false,
                     focused: false,
                     changed: false,

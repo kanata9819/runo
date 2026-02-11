@@ -14,7 +14,7 @@ use crate::retained::RetainedState;
 use crate::widget::button::ButtonBuilder;
 use crate::widget::combo_box::ComboBoxBuilder;
 use crate::widget::label::LabelBuilder;
-use crate::widget::text_box::{TextBoxBuilder, TextBoxResponse};
+use crate::widget::text_box::{Overflow, TextBoxBuilder, TextBoxResponse};
 
 pub(crate) struct ShowButtonArgs {
     pub(crate) id: String,
@@ -47,6 +47,8 @@ pub(crate) struct ShowTextBoxArgs {
     pub(crate) bg_color: Color,
     pub(crate) border_color: Color,
     pub(crate) enabled: bool,
+    pub(crate) overflow_x: Overflow,
+    pub(crate) overflow_y: Overflow,
 }
 
 pub(crate) struct ShowComboBoxArgs {
@@ -260,6 +262,8 @@ impl<'a> Ui<'a> {
             bg_color,
             border_color,
             enabled,
+            overflow_x,
+            overflow_y,
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
@@ -273,6 +277,8 @@ impl<'a> Ui<'a> {
             bg_color,
             border_color,
             enabled,
+            overflow_x,
+            overflow_y,
         )
     }
 

@@ -3,6 +3,24 @@ use vello::peniko::Color;
 use crate::Ui;
 use crate::ui::ShowTextBoxArgs;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Overflow {
+    Visible,
+    Hidden,
+    Scroll,
+    Auto,
+}
+
+impl Overflow {
+    pub(crate) fn allows_scroll(self) -> bool {
+        matches!(self, Self::Scroll | Self::Auto)
+    }
+
+    pub(crate) fn clips(self) -> bool {
+        !matches!(self, Self::Visible)
+    }
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct TextBoxResponse {
     pub text: String,
@@ -23,6 +41,8 @@ pub struct TextBoxBuilder<'ui, 'a> {
     bg_color: Color,
     border_color: Color,
     enabled: bool,
+    overflow_x: Overflow,
+    overflow_y: Overflow,
 }
 
 impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
@@ -39,6 +59,8 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             bg_color: Color::from_rgb8(33, 38, 46),
             border_color: Color::from_rgb8(78, 89, 104),
             enabled: true,
+            overflow_x: Overflow::Auto,
+            overflow_y: Overflow::Hidden,
         }
     }
 
@@ -92,6 +114,16 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
         self
     }
 
+    pub fn overflow_x(mut self, overflow: Overflow) -> Self {
+        self.overflow_x = overflow;
+        self
+    }
+
+    pub fn overflow_y(mut self, overflow: Overflow) -> Self {
+        self.overflow_y = overflow;
+        self
+    }
+
     pub fn show(self) -> TextBoxResponse {
         self.ui.show_text_box(ShowTextBoxArgs {
             id: self.id,
@@ -104,6 +136,8 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             bg_color: self.bg_color,
             border_color: self.border_color,
             enabled: self.enabled,
+            overflow_x: self.overflow_x,
+            overflow_y: self.overflow_y,
         })
     }
 }

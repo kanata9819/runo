@@ -69,7 +69,7 @@ impl<A: Application + 'static> AppRunner<A> {
     fn run_ui_frame(&mut self) {
         self.effects.begin_frame();
 
-        if !self.built {
+        {
             let mut ui = Ui::new(
                 &mut self.scene,
                 self.font.clone(),
@@ -77,7 +77,6 @@ impl<A: Application + 'static> AppRunner<A> {
                 &mut self.retained,
             );
             self.user_app.build(&mut ui);
-            self.built = true;
         }
 
         self.retained.begin_frame_input(self.input.frame());

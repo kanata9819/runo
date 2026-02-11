@@ -56,24 +56,45 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &Text
         return;
     };
 
-    let text_x = text_box.rect.x0 + 12.0;
+    let text_x = text_box.rect.x0 + 12.0 - text_box.scroll_x;
     let baseline_y =
-        text_box.rect.y0 + text_box.rect.height() * 0.5 + text_box.font_size as f64 * 0.35;
-    draw_text_run(
-        scene,
-        font,
-        glyphs,
-        text_x,
-        baseline_y,
-        text_box.font_size,
-        text_color,
-    );
+        text_box.rect.y0 + text_box.rect.height() * 0.5 + text_box.font_size as f64 * 0.35
+            - text_box.scroll_y;
+    let inner_left = text_box.rect.x0 + 12.0;
+    let inner_right = text_box.rect.x1 - 12.0;
+    let visible_glyphs = if text_box.overflow_x.clips() {
+        clip_glyphs_horizontally(
+            glyphs,
+            total_advance as f64,
+            text_x,
+            inner_left,
+            inner_right,
+        )
+    } else {
+        glyphs
+    };
+    if !visible_glyphs.is_empty() {
+        draw_text_run(
+            scene,
+            font,
+            visible_glyphs,
+            text_x,
+            baseline_y,
+            text_box.font_size,
+            text_color,
+        );
+    }
 
     if text_box.focused && text_box.enabled {
         let caret_x = if text_box.text.is_empty() {
             text_x
         } else {
             text_x + total_advance as f64 + 1.0
+        };
+        let caret_x = if text_box.overflow_x.clips() {
+            caret_x.clamp(inner_left, inner_right)
+        } else {
+            caret_x
         };
         let caret_h = text_box.font_size as f64 * 1.1;
         let caret_y0 = baseline_y - text_box.font_size as f64 * 0.9;
@@ -86,4 +107,30 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &Text
             &caret,
         );
     }
+}
+
+fn clip_glyphs_horizontally(
+    glyphs: Vec<vello::Glyph>,
+    total_advance: f64,
+    draw_origin_x: f64,
+    clip_left: f64,
+    clip_right: f64,
+) -> Vec<vello::Glyph> {
+    if glyphs.is_empty() || clip_right <= clip_left {
+        return Vec::new();
+    }
+
+    let mut out = Vec::new();
+    for (index, glyph) in glyphs.iter().enumerate() {
+        let x0 = draw_origin_x + glyph.x as f64;
+        let next_x = if let Some(next) = glyphs.get(index + 1) {
+            draw_origin_x + next.x as f64
+        } else {
+            draw_origin_x + total_advance
+        };
+        if next_x >= clip_left && x0 <= clip_right {
+            out.push(glyph.clone());
+        }
+    }
+    out
 }

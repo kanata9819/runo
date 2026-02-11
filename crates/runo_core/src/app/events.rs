@@ -1,5 +1,5 @@
 use winit::application::ApplicationHandler;
-use winit::event::{Ime, MouseButton, WindowEvent};
+use winit::event::{Ime, MouseButton, MouseScrollDelta, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
 use winit::keyboard::{Key, NamedKey};
 use winit::window::WindowId;
@@ -40,6 +40,14 @@ impl<A: Application + 'static> ApplicationHandler for AppRunner<A> {
                 ..
             } => {
                 self.input.on_mouse_input(state);
+                self.request_redraw();
+            }
+            WindowEvent::MouseWheel { delta, .. } => {
+                let (dx, dy) = match delta {
+                    MouseScrollDelta::LineDelta(dx, dy) => (dx as f64 * 20.0, dy as f64 * 20.0),
+                    MouseScrollDelta::PixelDelta(delta) => (delta.x, delta.y),
+                };
+                self.input.on_mouse_wheel(dx, dy);
                 self.request_redraw();
             }
             WindowEvent::KeyboardInput { event, .. } => {

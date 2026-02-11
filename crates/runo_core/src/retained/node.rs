@@ -1,6 +1,8 @@
 use vello::kurbo::Rect;
 use vello::peniko::Color;
 
+use crate::widget::text_box::Overflow;
+
 pub(super) enum WidgetNode {
     Button(ButtonNode),
     Label(LabelNode),
@@ -36,6 +38,10 @@ pub(super) struct TextBoxNode {
     pub(super) bg_color: Color,
     pub(super) border_color: Color,
     pub(super) enabled: bool,
+    pub(super) overflow_x: Overflow,
+    pub(super) overflow_y: Overflow,
+    pub(super) scroll_x: f64,
+    pub(super) scroll_y: f64,
     pub(super) hovered: bool,
     pub(super) focused: bool,
     pub(super) changed: bool,

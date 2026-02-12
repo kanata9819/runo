@@ -1,4 +1,4 @@
-#![windows_subsystem = "windows"]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use runo_core::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
 

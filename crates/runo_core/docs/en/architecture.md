@@ -23,14 +23,20 @@ Current built-in widgets:
 1. `Button`
 2. `Label`
 3. `TextBox`
-4. `ComboBox` (dropdown-style select)
+4. `ComboBox`
+5. `Checkbox`
+6. `RadioButton`
+7. `Slider`
 
-## 3. Application lifecycle
+## 3. RunoApplication lifecycle
 
 ```rust
-pub trait Application {
+pub trait RunoApplication {
     fn build(&mut self, _ui: &mut Ui<'_>) {}
     fn update(&mut self, _ui: &mut Ui<'_>) {}
+    fn options(&self) -> RunOptions {
+        RunOptions::default()
+    }
 }
 ```
 
@@ -44,7 +50,7 @@ pub trait Application {
 3. Start render
 4. Draw background
 5. Update retained widget interaction state (`hovered`, `pressed`, `focused`, `is_open`)
-6. Run `Application::update()`
+6. Run `RunoApplication::update()`
 7. Render retained widgets
 8. Submit/present via GPU
 
@@ -54,11 +60,9 @@ pub trait Application {
    `mod.rs`, `runner.rs`, `events.rs`, `frame.rs`, `gpu.rs`
    `frame.rs` separates `surface_size`, `compose_frame`, and `submit_frame`
 2. `retained/`: retained UI core
-   `node.rs`, `state.rs`, `input.rs`, `paint.rs`
-   includes interaction state, enabled/disabled state, and dropdown handling
-3. `ui.rs`: user-facing UI API
-   `button`, `label`, `text_box`, `combo_box`, `div`
-   `drain_events`, `next_event`
-   `set_button_enabled`, `set_text_box_enabled`, `set_combo_box_enabled`, `set_label_enabled`
-4. `widget/`: builders (`button`, `label`, `text_box`, `combo_box`) and text helpers
+   `node.rs`, `state.rs`, `input/mod.rs`, `paint/mod.rs`
+   includes interaction state and enabled/disabled handling
+3. `ui/`: user-facing API split by role
+   `widgets()`, `events()`, `state()` plus `vertical()`, `horizontal()`, `use_effect()`
+4. `widget/`: builders and response types (`button`, `label`, `checkbox`, `radio_button`, `slider`, `text_box`, `combo_box`)
 5. `input.rs`, `layout/mod.rs`, `hooks/effect.rs`, `font.rs`: support modules

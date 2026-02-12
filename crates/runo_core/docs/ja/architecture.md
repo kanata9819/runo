@@ -22,19 +22,22 @@ GUI フレームワークは主に次を行います。
 
 `Runo` は保持型（Retained Mode）寄りの設計です。
 
-1. ウィジェット（Button/Label/TextBox/ComboBox）を内部状態に保持する
+1. ウィジェット（Button/Label/TextBox/ComboBox/Checkbox/RadioButton/Slider）を内部状態に保持する
 2. 入力でその状態を更新する
 3. 保持された状態を描画する
 
 即時モードのように毎フレーム全部を作り直すのではなく、
 「保持された UI ツリー」を更新しながら描画します。
 
-## 3. Application ライフサイクル
+## 3. RunoApplication ライフサイクル
 
 ```rust
-pub trait Application {
+pub trait RunoApplication {
     fn build(&mut self, _ui: &mut Ui<'_>) {}
     fn update(&mut self, _ui: &mut Ui<'_>) {}
+    fn options(&self) -> RunOptions {
+        RunOptions::default()
+    }
 }
 ```
 
@@ -50,7 +53,7 @@ pub trait Application {
 3. `render()` 開始
 4. 背景を描画
 5. `RetainedState::begin_frame_input()` で `hovered/pressed/focused/open` などを更新
-6. `Application::update()` を実行
+6. `RunoApplication::update()` を実行
 7. `RetainedState::render()` で保持されたウィジェットを描画
 8. `wgpu` で swapchain に転送して表示
 
@@ -60,7 +63,7 @@ pub trait Application {
 
 アプリ実行の中心。
 
-1. `app/mod.rs`: `Application` と `run()`
+1. `app/mod.rs`: `RunoApplication` と `run()`
 2. `app/runner.rs`: `AppRunner` と初期化状態保持
 3. `app/events.rs`: `winit::ApplicationHandler` 実装
 4. `app/frame.rs`: フレーム処理（`surface_size` / `compose_frame` / `submit_frame`）
@@ -70,19 +73,19 @@ pub trait Application {
 
 保持型 UI の中核。
 
-1. `retained/node.rs`: `ButtonNode` / `LabelNode` / `TextBoxNode` / `ComboBoxNode`
+1. `retained/node.rs`: `ButtonNode` / `LabelNode` / `TextBoxNode` / `ComboBoxNode` / `CheckboxNode` / `RadioButtonNode` / `SliderNode`
 2. `retained/state.rs`: ノードの保持・更新 API（upsert）
-3. `retained/input.rs`: 入力から hover/click/focus/dropdown 状態を更新
-4. `retained/paint.rs`: 保持ノードの描画
+3. `retained/input/mod.rs`: 入力から hover/click/focus/dropdown などを更新
+4. `retained/paint/mod.rs`: 保持ノードの描画
 
-### `ui.rs`
+### `ui/`
 
 ユーザー向け API。
 
-1. `button`, `label`, `text_box`, `combo_box`, `div`, `vertical`, `horizontal`
-2. `drain_events`, `next_event`
-3. `set_button_text`, `set_text_box_text`, `set_combo_box_selected_index`
-4. `set_button_enabled`, `set_text_box_enabled`, `set_combo_box_enabled`, `set_label_enabled`
+1. `widgets()`: `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
+2. `events()`: `drain_events`, `next_event`
+3. `state()`: `set_text`, `set_selected_index`, `set_checked`, `set_selected`, `set_value`, `set_enabled` など
+4. `vertical`, `horizontal`
 5. `use_effect`
 
 ### `widget/`
@@ -91,9 +94,12 @@ pub trait Application {
 
 1. `widget/button.rs`: `ButtonBuilder`, `ButtonResponse`
 2. `widget/label.rs`: `LabelBuilder`
-3. `widget/text_box.rs`: `TextBoxBuilder`, `TextBoxResponse`
-4. `widget/combo_box.rs`: `ComboBoxBuilder`, `ComboBoxResponse`
-5. `widget/text.rs`: テキスト計測と描画ヘルパー
+3. `widget/checkbox.rs`: `CheckboxBuilder`, `CheckboxResponse`
+4. `widget/radio_button.rs`: `RadioButtonBuilder`, `RadioButtonResponse`
+5. `widget/slider.rs`: `SliderBuilder`, `SliderResponse`
+6. `widget/text_box.rs`: `TextBoxBuilder`, `TextBoxResponse`
+7. `widget/combo_box.rs`: `ComboBoxBuilder`, `ComboBoxResponse`
+8. `widget/text.rs`: テキスト計測と描画ヘルパー
 
 ### 補助モジュール
 
@@ -107,10 +113,10 @@ pub trait Application {
 1. `app/mod.rs`
 2. `app/events.rs`
 3. `app/frame.rs`
-4. `ui.rs`
+4. `ui/mod.rs`
 5. `retained/state.rs`
-6. `retained/input.rs`
-7. `retained/paint.rs`
+6. `retained/input/mod.rs`
+7. `retained/paint/mod.rs`
 8. `widget/button.rs`
 
 ## 7. 設計の意図
@@ -119,5 +125,5 @@ pub trait Application {
 2. 保持データを一元化し、描画と入力判定を安定させる
 3. アプリ側コードは「UI 構築」と「状態更新」に集中させる
 
-この構造により、今後 `Checkbox` / `Slider` / `Radio` を追加する場合も、
-`node -> state -> input -> paint -> widget` の流れで拡張できます。
+この構造により、`node -> state -> input -> paint -> widget` の流れで
+追加ウィジェットを拡張しやすくしています。

@@ -5,11 +5,11 @@ This section contains implementation-agnostic knowledge for building GUI librari
 ## Current `runo_core` implementation notes
 
 1. Built-in widgets
-   `button`, `label`, `text_box`, `combo_box`
+   `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
 2. Event model
-   `UiEvent` (`ButtonClicked`, `TextBoxChanged`, `ComboBoxChanged`)
+   `UiEvent` (`ButtonClicked`, `CheckboxChanged`, `RadioButtonChanged`, `SliderChanged`, `TextBoxChanged`, `ComboBoxChanged`)
 3. Enable/disable API
-   `set_*_enabled` and per-widget `enabled(...)`
+   `ui.state().*().set_enabled(...)` and per-widget `enabled(...)`
 
 ## Documents
 

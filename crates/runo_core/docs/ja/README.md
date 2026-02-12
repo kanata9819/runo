@@ -5,11 +5,11 @@ GUI ライブラリを作るときに必要になる、実装非依存の基礎�
 ## 現在の `runo_core` 実装メモ
 
 1. 組み込みウィジェット
-   `button`, `label`, `text_box`, `combo_box`
+   `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
 2. イベントモデル
-   `UiEvent`（`ButtonClicked`, `TextBoxChanged`, `ComboBoxChanged`）
+   `UiEvent`（`ButtonClicked`, `CheckboxChanged`, `RadioButtonChanged`, `SliderChanged`, `TextBoxChanged`, `ComboBoxChanged`）
 3. 活性/非活性 API
-   `set_*_enabled` / `enabled(...)`
+   `ui.state().*().set_enabled(...)` / `enabled(...)`
 
 ## ドキュメント
 

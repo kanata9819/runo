@@ -1,5 +1,6 @@
 pub mod colors;
 mod events;
+mod show;
 mod state;
 mod widgets;
 
@@ -10,122 +11,24 @@ pub use state::{
 };
 pub use widgets::UiWidgets;
 
+pub(crate) use show::button::ShowButtonArgs;
+pub(crate) use show::checkbox::ShowCheckboxArgs;
+pub(crate) use show::combo_box::ShowComboBoxArgs;
+pub(crate) use show::div::ShowDivArgs;
+pub(crate) use show::label::ShowLabelArgs;
+pub(crate) use show::radio_button::ShowRadioButtonArgs;
+pub(crate) use show::slider::ShowSliderArgs;
+pub(crate) use show::text_box::ShowTextBoxArgs;
+
 use vello::Scene;
-use vello::kurbo::{Affine, Rect, RoundedRect, Stroke};
+use vello::kurbo::{Affine, Rect};
 use vello::peniko::{Fill, FontData};
 
-use crate::ButtonResponse;
-use crate::CheckboxResponse;
 use crate::Color;
-use crate::ComboBoxResponse;
-use crate::RadioButtonResponse;
-use crate::SliderResponse;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
-use crate::widget::text_box::{Overflow, TextBoxResponse};
-
-pub(crate) struct ShowButtonArgs {
-    pub(crate) id: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) text: Option<String>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
-}
-
-pub(crate) struct ShowLabelArgs {
-    pub(crate) id: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) text: String,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
-}
-
-pub(crate) struct ShowCheckboxArgs {
-    pub(crate) id: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) text: Option<String>,
-    pub(crate) checked: Option<bool>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
-}
-
-pub(crate) struct ShowRadioButtonArgs {
-    pub(crate) id: String,
-    pub(crate) group: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) text: Option<String>,
-    pub(crate) selected: Option<bool>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
-}
-
-pub(crate) struct ShowTextBoxArgs {
-    pub(crate) id: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) text: Option<String>,
-    pub(crate) placeholder: Option<String>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) bg_color: Color,
-    pub(crate) border_color: Color,
-    pub(crate) enabled: bool,
-    pub(crate) overflow_x: Overflow,
-    pub(crate) overflow_y: Overflow,
-}
-
-pub(crate) struct ShowSliderArgs {
-    pub(crate) id: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) min: f64,
-    pub(crate) max: f64,
-    pub(crate) value: Option<f64>,
-    pub(crate) step: Option<f64>,
-    pub(crate) text: Option<String>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
-}
-
-pub(crate) struct ShowComboBoxArgs {
-    pub(crate) id: String,
-    pub(crate) width: f64,
-    pub(crate) height: f64,
-    pub(crate) items: Vec<String>,
-    pub(crate) selected_index: Option<usize>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) bg_color: Color,
-    pub(crate) border_color: Color,
-    pub(crate) enabled: bool,
-}
-
-pub(crate) struct ShowDivArgs {
-    pub(crate) id: String,
-    pub(crate) direction: LayoutDirection,
-    pub(crate) gap: f64,
-    pub(crate) width: Option<f64>,
-    pub(crate) height: Option<f64>,
-    pub(crate) padding_left: f64,
-    pub(crate) padding_top: f64,
-    pub(crate) padding_right: f64,
-    pub(crate) padding_bottom: f64,
-    pub(crate) bg_color: Option<Color>,
-    pub(crate) border_color: Option<Color>,
-    pub(crate) border_width: f64,
-    pub(crate) radius: f64,
-}
 
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
@@ -237,245 +140,6 @@ impl<'a> Ui<'a> {
         let id = format!("__auto_div_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
         crate::layout::div::DivBuilder::new(self, id)
-    }
-
-    pub(crate) fn show_button(&mut self, args: ShowButtonArgs) -> ButtonResponse {
-        let ShowButtonArgs {
-            id,
-            width,
-            height,
-            text,
-            font_size,
-            text_color,
-            enabled,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_button(
-            id,
-            rect,
-            text,
-            font_size,
-            text_color,
-            enabled && self.current_enabled(),
-        )
-    }
-
-    pub(crate) fn show_label(&mut self, args: ShowLabelArgs) {
-        let ShowLabelArgs {
-            id,
-            width,
-            height,
-            text,
-            font_size,
-            text_color,
-            enabled,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_label(
-            id,
-            rect,
-            text,
-            font_size,
-            text_color,
-            enabled && self.current_enabled(),
-        );
-    }
-
-    pub(crate) fn show_checkbox(&mut self, args: ShowCheckboxArgs) -> CheckboxResponse {
-        let ShowCheckboxArgs {
-            id,
-            width,
-            height,
-            text,
-            checked,
-            font_size,
-            text_color,
-            enabled,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_checkbox(
-            id,
-            rect,
-            text,
-            checked,
-            font_size,
-            text_color,
-            enabled && self.current_enabled(),
-        )
-    }
-
-    pub(crate) fn show_text_box(&mut self, args: ShowTextBoxArgs) -> TextBoxResponse {
-        let ShowTextBoxArgs {
-            id,
-            width,
-            height,
-            text,
-            placeholder,
-            font_size,
-            text_color,
-            bg_color,
-            border_color,
-            enabled: enabled_arg,
-            overflow_x,
-            overflow_y,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_text_box(
-            id,
-            rect,
-            text,
-            placeholder,
-            font_size,
-            text_color,
-            bg_color,
-            border_color,
-            enabled_arg && self.current_enabled(),
-            overflow_x,
-            overflow_y,
-        )
-    }
-
-    pub(crate) fn show_slider(&mut self, args: ShowSliderArgs) -> SliderResponse {
-        let ShowSliderArgs {
-            id,
-            width,
-            height,
-            min,
-            max,
-            value,
-            step,
-            text,
-            font_size,
-            text_color,
-            enabled,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_slider(
-            id,
-            rect,
-            min,
-            max,
-            value,
-            step,
-            text,
-            font_size,
-            text_color,
-            enabled && self.current_enabled(),
-        )
-    }
-
-    pub(crate) fn show_combo_box(&mut self, args: ShowComboBoxArgs) -> ComboBoxResponse {
-        let ShowComboBoxArgs {
-            id,
-            width,
-            height,
-            items,
-            selected_index,
-            font_size,
-            text_color,
-            bg_color,
-            border_color,
-            enabled: enabled_arg,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_combo_box(
-            id,
-            rect,
-            items,
-            selected_index,
-            font_size,
-            text_color,
-            bg_color,
-            border_color,
-            enabled_arg && self.current_enabled(),
-        )
-    }
-
-    pub(crate) fn show_radio_button(&mut self, args: ShowRadioButtonArgs) -> RadioButtonResponse {
-        let ShowRadioButtonArgs {
-            id,
-            group,
-            width,
-            height,
-            text,
-            selected,
-            font_size,
-            text_color,
-            enabled,
-        } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_radio_button(
-            id,
-            group,
-            rect,
-            text,
-            selected,
-            font_size,
-            text_color,
-            enabled && self.current_enabled(),
-        )
-    }
-
-    pub(crate) fn show_div<R>(&mut self, args: ShowDivArgs, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
-        let ShowDivArgs {
-            id,
-            direction,
-            gap,
-            width,
-            height,
-            padding_left,
-            padding_top,
-            padding_right,
-            padding_bottom,
-            bg_color,
-            border_color,
-            border_width,
-            radius,
-        } = args;
-        let div_visible = self.retained.div_visible(&id);
-        let div_enabled = self.retained.div_enabled(&id);
-        let bg_color = self.retained.div_background(&id).or(bg_color);
-        let effective_enabled = self.current_enabled() && div_enabled;
-
-        let origin = self.layout_stack.peek_next_position();
-        let content_origin = (origin.0 + padding_left, origin.1 + padding_top);
-        self.layout_stack
-            .push_layout_at(content_origin, direction, gap);
-        self.enabled_stack.push(effective_enabled);
-        let result = f(self);
-        let _ = self.enabled_stack.pop();
-        let (content_w, content_h) = self.layout_stack.pop_layout_consumed();
-
-        let auto_w = content_w + padding_left + padding_right;
-        let auto_h = content_h + padding_top + padding_bottom;
-        let div_w = width.unwrap_or(auto_w);
-        let div_h = height.unwrap_or(auto_h);
-
-        let rect = Rect::new(origin.0, origin.1, origin.0 + div_w, origin.1 + div_h);
-        let rounded = RoundedRect::from_rect(rect, radius);
-        if div_visible && let Some(color) = bg_color {
-            self.scene
-                .fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
-        }
-        if div_visible && let Some(color) = border_color {
-            self.scene.stroke(
-                &Stroke::new(border_width.max(0.0)),
-                Affine::IDENTITY,
-                color,
-                None,
-                &rounded,
-            );
-        }
-
-        self.layout_stack.advance_current(div_w, div_h);
-        result
     }
 
     fn with_layout<R>(

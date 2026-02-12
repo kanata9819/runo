@@ -80,7 +80,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         }
 
         self.retained
-            .begin_frame_input(self.input.frame(), self.font.as_ref());
+            .begin_frame_input(self.input.snapshot(), self.font.as_ref());
         {
             let mut ui = Ui::new(
                 &mut self.scene,

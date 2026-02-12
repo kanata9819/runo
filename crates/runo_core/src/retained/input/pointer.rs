@@ -38,6 +38,14 @@ impl RetainedState {
                         contains(checkbox.rect, cursor_pos.0, cursor_pos.1)
                     };
                 }
+                WidgetNode::RadioButton(radio_button) => {
+                    radio_button.changed = false;
+                    radio_button.hovered = if !radio_button.enabled || open_overlay_id.is_some() {
+                        false
+                    } else {
+                        contains(radio_button.rect, cursor_pos.0, cursor_pos.1)
+                    };
+                }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
                     text_box.hovered = if !text_box.enabled || open_overlay_id.is_some() {
@@ -89,6 +97,17 @@ impl RetainedState {
                     return None;
                 };
                 if checkbox.enabled && checkbox.hovered {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            });
+
+            self.active_radio_button = self.order.iter().rev().find_map(|id| {
+                let WidgetNode::RadioButton(radio_button) = self.widgets.get(id)? else {
+                    return None;
+                };
+                if radio_button.enabled && radio_button.hovered {
                     Some(id.clone())
                 } else {
                     None
@@ -193,6 +212,55 @@ impl RetainedState {
 
         if mouse_released {
             self.active_checkbox = None;
+        }
+    }
+
+    pub(super) fn update_radio_button_states(&mut self, mouse_down: bool, mouse_released: bool) {
+        let active_radio_button = self.active_radio_button.clone();
+        let mut selected_id: Option<String> = None;
+        let mut selected_group = String::new();
+
+        for (id, node) in &mut self.widgets {
+            if let WidgetNode::RadioButton(radio_button) = node {
+                if !radio_button.enabled {
+                    radio_button.hovered = false;
+                    radio_button.pressed = false;
+                    radio_button.changed = false;
+                    continue;
+                }
+                let is_active = active_radio_button
+                    .as_ref()
+                    .map(|active| active == id)
+                    .unwrap_or(false);
+                radio_button.pressed = mouse_down && is_active;
+
+                if mouse_released && is_active && radio_button.hovered && !radio_button.selected {
+                    selected_id = Some(id.clone());
+                    selected_group = radio_button.group.clone();
+                }
+            }
+        }
+
+        if let Some(selected_id) = selected_id {
+            for (id, node) in &mut self.widgets {
+                if let WidgetNode::RadioButton(radio_button) = node
+                    && radio_button.group == selected_group
+                {
+                    let next_selected = id == &selected_id;
+                    radio_button.changed = radio_button.selected != next_selected;
+                    radio_button.selected = next_selected;
+                }
+            }
+
+            self.push_event(UiEvent::RadioButtonChanged {
+                id: selected_id,
+                group: selected_group,
+                selected: true,
+            });
+        }
+
+        if mouse_released {
+            self.active_radio_button = None;
         }
     }
 

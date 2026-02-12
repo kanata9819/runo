@@ -5,8 +5,8 @@ mod widgets;
 
 pub use events::UiEvents;
 pub use state::{
-    UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiState,
-    UiTextBoxState,
+    UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiRadioButtonState,
+    UiState, UiTextBoxState,
 };
 pub use widgets::UiWidgets;
 
@@ -18,6 +18,7 @@ use crate::ButtonResponse;
 use crate::CheckboxResponse;
 use crate::Color;
 use crate::ComboBoxResponse;
+use crate::RadioButtonResponse;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
@@ -50,6 +51,18 @@ pub(crate) struct ShowCheckboxArgs {
     pub(crate) height: f64,
     pub(crate) text: Option<String>,
     pub(crate) checked: Option<bool>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
+}
+
+pub(crate) struct ShowRadioButtonArgs {
+    pub(crate) id: String,
+    pub(crate) group: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) text: Option<String>,
+    pub(crate) selected: Option<bool>,
     pub(crate) font_size: f32,
     pub(crate) text_color: Color,
     pub(crate) enabled: bool,
@@ -191,6 +204,14 @@ impl<'a> Ui<'a> {
         crate::widget::combo_box::ComboBoxBuilder::new(self, id)
     }
 
+    pub(crate) fn radio_button(
+        &mut self,
+    ) -> crate::widget::radio_button::RadioButtonBuilder<'_, 'a> {
+        let id = format!("__auto_radio_button_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::radio_button::RadioButtonBuilder::new(self, id)
+    }
+
     pub(crate) fn div(&mut self) -> crate::layout::div::DivBuilder<'_, 'a> {
         let id = format!("__auto_div_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
@@ -322,6 +343,32 @@ impl<'a> Ui<'a> {
             bg_color,
             border_color,
             enabled_arg && self.current_enabled(),
+        )
+    }
+
+    pub(crate) fn show_radio_button(&mut self, args: ShowRadioButtonArgs) -> RadioButtonResponse {
+        let ShowRadioButtonArgs {
+            id,
+            group,
+            width,
+            height,
+            text,
+            selected,
+            font_size,
+            text_color,
+            enabled,
+        } = args;
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained.upsert_radio_button(
+            id,
+            group,
+            rect,
+            text,
+            selected,
+            font_size,
+            text_color,
+            enabled && self.current_enabled(),
         )
     }
 

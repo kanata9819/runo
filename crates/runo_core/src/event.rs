@@ -7,6 +7,11 @@ pub enum UiEvent {
         id: String,
         checked: bool,
     },
+    RadioButtonChanged {
+        id: String,
+        group: String,
+        selected: bool,
+    },
     TextBoxChanged {
         id: String,
         text: String,

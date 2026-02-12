@@ -1,5 +1,6 @@
 use super::Ui;
 use crate::widget::checkbox::CheckboxResponse;
+use crate::widget::radio_button::RadioButtonResponse;
 use crate::widget::text_box::TextBoxResponse;
 use crate::{ButtonResponse, ComboBoxResponse};
 
@@ -16,6 +17,10 @@ pub struct UiTextBoxState<'ui, 'a> {
 }
 
 pub struct UiCheckboxState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiRadioButtonState<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
 }
 
@@ -42,6 +47,10 @@ impl<'ui, 'a> UiState<'ui, 'a> {
 
     pub fn checkbox(&mut self) -> UiCheckboxState<'_, 'a> {
         UiCheckboxState { ui: &mut *self.ui }
+    }
+
+    pub fn radio_button(&mut self) -> UiRadioButtonState<'_, 'a> {
+        UiRadioButtonState { ui: &mut *self.ui }
     }
 
     pub fn combo_box(&mut self) -> UiComboBoxState<'_, 'a> {
@@ -108,6 +117,24 @@ impl<'ui, 'a> UiCheckboxState<'ui, 'a> {
 
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_checkbox_enabled(id, enabled);
+    }
+}
+
+impl<'ui, 'a> UiRadioButtonState<'ui, 'a> {
+    pub fn response(&self, id: impl AsRef<str>) -> RadioButtonResponse {
+        self.ui.retained.radio_button_response(id)
+    }
+
+    pub fn selected(&self, id: impl AsRef<str>) -> bool {
+        self.response(id).selected
+    }
+
+    pub fn set_selected(&mut self, id: impl AsRef<str>, selected: bool) {
+        self.ui.retained.set_radio_button_selected(id, selected);
+    }
+
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_radio_button_enabled(id, enabled);
     }
 }
 

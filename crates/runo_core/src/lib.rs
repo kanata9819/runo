@@ -15,10 +15,11 @@ pub use hooks::effect::EffectCleanup;
 pub use ui::colors;
 pub use ui::{
     Ui, UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiEvents, UiLabelState,
-    UiState, UiTextBoxState, UiWidgets,
+    UiRadioButtonState, UiState, UiTextBoxState, UiWidgets,
 };
 pub use vello::peniko::Color;
 pub use widget::button::ButtonResponse;
 pub use widget::checkbox::CheckboxResponse;
 pub use widget::combo_box::ComboBoxResponse;
+pub use widget::radio_button::RadioButtonResponse;
 pub use widget::text_box::{Overflow, TextBoxResponse};

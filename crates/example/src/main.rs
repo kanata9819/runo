@@ -6,6 +6,10 @@ const TITLE_ID: &str = "title";
 const INPUT_NAME_ID: &str = "input.name";
 const COMBO_ROLE_ID: &str = "combo.role";
 const CHECKBOX_NEWSLETTER_ID: &str = "check.newsletter";
+const RADIO_CHANNEL_EMAIL_ID: &str = "radio.channel.email";
+const RADIO_CHANNEL_SMS_ID: &str = "radio.channel.sms";
+const RADIO_CHANNEL_PUSH_ID: &str = "radio.channel.push";
+const RADIO_CHANNEL_GROUP: &str = "channel";
 const TOGGLE_BUTTON_ID: &str = "btnToggle";
 const MAIN_PANEL_ID: &str = "main.panel";
 
@@ -14,6 +18,7 @@ struct MyApp {
     input_text: String,
     selected_role: String,
     newsletter_opt_in: bool,
+    selected_channel: String,
 }
 
 impl MyApp {
@@ -69,6 +74,31 @@ impl MyApp {
             .checked(true)
             .show();
     }
+
+    fn build_channel_radio_buttons(ui: &mut Ui<'_>) {
+        ui.widgets()
+            .radio_button()
+            .id(RADIO_CHANNEL_EMAIL_ID)
+            .group(RADIO_CHANNEL_GROUP)
+            .height(36)
+            .text("Channel: Email")
+            .selected(true)
+            .show();
+        ui.widgets()
+            .radio_button()
+            .id(RADIO_CHANNEL_SMS_ID)
+            .group(RADIO_CHANNEL_GROUP)
+            .height(36)
+            .text("Channel: SMS")
+            .show();
+        ui.widgets()
+            .radio_button()
+            .id(RADIO_CHANNEL_PUSH_ID)
+            .group(RADIO_CHANNEL_GROUP)
+            .height(36)
+            .text("Channel: Push")
+            .show();
+    }
 }
 
 impl RunoApplication for MyApp {
@@ -96,6 +126,7 @@ impl RunoApplication for MyApp {
                     Self::build_name_input(ui);
                     Self::build_role_combo(ui);
                     Self::build_newsletter_checkbox(ui);
+                    Self::build_channel_radio_buttons(ui);
                     Self::build_toggle_button(ui);
                 });
         });
@@ -188,6 +219,15 @@ impl RunoApplication for MyApp {
                         ),
                     );
                 }
+                UiEvent::RadioButtonChanged { id, group, .. } if group == RADIO_CHANNEL_GROUP => {
+                    self.selected_channel = match id.as_str() {
+                        RADIO_CHANNEL_EMAIL_ID => "Email".to_string(),
+                        RADIO_CHANNEL_SMS_ID => "SMS".to_string(),
+                        RADIO_CHANNEL_PUSH_ID => "Push".to_string(),
+                        _ => self.selected_channel.clone(),
+                    };
+                    println!("selected channel: {}", self.selected_channel);
+                }
                 _ => {}
             }
         }
@@ -206,5 +246,6 @@ fn main() {
         input_text: String::new(),
         selected_role: "Designer".to_string(),
         newsletter_opt_in: true,
+        selected_channel: "Email".to_string(),
     });
 }

@@ -6,9 +6,10 @@ use vello::peniko::Color;
 use crate::ButtonResponse;
 use crate::CheckboxResponse;
 use crate::ComboBoxResponse;
+use crate::RadioButtonResponse;
 use crate::event::UiEvent;
 use crate::retained::node::{
-    ButtonNode, CheckboxNode, ComboBoxNode, LabelNode, TextBoxNode, WidgetNode,
+    ButtonNode, CheckboxNode, ComboBoxNode, LabelNode, RadioButtonNode, TextBoxNode, WidgetNode,
 };
 use crate::widget::text::estimate_text_width;
 use crate::widget::text_box::Overflow;
@@ -19,6 +20,7 @@ pub(crate) struct RetainedState {
     pub(super) order: Vec<String>,
     pub(super) active_button: Option<String>,
     pub(super) active_checkbox: Option<String>,
+    pub(super) active_radio_button: Option<String>,
     pub(super) active_combo_box: Option<String>,
     pub(super) active_text_box_scrollbar: Option<String>,
     pub(super) focused_text_box: Option<String>,
@@ -36,6 +38,7 @@ impl RetainedState {
             order: Vec::new(),
             active_button: None,
             active_checkbox: None,
+            active_radio_button: None,
             active_combo_box: None,
             active_text_box_scrollbar: None,
             focused_text_box: None,
@@ -207,6 +210,80 @@ impl RetainedState {
                 CheckboxResponse::default()
             }
         }
+    }
+
+    pub(crate) fn upsert_radio_button(
+        &mut self,
+        id: String,
+        group: String,
+        rect: Rect,
+        text: Option<String>,
+        selected: Option<bool>,
+        font_size: f32,
+        text_color: Color,
+        enabled: bool,
+    ) -> RadioButtonResponse {
+        let default_selected = selected.unwrap_or(false);
+        if !self.widgets.contains_key(&id) {
+            if default_selected {
+                Self::clear_radio_group_selection(&mut self.widgets, &group);
+            }
+            self.order.push(id.clone());
+            self.widgets.insert(
+                id.clone(),
+                WidgetNode::RadioButton(RadioButtonNode {
+                    rect,
+                    group,
+                    text,
+                    selected: default_selected,
+                    font_size,
+                    text_color,
+                    enabled,
+                    hovered: false,
+                    pressed: false,
+                    changed: false,
+                }),
+            );
+            return RadioButtonResponse::default();
+        }
+
+        if let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(&id) {
+            radio_button.rect = rect;
+            radio_button.group = group;
+            radio_button.text = text;
+            // Keep internal selected state after creation.
+            // Builder-provided `selected` is treated as initial value only.
+            let _ = selected;
+            radio_button.font_size = font_size;
+            radio_button.text_color = text_color;
+            radio_button.enabled = enabled;
+            return RadioButtonResponse {
+                selected: radio_button.selected,
+                hovered: radio_button.hovered,
+                pressed: radio_button.pressed,
+                changed: radio_button.changed,
+            };
+        }
+
+        if default_selected {
+            Self::clear_radio_group_selection(&mut self.widgets, &group);
+        }
+        self.widgets.insert(
+            id,
+            WidgetNode::RadioButton(RadioButtonNode {
+                rect,
+                group,
+                text,
+                selected: default_selected,
+                font_size,
+                text_color,
+                enabled,
+                hovered: false,
+                pressed: false,
+                changed: false,
+            }),
+        );
+        RadioButtonResponse::default()
     }
 
     pub(crate) fn upsert_text_box(
@@ -475,6 +552,54 @@ impl RetainedState {
         }
     }
 
+    pub(crate) fn radio_button_response(&self, id: impl AsRef<str>) -> RadioButtonResponse {
+        let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get(id.as_ref()) else {
+            return RadioButtonResponse::default();
+        };
+        RadioButtonResponse {
+            selected: radio_button.selected,
+            hovered: radio_button.hovered,
+            pressed: radio_button.pressed,
+            changed: radio_button.changed,
+        }
+    }
+
+    pub(crate) fn set_radio_button_selected(&mut self, id: impl AsRef<str>, selected: bool) {
+        let id_ref = id.as_ref();
+        let group = self.widgets.get(id_ref).and_then(|node| match node {
+            WidgetNode::RadioButton(radio_button) => Some(radio_button.group.clone()),
+            _ => None,
+        });
+        let Some(group) = group else {
+            return;
+        };
+
+        if selected {
+            Self::clear_radio_group_selection(&mut self.widgets, &group);
+        }
+        let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
+            return;
+        };
+        radio_button.changed = radio_button.selected != selected;
+        radio_button.selected = selected;
+    }
+
+    pub(crate) fn set_radio_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let id_ref = id.as_ref();
+        let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
+            return;
+        };
+        radio_button.enabled = enabled;
+        if !enabled {
+            radio_button.hovered = false;
+            radio_button.pressed = false;
+            radio_button.changed = false;
+            if self.active_radio_button.as_deref() == Some(id_ref) {
+                self.active_radio_button = None;
+            }
+        }
+    }
+
     pub(crate) fn text_box_response(&self, id: impl AsRef<str>) -> TextBoxResponse {
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get(id.as_ref()) else {
             return TextBoxResponse::default();
@@ -611,5 +736,16 @@ impl RetainedState {
 
     pub(super) fn push_event(&mut self, event: UiEvent) {
         self.events.push_back(event);
+    }
+
+    fn clear_radio_group_selection(widgets: &mut HashMap<String, WidgetNode>, group: &str) {
+        for node in widgets.values_mut() {
+            if let WidgetNode::RadioButton(radio_button) = node
+                && radio_button.group == group
+            {
+                radio_button.selected = false;
+                radio_button.changed = false;
+            }
+        }
     }
 }

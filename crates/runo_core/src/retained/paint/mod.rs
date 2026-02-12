@@ -3,6 +3,7 @@ mod checkbox;
 mod combo_box;
 mod label;
 mod radio_button;
+mod slider;
 mod text_box;
 
 use vello::Scene;
@@ -23,6 +24,7 @@ impl RetainedState {
                 WidgetNode::RadioButton(radio_button) => {
                     radio_button::render(scene, font, radio_button)
                 }
+                WidgetNode::Slider(slider) => slider::render(scene, font, slider),
                 WidgetNode::Label(label) => label::render(scene, font, label),
                 WidgetNode::TextBox(text_box) => text_box::render(scene, font, text_box),
                 WidgetNode::ComboBox(combo_box) => combo_box::render(scene, font, combo_box),
@@ -40,6 +42,7 @@ impl RetainedState {
                 WidgetNode::Button(_)
                 | WidgetNode::Checkbox(_)
                 | WidgetNode::RadioButton(_)
+                | WidgetNode::Slider(_)
                 | WidgetNode::Label(_)
                 | WidgetNode::TextBox(_) => {}
             }

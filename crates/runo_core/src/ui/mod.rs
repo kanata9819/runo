@@ -6,7 +6,7 @@ mod widgets;
 pub use events::UiEvents;
 pub use state::{
     UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiRadioButtonState,
-    UiState, UiTextBoxState,
+    UiSliderState, UiState, UiTextBoxState,
 };
 pub use widgets::UiWidgets;
 
@@ -19,6 +19,7 @@ use crate::CheckboxResponse;
 use crate::Color;
 use crate::ComboBoxResponse;
 use crate::RadioButtonResponse;
+use crate::SliderResponse;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
@@ -81,6 +82,20 @@ pub(crate) struct ShowTextBoxArgs {
     pub(crate) enabled: bool,
     pub(crate) overflow_x: Overflow,
     pub(crate) overflow_y: Overflow,
+}
+
+pub(crate) struct ShowSliderArgs {
+    pub(crate) id: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) min: f64,
+    pub(crate) max: f64,
+    pub(crate) value: Option<f64>,
+    pub(crate) step: Option<f64>,
+    pub(crate) text: Option<String>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
 }
 
 pub(crate) struct ShowComboBoxArgs {
@@ -204,6 +219,12 @@ impl<'a> Ui<'a> {
         crate::widget::combo_box::ComboBoxBuilder::new(self, id)
     }
 
+    pub(crate) fn slider(&mut self) -> crate::widget::slider::SliderBuilder<'_, 'a> {
+        let id = format!("__auto_slider_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::slider::SliderBuilder::new(self, id)
+    }
+
     pub(crate) fn radio_button(
         &mut self,
     ) -> crate::widget::radio_button::RadioButtonBuilder<'_, 'a> {
@@ -315,6 +336,36 @@ impl<'a> Ui<'a> {
             enabled_arg && self.current_enabled(),
             overflow_x,
             overflow_y,
+        )
+    }
+
+    pub(crate) fn show_slider(&mut self, args: ShowSliderArgs) -> SliderResponse {
+        let ShowSliderArgs {
+            id,
+            width,
+            height,
+            min,
+            max,
+            value,
+            step,
+            text,
+            font_size,
+            text_color,
+            enabled,
+        } = args;
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained.upsert_slider(
+            id,
+            rect,
+            min,
+            max,
+            value,
+            step,
+            text,
+            font_size,
+            text_color,
+            enabled && self.current_enabled(),
         )
     }
 

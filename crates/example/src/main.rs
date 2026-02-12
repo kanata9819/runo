@@ -10,6 +10,7 @@ const RADIO_CHANNEL_EMAIL_ID: &str = "radio.channel.email";
 const RADIO_CHANNEL_SMS_ID: &str = "radio.channel.sms";
 const RADIO_CHANNEL_PUSH_ID: &str = "radio.channel.push";
 const RADIO_CHANNEL_GROUP: &str = "channel";
+const SLIDER_VOLUME_ID: &str = "slider.volume";
 const TOGGLE_BUTTON_ID: &str = "btnToggle";
 const MAIN_PANEL_ID: &str = "main.panel";
 
@@ -19,6 +20,7 @@ struct MyApp {
     selected_role: String,
     newsletter_opt_in: bool,
     selected_channel: String,
+    volume: f64,
 }
 
 impl MyApp {
@@ -99,6 +101,19 @@ impl MyApp {
             .text("Channel: Push")
             .show();
     }
+
+    fn build_volume_slider(ui: &mut Ui<'_>) {
+        ui.widgets()
+            .slider()
+            .id(SLIDER_VOLUME_ID)
+            .width(320)
+            .height(48)
+            .text("Volume")
+            .range(0.0, 1.0)
+            .step(0.01)
+            .value(0.35)
+            .show();
+    }
 }
 
 impl RunoApplication for MyApp {
@@ -127,6 +142,7 @@ impl RunoApplication for MyApp {
                     Self::build_role_combo(ui);
                     Self::build_newsletter_checkbox(ui);
                     Self::build_channel_radio_buttons(ui);
+                    Self::build_volume_slider(ui);
                     Self::build_toggle_button(ui);
                 });
         });
@@ -228,6 +244,10 @@ impl RunoApplication for MyApp {
                     };
                     println!("selected channel: {}", self.selected_channel);
                 }
+                UiEvent::SliderChanged { id, value } if id == SLIDER_VOLUME_ID => {
+                    self.volume = value;
+                    println!("volume: {:.2}", self.volume);
+                }
                 _ => {}
             }
         }
@@ -247,5 +267,6 @@ fn main() {
         selected_role: "Designer".to_string(),
         newsletter_opt_in: true,
         selected_channel: "Email".to_string(),
+        volume: 0.35,
     });
 }

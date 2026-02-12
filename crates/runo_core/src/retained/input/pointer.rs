@@ -46,6 +46,14 @@ impl RetainedState {
                         contains(radio_button.rect, cursor_pos.0, cursor_pos.1)
                     };
                 }
+                WidgetNode::Slider(slider) => {
+                    slider.changed = false;
+                    slider.hovered = if !slider.enabled || open_overlay_id.is_some() {
+                        false
+                    } else {
+                        contains(slider.rect, cursor_pos.0, cursor_pos.1)
+                    };
+                }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
                     text_box.hovered = if !text_box.enabled || open_overlay_id.is_some() {
@@ -108,6 +116,17 @@ impl RetainedState {
                     return None;
                 };
                 if radio_button.enabled && radio_button.hovered {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            });
+
+            self.active_slider = self.order.iter().rev().find_map(|id| {
+                let WidgetNode::Slider(slider) = self.widgets.get(id)? else {
+                    return None;
+                };
+                if slider.enabled && slider.hovered {
                     Some(id.clone())
                 } else {
                     None
@@ -264,6 +283,49 @@ impl RetainedState {
         }
     }
 
+    pub(super) fn update_slider_states(
+        &mut self,
+        cursor_pos: (f64, f64),
+        mouse_pressed: bool,
+        mouse_down: bool,
+        mouse_released: bool,
+    ) {
+        let active_slider = self.active_slider.clone();
+        let mut changed = Vec::new();
+        for (id, node) in &mut self.widgets {
+            if let WidgetNode::Slider(slider) = node {
+                if !slider.enabled {
+                    slider.hovered = false;
+                    slider.pressed = false;
+                    slider.changed = false;
+                    continue;
+                }
+                let is_active = active_slider
+                    .as_ref()
+                    .map(|active| active == id)
+                    .unwrap_or(false);
+                slider.pressed = mouse_down && is_active;
+
+                if (mouse_pressed || mouse_down) && is_active {
+                    let next_value = slider_value_from_cursor(slider, cursor_pos.0);
+                    slider.changed = (slider.value - next_value).abs() > f64::EPSILON;
+                    slider.value = next_value;
+                    if slider.changed {
+                        changed.push((id.clone(), slider.value));
+                    }
+                }
+            }
+        }
+
+        for (id, value) in changed {
+            self.push_event(UiEvent::SliderChanged { id, value });
+        }
+
+        if mouse_released {
+            self.active_slider = None;
+        }
+    }
+
     pub(super) fn update_combo_box_states(&mut self, mouse_down: bool, mouse_released: bool) {
         let mut changed = Vec::new();
         let active_combo_box = self.active_combo_box.clone();
@@ -379,4 +441,18 @@ fn combo_expanded_contains(
         return true;
     }
     combo_item_index_at(combo_box, x, y).is_some()
+}
+
+fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x: f64) -> f64 {
+    let x0 = slider.rect.x0 + 12.0;
+    let x1 = slider.rect.x1 - 12.0;
+    let width = (x1 - x0).max(1.0);
+    let ratio = ((cursor_x - x0) / width).clamp(0.0, 1.0);
+    let mut value = slider.min + (slider.max - slider.min) * ratio;
+    if let Some(step) = slider.step
+        && step > 0.0
+    {
+        value = ((value - slider.min) / step).round() * step + slider.min;
+    }
+    value.clamp(slider.min, slider.max)
 }

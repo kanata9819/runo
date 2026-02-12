@@ -12,6 +12,10 @@ pub enum UiEvent {
         group: String,
         selected: bool,
     },
+    SliderChanged {
+        id: String,
+        value: f64,
+    },
     TextBoxChanged {
         id: String,
         text: String,

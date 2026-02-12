@@ -7,9 +7,11 @@ use crate::ButtonResponse;
 use crate::CheckboxResponse;
 use crate::ComboBoxResponse;
 use crate::RadioButtonResponse;
+use crate::SliderResponse;
 use crate::event::UiEvent;
 use crate::retained::node::{
-    ButtonNode, CheckboxNode, ComboBoxNode, LabelNode, RadioButtonNode, TextBoxNode, WidgetNode,
+    ButtonNode, CheckboxNode, ComboBoxNode, LabelNode, RadioButtonNode, SliderNode, TextBoxNode,
+    WidgetNode,
 };
 use crate::widget::text::estimate_text_width;
 use crate::widget::text_box::Overflow;
@@ -21,6 +23,7 @@ pub(crate) struct RetainedState {
     pub(super) active_button: Option<String>,
     pub(super) active_checkbox: Option<String>,
     pub(super) active_radio_button: Option<String>,
+    pub(super) active_slider: Option<String>,
     pub(super) active_combo_box: Option<String>,
     pub(super) active_text_box_scrollbar: Option<String>,
     pub(super) focused_text_box: Option<String>,
@@ -39,6 +42,7 @@ impl RetainedState {
             active_button: None,
             active_checkbox: None,
             active_radio_button: None,
+            active_slider: None,
             active_combo_box: None,
             active_text_box_scrollbar: None,
             focused_text_box: None,
@@ -284,6 +288,84 @@ impl RetainedState {
             }),
         );
         RadioButtonResponse::default()
+    }
+
+    pub(crate) fn upsert_slider(
+        &mut self,
+        id: String,
+        rect: Rect,
+        min: f64,
+        max: f64,
+        value: Option<f64>,
+        step: Option<f64>,
+        text: Option<String>,
+        font_size: f32,
+        text_color: Color,
+        enabled: bool,
+    ) -> SliderResponse {
+        let (min, max) = normalize_range(min, max);
+        let default_value = snap_and_clamp(value.unwrap_or(min), min, max, step);
+        if !self.widgets.contains_key(&id) {
+            self.order.push(id.clone());
+            self.widgets.insert(
+                id.clone(),
+                WidgetNode::Slider(SliderNode {
+                    rect,
+                    min,
+                    max,
+                    value: default_value,
+                    step,
+                    text,
+                    font_size,
+                    text_color,
+                    enabled,
+                    hovered: false,
+                    pressed: false,
+                    changed: false,
+                }),
+            );
+            return SliderResponse::default();
+        }
+
+        if let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(&id) {
+            slider.rect = rect;
+            slider.min = min;
+            slider.max = max;
+            slider.step = step;
+            slider.text = text;
+            slider.font_size = font_size;
+            slider.text_color = text_color;
+            slider.enabled = enabled;
+            slider.value = snap_and_clamp(slider.value, slider.min, slider.max, slider.step);
+            // Keep internal value after creation.
+            // Builder-provided `value` is treated as initial value only.
+            let _ = value;
+            return SliderResponse {
+                value: slider.value,
+                hovered: slider.hovered,
+                pressed: slider.pressed,
+                changed: slider.changed,
+            };
+        }
+
+        self.widgets.insert(
+            id,
+            WidgetNode::Slider(SliderNode {
+                rect,
+                min,
+                max,
+                value: default_value,
+                step,
+                text,
+                font_size,
+                text_color,
+                enabled,
+                hovered: false,
+                pressed: false,
+                changed: false,
+            }),
+        );
+        SliderResponse::default()
     }
 
     pub(crate) fn upsert_text_box(
@@ -600,6 +682,43 @@ impl RetainedState {
         }
     }
 
+    pub(crate) fn slider_response(&self, id: impl AsRef<str>) -> SliderResponse {
+        let Some(WidgetNode::Slider(slider)) = self.widgets.get(id.as_ref()) else {
+            return SliderResponse::default();
+        };
+        SliderResponse {
+            value: slider.value,
+            hovered: slider.hovered,
+            pressed: slider.pressed,
+            changed: slider.changed,
+        }
+    }
+
+    pub(crate) fn set_slider_value(&mut self, id: impl AsRef<str>, value: f64) {
+        let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(id.as_ref()) else {
+            return;
+        };
+        let next = snap_and_clamp(value, slider.min, slider.max, slider.step);
+        slider.changed = (slider.value - next).abs() > f64::EPSILON;
+        slider.value = next;
+    }
+
+    pub(crate) fn set_slider_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let id_ref = id.as_ref();
+        let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(id_ref) else {
+            return;
+        };
+        slider.enabled = enabled;
+        if !enabled {
+            slider.hovered = false;
+            slider.pressed = false;
+            slider.changed = false;
+            if self.active_slider.as_deref() == Some(id_ref) {
+                self.active_slider = None;
+            }
+        }
+    }
+
     pub(crate) fn text_box_response(&self, id: impl AsRef<str>) -> TextBoxResponse {
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get(id.as_ref()) else {
             return TextBoxResponse::default();
@@ -748,4 +867,19 @@ impl RetainedState {
             }
         }
     }
+}
+
+fn normalize_range(min: f64, max: f64) -> (f64, f64) {
+    if min <= max { (min, max) } else { (max, min) }
+}
+
+fn snap_and_clamp(value: f64, min: f64, max: f64, step: Option<f64>) -> f64 {
+    let mut clamped = value.clamp(min, max);
+    if let Some(step) = step
+        && step > 0.0
+    {
+        let snapped = ((clamped - min) / step).round() * step + min;
+        clamped = snapped.clamp(min, max);
+    }
+    clamped
 }

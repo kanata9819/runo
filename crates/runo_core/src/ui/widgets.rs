@@ -5,6 +5,7 @@ use crate::widget::checkbox::CheckboxBuilder;
 use crate::widget::combo_box::ComboBoxBuilder;
 use crate::widget::label::LabelBuilder;
 use crate::widget::radio_button::RadioButtonBuilder;
+use crate::widget::slider::SliderBuilder;
 use crate::widget::text_box::TextBoxBuilder;
 
 pub struct UiWidgets<'ui, 'a> {
@@ -34,6 +35,10 @@ impl<'ui, 'a> UiWidgets<'ui, 'a> {
 
     pub fn radio_button(self) -> RadioButtonBuilder<'ui, 'a> {
         self.ui.radio_button()
+    }
+
+    pub fn slider(self) -> SliderBuilder<'ui, 'a> {
+        self.ui.slider()
     }
 
     pub fn div(self) -> DivBuilder<'ui, 'a> {

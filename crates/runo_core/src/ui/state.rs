@@ -1,6 +1,7 @@
 use super::Ui;
 use crate::widget::checkbox::CheckboxResponse;
 use crate::widget::radio_button::RadioButtonResponse;
+use crate::widget::slider::SliderResponse;
 use crate::widget::text_box::TextBoxResponse;
 use crate::{ButtonResponse, ComboBoxResponse};
 
@@ -21,6 +22,10 @@ pub struct UiCheckboxState<'ui, 'a> {
 }
 
 pub struct UiRadioButtonState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiSliderState<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
 }
 
@@ -51,6 +56,10 @@ impl<'ui, 'a> UiState<'ui, 'a> {
 
     pub fn radio_button(&mut self) -> UiRadioButtonState<'_, 'a> {
         UiRadioButtonState { ui: &mut *self.ui }
+    }
+
+    pub fn slider(&mut self) -> UiSliderState<'_, 'a> {
+        UiSliderState { ui: &mut *self.ui }
     }
 
     pub fn combo_box(&mut self) -> UiComboBoxState<'_, 'a> {
@@ -135,6 +144,24 @@ impl<'ui, 'a> UiRadioButtonState<'ui, 'a> {
 
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_radio_button_enabled(id, enabled);
+    }
+}
+
+impl<'ui, 'a> UiSliderState<'ui, 'a> {
+    pub fn response(&self, id: impl AsRef<str>) -> SliderResponse {
+        self.ui.retained.slider_response(id)
+    }
+
+    pub fn value(&self, id: impl AsRef<str>) -> f64 {
+        self.response(id).value
+    }
+
+    pub fn set_value(&mut self, id: impl AsRef<str>, value: f64) {
+        self.ui.retained.set_slider_value(id, value);
+    }
+
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_slider_enabled(id, enabled);
     }
 }
 

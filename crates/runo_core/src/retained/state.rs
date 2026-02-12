@@ -178,7 +178,12 @@ impl RetainedState {
                     changed: false,
                 }),
             );
-            return CheckboxResponse::default();
+            return CheckboxResponse {
+                checked: default_checked,
+                hovered: false,
+                pressed: false,
+                changed: false,
+            };
         }
 
         let entry = self.widgets.get_mut(&id).expect("checkbox entry missing");
@@ -211,7 +216,12 @@ impl RetainedState {
                     pressed: false,
                     changed: false,
                 });
-                CheckboxResponse::default()
+                CheckboxResponse {
+                    checked: default_checked,
+                    hovered: false,
+                    pressed: false,
+                    changed: false,
+                }
             }
         }
     }
@@ -248,7 +258,12 @@ impl RetainedState {
                     changed: false,
                 }),
             );
-            return RadioButtonResponse::default();
+            return RadioButtonResponse {
+                selected: default_selected,
+                hovered: false,
+                pressed: false,
+                changed: false,
+            };
         }
 
         if let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(&id) {
@@ -287,7 +302,12 @@ impl RetainedState {
                 changed: false,
             }),
         );
-        RadioButtonResponse::default()
+        RadioButtonResponse {
+            selected: default_selected,
+            hovered: false,
+            pressed: false,
+            changed: false,
+        }
     }
 
     pub(crate) fn upsert_slider(
@@ -324,7 +344,12 @@ impl RetainedState {
                     changed: false,
                 }),
             );
-            return SliderResponse::default();
+            return SliderResponse {
+                value: default_value,
+                hovered: false,
+                pressed: false,
+                changed: false,
+            };
         }
 
         if let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(&id) {
@@ -365,7 +390,12 @@ impl RetainedState {
                 changed: false,
             }),
         );
-        SliderResponse::default()
+        SliderResponse {
+            value: default_value,
+            hovered: false,
+            pressed: false,
+            changed: false,
+        }
     }
 
     pub(crate) fn upsert_text_box(
@@ -386,6 +416,7 @@ impl RetainedState {
             let text = text.unwrap_or_default();
             let text_advance = estimate_text_width(&text, font_size) as f64;
             let caret_index = text.chars().count();
+            let response_text = text.clone();
             self.order.push(id.clone());
             self.widgets.insert(
                 id.clone(),
@@ -409,7 +440,12 @@ impl RetainedState {
                     changed: false,
                 }),
             );
-            return TextBoxResponse::default();
+            return TextBoxResponse {
+                text: response_text,
+                hovered: false,
+                focused: false,
+                changed: false,
+            };
         }
 
         let entry = self.widgets.get_mut(&id).expect("text box entry missing");
@@ -446,6 +482,7 @@ impl RetainedState {
                 let text = text.unwrap_or_default();
                 let text_advance = estimate_text_width(&text, font_size) as f64;
                 let caret_index = text.chars().count();
+                let response_text = text.clone();
                 *entry = WidgetNode::TextBox(TextBoxNode {
                     rect,
                     text,
@@ -465,7 +502,12 @@ impl RetainedState {
                     focused: false,
                     changed: false,
                 });
-                TextBoxResponse::default()
+                TextBoxResponse {
+                    text: response_text,
+                    hovered: false,
+                    focused: false,
+                    changed: false,
+                }
             }
         }
     }
@@ -490,6 +532,10 @@ impl RetainedState {
         };
 
         if !self.widgets.contains_key(&id) {
+            let selected_text = items
+                .get(initial_selected_index)
+                .cloned()
+                .unwrap_or_default();
             self.order.push(id.clone());
             self.widgets.insert(
                 id.clone(),
@@ -509,7 +555,14 @@ impl RetainedState {
                     is_open: false,
                 }),
             );
-            return ComboBoxResponse::default();
+            return ComboBoxResponse {
+                selected_index: initial_selected_index,
+                selected_text,
+                hovered: false,
+                pressed: false,
+                changed: false,
+                is_open: false,
+            };
         }
 
         let entry = self.widgets.get_mut(&id).expect("combo box entry missing");
@@ -543,6 +596,10 @@ impl RetainedState {
                 }
             }
             _ => {
+                let selected_text = items
+                    .get(initial_selected_index)
+                    .cloned()
+                    .unwrap_or_default();
                 *entry = WidgetNode::ComboBox(ComboBoxNode {
                     rect,
                     items,
@@ -558,7 +615,14 @@ impl RetainedState {
                     changed: false,
                     is_open: false,
                 });
-                ComboBoxResponse::default()
+                ComboBoxResponse {
+                    selected_index: initial_selected_index,
+                    selected_text,
+                    hovered: false,
+                    pressed: false,
+                    changed: false,
+                    is_open: false,
+                }
             }
         }
     }

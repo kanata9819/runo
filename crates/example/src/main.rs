@@ -1,8 +1,11 @@
+#![windows_subsystem = "windows"]
+
 use runo_core::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
 
 const TITLE_ID: &str = "title";
 const INPUT_NAME_ID: &str = "input.name";
 const COMBO_ROLE_ID: &str = "combo.role";
+const CHECKBOX_NEWSLETTER_ID: &str = "check.newsletter";
 const TOGGLE_BUTTON_ID: &str = "btnToggle";
 const MAIN_PANEL_ID: &str = "main.panel";
 
@@ -10,6 +13,7 @@ struct MyApp {
     toggled: bool,
     input_text: String,
     selected_role: String,
+    newsletter_opt_in: bool,
 }
 
 impl MyApp {
@@ -55,6 +59,16 @@ impl MyApp {
             .text("Toggle: OFF")
             .show();
     }
+
+    fn build_newsletter_checkbox(ui: &mut Ui<'_>) {
+        ui.widgets()
+            .checkbox()
+            .id(CHECKBOX_NEWSLETTER_ID)
+            .height(40)
+            .text("Receive newsletter")
+            .checked(true)
+            .show();
+    }
 }
 
 impl RunoApplication for MyApp {
@@ -81,6 +95,7 @@ impl RunoApplication for MyApp {
                 .show(|ui| {
                     Self::build_name_input(ui);
                     Self::build_role_combo(ui);
+                    Self::build_newsletter_checkbox(ui);
                     Self::build_toggle_button(ui);
                 });
         });
@@ -147,6 +162,32 @@ impl RunoApplication for MyApp {
                         );
                     }
                 }
+                UiEvent::CheckboxChanged { id, checked } if id == CHECKBOX_NEWSLETTER_ID => {
+                    self.newsletter_opt_in = checked;
+                    let label = if self.toggled {
+                        "Toggle: ON"
+                    } else {
+                        "Toggle: OFF"
+                    };
+                    ui.state().button().set_text(
+                        TOGGLE_BUTTON_ID,
+                        format!(
+                            "{} ({}) [{}] {}",
+                            label,
+                            if self.input_text.is_empty() {
+                                "anonymous"
+                            } else {
+                                &self.input_text
+                            },
+                            self.selected_role,
+                            if self.newsletter_opt_in {
+                                "newsletter:on"
+                            } else {
+                                "newsletter:off"
+                            }
+                        ),
+                    );
+                }
                 _ => {}
             }
         }
@@ -164,5 +205,6 @@ fn main() {
         toggled: false,
         input_text: String::new(),
         selected_role: "Designer".to_string(),
+        newsletter_opt_in: true,
     });
 }

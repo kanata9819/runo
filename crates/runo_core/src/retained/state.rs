@@ -4,9 +4,12 @@ use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::ButtonResponse;
+use crate::CheckboxResponse;
 use crate::ComboBoxResponse;
 use crate::event::UiEvent;
-use crate::retained::node::{ButtonNode, ComboBoxNode, LabelNode, TextBoxNode, WidgetNode};
+use crate::retained::node::{
+    ButtonNode, CheckboxNode, ComboBoxNode, LabelNode, TextBoxNode, WidgetNode,
+};
 use crate::widget::text::estimate_text_width;
 use crate::widget::text_box::Overflow;
 use crate::widget::text_box::TextBoxResponse;
@@ -15,6 +18,7 @@ pub(crate) struct RetainedState {
     pub(super) widgets: HashMap<String, WidgetNode>,
     pub(super) order: Vec<String>,
     pub(super) active_button: Option<String>,
+    pub(super) active_checkbox: Option<String>,
     pub(super) active_combo_box: Option<String>,
     pub(super) active_text_box_scrollbar: Option<String>,
     pub(super) focused_text_box: Option<String>,
@@ -31,6 +35,7 @@ impl RetainedState {
             widgets: HashMap::new(),
             order: Vec::new(),
             active_button: None,
+            active_checkbox: None,
             active_combo_box: None,
             active_text_box_scrollbar: None,
             focused_text_box: None,
@@ -137,6 +142,71 @@ impl RetainedState {
                 enabled,
             }),
         );
+    }
+
+    pub(crate) fn upsert_checkbox(
+        &mut self,
+        id: String,
+        rect: Rect,
+        text: Option<String>,
+        checked: Option<bool>,
+        font_size: f32,
+        text_color: Color,
+        enabled: bool,
+    ) -> CheckboxResponse {
+        let default_checked = checked.unwrap_or(false);
+        if !self.widgets.contains_key(&id) {
+            self.order.push(id.clone());
+            self.widgets.insert(
+                id.clone(),
+                WidgetNode::Checkbox(CheckboxNode {
+                    rect,
+                    text,
+                    checked: default_checked,
+                    font_size,
+                    text_color,
+                    enabled,
+                    hovered: false,
+                    pressed: false,
+                    changed: false,
+                }),
+            );
+            return CheckboxResponse::default();
+        }
+
+        let entry = self.widgets.get_mut(&id).expect("checkbox entry missing");
+        match entry {
+            WidgetNode::Checkbox(checkbox) => {
+                checkbox.rect = rect;
+                checkbox.text = text;
+                // Keep internal toggled state after creation.
+                // Builder-provided `checked` is treated as initial value only.
+                let _ = checked;
+                checkbox.font_size = font_size;
+                checkbox.text_color = text_color;
+                checkbox.enabled = enabled;
+                CheckboxResponse {
+                    checked: checkbox.checked,
+                    hovered: checkbox.hovered,
+                    pressed: checkbox.pressed,
+                    changed: checkbox.changed,
+                }
+            }
+            _ => {
+                *entry = WidgetNode::Checkbox(CheckboxNode {
+                    rect,
+                    text,
+                    checked: default_checked,
+                    font_size,
+                    text_color,
+                    enabled,
+                    hovered: false,
+                    pressed: false,
+                    changed: false,
+                });
+                CheckboxResponse::default()
+            }
+        }
     }
 
     pub(crate) fn upsert_text_box(
@@ -365,6 +435,42 @@ impl RetainedState {
             button.clicked = false;
             if self.active_button.as_deref() == Some(id_ref) {
                 self.active_button = None;
+            }
+        }
+    }
+
+    pub(crate) fn checkbox_response(&self, id: impl AsRef<str>) -> CheckboxResponse {
+        let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get(id.as_ref()) else {
+            return CheckboxResponse::default();
+        };
+        CheckboxResponse {
+            checked: checkbox.checked,
+            hovered: checkbox.hovered,
+            pressed: checkbox.pressed,
+            changed: checkbox.changed,
+        }
+    }
+
+    pub(crate) fn set_checkbox_checked(&mut self, id: impl AsRef<str>, checked: bool) {
+        let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get_mut(id.as_ref()) else {
+            return;
+        };
+        checkbox.changed = checkbox.checked != checked;
+        checkbox.checked = checked;
+    }
+
+    pub(crate) fn set_checkbox_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        let id_ref = id.as_ref();
+        let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get_mut(id_ref) else {
+            return;
+        };
+        checkbox.enabled = enabled;
+        if !enabled {
+            checkbox.hovered = false;
+            checkbox.pressed = false;
+            checkbox.changed = false;
+            if self.active_checkbox.as_deref() == Some(id_ref) {
+                self.active_checkbox = None;
             }
         }
     }

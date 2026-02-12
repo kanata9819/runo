@@ -5,6 +5,7 @@ use crate::widget::text_box::Overflow;
 
 pub(super) enum WidgetNode {
     Button(ButtonNode),
+    Checkbox(CheckboxNode),
     Label(LabelNode),
     TextBox(TextBoxNode),
     ComboBox(ComboBoxNode),
@@ -28,6 +29,18 @@ pub(super) struct LabelNode {
     pub(super) font_size: f32,
     pub(super) text_color: Color,
     pub(super) enabled: bool,
+}
+
+pub(super) struct CheckboxNode {
+    pub(super) rect: Rect,
+    pub(super) text: Option<String>,
+    pub(super) checked: bool,
+    pub(super) font_size: f32,
+    pub(super) text_color: Color,
+    pub(super) enabled: bool,
+    pub(super) hovered: bool,
+    pub(super) pressed: bool,
+    pub(super) changed: bool,
 }
 
 pub(super) struct TextBoxNode {

@@ -3,6 +3,10 @@ pub enum UiEvent {
     ButtonClicked {
         id: String,
     },
+    CheckboxChanged {
+        id: String,
+        checked: bool,
+    },
     TextBoxChanged {
         id: String,
         text: String,

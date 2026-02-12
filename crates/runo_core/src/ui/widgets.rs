@@ -1,6 +1,7 @@
 use super::Ui;
 use crate::layout::div::DivBuilder;
 use crate::widget::button::ButtonBuilder;
+use crate::widget::checkbox::CheckboxBuilder;
 use crate::widget::combo_box::ComboBoxBuilder;
 use crate::widget::label::LabelBuilder;
 use crate::widget::text_box::TextBoxBuilder;
@@ -16,6 +17,10 @@ impl<'ui, 'a> UiWidgets<'ui, 'a> {
 
     pub fn label(self) -> LabelBuilder<'ui, 'a> {
         self.ui.label()
+    }
+
+    pub fn checkbox(self) -> CheckboxBuilder<'ui, 'a> {
+        self.ui.checkbox()
     }
 
     pub fn text_box(self) -> TextBoxBuilder<'ui, 'a> {

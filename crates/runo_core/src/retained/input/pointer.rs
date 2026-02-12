@@ -30,6 +30,14 @@ impl RetainedState {
                         contains(button.rect, cursor_pos.0, cursor_pos.1)
                     };
                 }
+                WidgetNode::Checkbox(checkbox) => {
+                    checkbox.changed = false;
+                    checkbox.hovered = if !checkbox.enabled || open_overlay_id.is_some() {
+                        false
+                    } else {
+                        contains(checkbox.rect, cursor_pos.0, cursor_pos.1)
+                    };
+                }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
                     text_box.hovered = if !text_box.enabled || open_overlay_id.is_some() {
@@ -70,6 +78,17 @@ impl RetainedState {
                     return None;
                 };
                 if button.enabled && button.hovered {
+                    Some(id.clone())
+                } else {
+                    None
+                }
+            });
+
+            self.active_checkbox = self.order.iter().rev().find_map(|id| {
+                let WidgetNode::Checkbox(checkbox) = self.widgets.get(id)? else {
+                    return None;
+                };
+                if checkbox.enabled && checkbox.hovered {
                     Some(id.clone())
                 } else {
                     None
@@ -140,6 +159,40 @@ impl RetainedState {
 
         if mouse_released {
             self.active_button = None;
+        }
+    }
+
+    pub(super) fn update_checkbox_states(&mut self, mouse_down: bool, mouse_released: bool) {
+        let mut changed = Vec::new();
+        let active_checkbox = self.active_checkbox.clone();
+        for (id, node) in &mut self.widgets {
+            if let WidgetNode::Checkbox(checkbox) = node {
+                if !checkbox.enabled {
+                    checkbox.hovered = false;
+                    checkbox.pressed = false;
+                    checkbox.changed = false;
+                    continue;
+                }
+                let is_active = active_checkbox
+                    .as_ref()
+                    .map(|active| active == id)
+                    .unwrap_or(false);
+                checkbox.pressed = mouse_down && is_active;
+
+                if mouse_released && is_active && checkbox.hovered {
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.changed = true;
+                    changed.push((id.clone(), checkbox.checked));
+                }
+            }
+        }
+
+        for (id, checked) in changed {
+            self.push_event(UiEvent::CheckboxChanged { id, checked });
+        }
+
+        if mouse_released {
+            self.active_checkbox = None;
         }
     }
 

@@ -5,7 +5,8 @@ mod widgets;
 
 pub use events::UiEvents;
 pub use state::{
-    UiButtonState, UiComboBoxState, UiDivState, UiLabelState, UiState, UiTextBoxState,
+    UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiState,
+    UiTextBoxState,
 };
 pub use widgets::UiWidgets;
 
@@ -14,6 +15,7 @@ use vello::kurbo::{Affine, Rect, RoundedRect, Stroke};
 use vello::peniko::{Fill, FontData};
 
 use crate::ButtonResponse;
+use crate::CheckboxResponse;
 use crate::Color;
 use crate::ComboBoxResponse;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
@@ -37,6 +39,17 @@ pub(crate) struct ShowLabelArgs {
     pub(crate) width: f64,
     pub(crate) height: f64,
     pub(crate) text: String,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
+}
+
+pub(crate) struct ShowCheckboxArgs {
+    pub(crate) id: String,
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) text: Option<String>,
+    pub(crate) checked: Option<bool>,
     pub(crate) font_size: f32,
     pub(crate) text_color: Color,
     pub(crate) enabled: bool,
@@ -160,6 +173,12 @@ impl<'a> Ui<'a> {
         crate::widget::label::LabelBuilder::new(self, id)
     }
 
+    pub(crate) fn checkbox(&mut self) -> crate::widget::checkbox::CheckboxBuilder<'_, 'a> {
+        let id = format!("__auto_checkbox_{}", self.auto_id_counter);
+        self.auto_id_counter += 1;
+        crate::widget::checkbox::CheckboxBuilder::new(self, id)
+    }
+
     pub(crate) fn text_box(&mut self) -> crate::widget::text_box::TextBoxBuilder<'_, 'a> {
         let id = format!("__auto_text_box_{}", self.auto_id_counter);
         self.auto_id_counter += 1;
@@ -220,6 +239,30 @@ impl<'a> Ui<'a> {
             text_color,
             enabled && self.current_enabled(),
         );
+    }
+
+    pub(crate) fn show_checkbox(&mut self, args: ShowCheckboxArgs) -> CheckboxResponse {
+        let ShowCheckboxArgs {
+            id,
+            width,
+            height,
+            text,
+            checked,
+            font_size,
+            text_color,
+            enabled,
+        } = args;
+        let (x, y) = self.allocate_rect(width, height);
+        let rect = Rect::new(x, y, x + width, y + height);
+        self.retained.upsert_checkbox(
+            id,
+            rect,
+            text,
+            checked,
+            font_size,
+            text_color,
+            enabled && self.current_enabled(),
+        )
     }
 
     pub(crate) fn show_text_box(&mut self, args: ShowTextBoxArgs) -> TextBoxResponse {

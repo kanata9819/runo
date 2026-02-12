@@ -1,4 +1,5 @@
 mod button;
+mod checkbox;
 mod combo_box;
 mod label;
 mod text_box;
@@ -17,6 +18,7 @@ impl RetainedState {
             };
             match node {
                 WidgetNode::Button(button) => button::render(scene, font, button),
+                WidgetNode::Checkbox(checkbox) => checkbox::render(scene, font, checkbox),
                 WidgetNode::Label(label) => label::render(scene, font, label),
                 WidgetNode::TextBox(text_box) => text_box::render(scene, font, text_box),
                 WidgetNode::ComboBox(combo_box) => combo_box::render(scene, font, combo_box),
@@ -31,7 +33,10 @@ impl RetainedState {
                 WidgetNode::ComboBox(combo_box) => {
                     combo_box::render_overlay(scene, font, combo_box)
                 }
-                WidgetNode::Button(_) | WidgetNode::Label(_) | WidgetNode::TextBox(_) => {}
+                WidgetNode::Button(_)
+                | WidgetNode::Checkbox(_)
+                | WidgetNode::Label(_)
+                | WidgetNode::TextBox(_) => {}
             }
         }
     }

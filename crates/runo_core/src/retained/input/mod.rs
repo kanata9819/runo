@@ -17,6 +17,7 @@ impl RetainedState {
             input.cursor_pos,
         );
         self.update_button_states(input.mouse_pressed, input.mouse_down, input.mouse_released);
+        self.update_checkbox_states(input.mouse_down, input.mouse_released);
         self.update_combo_box_states(input.mouse_down, input.mouse_released);
         self.update_text_box_focus();
         self.apply_text_box_scroll(&input);

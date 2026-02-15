@@ -10,6 +10,10 @@ This section contains implementation-agnostic knowledge for building GUI librari
    `UiEvent` (`ButtonClicked`, `CheckboxChanged`, `RadioButtonChanged`, `SliderChanged`, `TextBoxChanged`, `ComboBoxChanged`)
 3. Enable/disable API
    `ui.state().*().set_enabled(...)` and per-widget `enabled(...)`
+4. Dynamic combo box items API
+   `ui.state().combo_box().set_items(...)`
+5. Color presets
+   constants + grouped APIs like `Gray::gray_50()` and `Semantic::success()`
 
 ## Documents
 
@@ -25,3 +29,7 @@ This section contains implementation-agnostic knowledge for building GUI librari
    Rendering pipeline and performance practices
 6. `knowledge-testing-release.md`
    Testing strategy and release checklist
+
+## Local quality checks
+
+Use `just ci` to run the same checks as CI (`fmt --check`, strict `clippy`, workspace tests).

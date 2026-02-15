@@ -10,6 +10,10 @@ GUI ライブラリを作るときに必要になる、実装非依存の基礎�
    `UiEvent`（`ButtonClicked`, `CheckboxChanged`, `RadioButtonChanged`, `SliderChanged`, `TextBoxChanged`, `ComboBoxChanged`）
 3. 活性/非活性 API
    `ui.state().*().set_enabled(...)` / `enabled(...)`
+4. ComboBox の動的 items 更新 API
+   `ui.state().combo_box().set_items(...)`
+5. 色プリセット API
+   定数 + grouped API（`Gray::gray_50()`, `Semantic::success()` など）
 
 ## ドキュメント
 
@@ -25,3 +29,7 @@ GUI ライブラリを作るときに必要になる、実装非依存の基礎�
    描画パイプラインと性能
 6. `knowledge-testing-release.md`
    テスト戦略と公開前チェック
+
+## ローカル品質チェック
+
+`just ci` で CI と同等のチェック（`fmt --check`, strict `clippy`, workspace tests）を実行できます。

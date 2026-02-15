@@ -57,12 +57,33 @@ pub trait RunoApplication {
 ## 5. Module map
 
 1. `app/`: runtime orchestration
-   `mod.rs`, `runner.rs`, `events.rs`, `frame.rs`, `gpu.rs`
-   `frame.rs` separates `surface_size`, `compose_frame`, and `submit_frame`
+   owns application lifecycle, window/surface setup, and frame submission boundaries
+   `mod.rs`: public entry (`RunoApplication`, `run`)
+   `runner.rs`: `AppRunner` state holder (window, renderer, input, effects, retained state)
+   `events.rs`: OS event handling via `winit::ApplicationHandler`
+   `frame.rs`: frame pipeline split (`surface_size`, `compose_frame`, `submit_frame`)
+   `gpu.rs`: surface acquire/render/present and GPU error classification
 2. `retained/`: retained UI core
-   `node.rs`, `state.rs`, `input/mod.rs`, `paint/mod.rs`
-   includes interaction state and enabled/disabled handling
+   single source of truth for persistent widget nodes and interaction state
+   `node.rs`: widget node structs (rect/state/flags per widget)
+   `state/`: state mutation/query API split by concern (`core`, `button`, `checkbox`, `radio_button`, `slider`, `text_box`, `combo_box`)
+   `input/mod.rs`: retained input pipeline entry
+   `input/pointer.rs`: pointer-driven transitions (hover/press/drag/dropdown)
+   `input/text_box.rs`: text editing, caret movement, scroll behavior
+   `paint/mod.rs` + `paint/*.rs`: widget-specific rendering dispatch/implementation
 3. `ui/`: user-facing API split by role
-   `widgets()`, `events()`, `state()` plus `vertical()`, `horizontal()`, `use_effect()`
-4. `widget/`: builders and response types (`button`, `label`, `checkbox`, `radio_button`, `slider`, `text_box`, `combo_box`)
-5. `input.rs`, `layout/mod.rs`, `hooks/effect.rs`, `font.rs`: support modules
+   high-level API consumed by applications
+   `ui/mod.rs`: `Ui` root object and layout/effect helpers
+   `ui/widgets.rs`: `ui.widgets()` builder entrypoints
+   `ui/state.rs`: `ui.state()` mutation API (`set_text`, `set_value`, `combo_box().set_items`, etc.)
+   `ui/events.rs`: `drain_events` / `next_event`
+   `ui/show/*.rs`: adapter layer from builders to retained state upserts
+4. `ui/colors`: constants + grouped APIs (`Gray::gray_50()`, `Blue::blue_500()`, `Semantic::success()`)
+5. `widget/`: builders and response types (`button`, `label`, `checkbox`, `radio_button`, `slider`, `text_box`, `combo_box`)
+6. Support modules
+   `input.rs`: normalized per-frame input snapshot
+   `layout/mod.rs`, `layout/stack.rs`, `layout/div.rs`: layout allocation and container flow
+   `hooks/effect.rs`: effect dependency tracking and cleanup execution
+   `cache/mod.rs`, `cache/text_layout.rs`: text layout caching
+   `event.rs`: `UiEvent` definitions
+   `font.rs`: default font discovery/loading

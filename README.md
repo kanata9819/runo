@@ -9,7 +9,8 @@
 - Widget API (`button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`)
 - Basic layout containers (`vertical`, `horizontal`)
 - Event-driven update model (`UiEvent`)
-- Per-control enable/disable API (`ui.state().*().set_enabled(...)`, `enabled(...)`)
+- State API (`set_text`, `set_value`, `set_enabled`, `combo_box().set_items(...)` etc.)
+- Built-in palette presets and grouped color APIs (`Gray::gray_50()`, `Blue::blue_500()`, `Semantic::success()`)
 - Lightweight hook-like effect API (`use_effect`)
 
 ## Current Workspace
@@ -29,6 +30,12 @@ Run example app:
 
 ```bash
 cargo run -p example
+```
+
+Run CI-equivalent local checks:
+
+```bash
+just ci
 ```
 
 ## Example Usage

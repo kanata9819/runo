@@ -61,52 +61,60 @@ pub trait RunoApplication {
 
 ### `app/`
 
-アプリ実行の中心。
+アプリ実行とGPUライフサイクル管理の中心です。イベントループの入口からフレーム送出までを扱います。
 
-1. `app/mod.rs`: `RunoApplication` と `run()`
-2. `app/runner.rs`: `AppRunner` と初期化状態保持
-3. `app/events.rs`: `winit::ApplicationHandler` 実装
-4. `app/frame.rs`: フレーム処理（`surface_size` / `compose_frame` / `submit_frame`）
-5. `app/gpu.rs`: GPU 描画・surface 転送処理
+1. `app/mod.rs`: `RunoApplication` と `run()` の公開エントリ
+2. `app/runner.rs`: `AppRunner`（window/surface/renderer/input/effects/retained）を保持
+3. `app/events.rs`: `winit::ApplicationHandler` 実装。OSイベントを入力状態へ反映
+4. `app/frame.rs`: フレーム処理を `surface_size` / `compose_frame` / `submit_frame` に分割
+5. `app/gpu.rs`: surface取得・レンダリング・present処理とGPUエラー分類
 
 ### `retained/`
 
-保持型 UI の中核。
+保持型UIの中核で、描画対象ノードと相互作用状態の単一ソースです。
 
-1. `retained/node.rs`: `ButtonNode` / `LabelNode` / `TextBoxNode` / `ComboBoxNode` / `CheckboxNode` / `RadioButtonNode` / `SliderNode`
-2. `retained/state.rs`: ノードの保持・更新 API（upsert）
-3. `retained/input/mod.rs`: 入力から hover/click/focus/dropdown などを更新
-4. `retained/paint/mod.rs`: 保持ノードの描画
+1. `retained/node.rs`: 各ウィジェットノードのデータ構造（rect、hovered、pressed、selectedなど）
+2. `retained/state/`: ノードの生成・更新・参照API（upsert/state mutation）
+   `mod.rs` / `core.rs` / `button.rs` / `checkbox.rs` / `radio_button.rs` / `slider.rs` / `text_box.rs` / `combo_box.rs`
+3. `retained/input/mod.rs`: 入力処理の統合入口
+4. `retained/input/pointer.rs`: hover/click/drag/dropdownなどポインタ由来の状態遷移
+5. `retained/input/text_box.rs`: テキスト編集、キャレット移動、スクロールバー/ホイール処理
+6. `retained/paint/mod.rs`: ノード描画の統合入口
+7. `retained/paint/*.rs`: ウィジェット別の描画実装（button/checkbox/combo_box/label/radio_button/slider/text_box）
 
 ### `ui/`
 
-ユーザー向け API。
+アプリ利用者が直接触る高水準API層です。
 
-1. `widgets()`: `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
-2. `events()`: `drain_events`, `next_event`
-3. `state()`: `set_text`, `set_selected_index`, `set_checked`, `set_selected`, `set_value`, `set_enabled` など
-4. `vertical`, `horizontal`
-5. `use_effect`
+1. `ui/mod.rs`: `Ui` 本体。`widgets/state/events` の窓口を提供
+2. `ui/widgets.rs`: `ui.widgets()` の各ビルダー入口
+3. `ui/state.rs`: `ui.state()` の状態更新API（例: `combo_box().set_items(...)`）
+4. `ui/events.rs`: `ui.events()` で `drain_events` / `next_event`
+5. `ui/show/*.rs`: 各ウィジェットを保持状態へ反映する中継層
+6. `ui/colors.rs`: 色定数 + grouped API（`Gray::gray_50()`, `Blue::blue_500()`, `Semantic::success()`）
+7. `ui/mod.rs` の補助: `vertical`, `horizontal`, `use_effect`
 
 ### `widget/`
 
-各ウィジェットのビルダー。
+ウィジェットビルダーとレスポンス型を提供する層です。
 
 1. `widget/button.rs`: `ButtonBuilder`, `ButtonResponse`
 2. `widget/label.rs`: `LabelBuilder`
 3. `widget/checkbox.rs`: `CheckboxBuilder`, `CheckboxResponse`
 4. `widget/radio_button.rs`: `RadioButtonBuilder`, `RadioButtonResponse`
 5. `widget/slider.rs`: `SliderBuilder`, `SliderResponse`
-6. `widget/text_box.rs`: `TextBoxBuilder`, `TextBoxResponse`
+6. `widget/text_box.rs`: `TextBoxBuilder`, `TextBoxResponse`, `Overflow`
 7. `widget/combo_box.rs`: `ComboBoxBuilder`, `ComboBoxResponse`
-8. `widget/text.rs`: テキスト計測と描画ヘルパー
+8. `widget/text.rs`: 文字幅推定、glyphレイアウト、テキスト描画ヘルパー
 
 ### 補助モジュール
 
-1. `input.rs`: フレーム入力状態
-2. `layout/mod.rs`: 簡易レイアウト
-3. `hooks/effect.rs`: `use_effect` 実装
-4. `font.rs`: デフォルトフォント読み込み
+1. `input.rs`: フレーム入力スナップショット（pressed/released/text/scrollなど）
+2. `layout/mod.rs` / `layout/stack.rs` / `layout/div.rs`: レイアウト配置とコンテナ計算
+3. `hooks/effect.rs`: `use_effect` の依存追跡と cleanup 管理
+4. `cache/mod.rs` / `cache/text_layout.rs`: テキストレイアウトのキャッシュ
+5. `event.rs`: `UiEvent` 定義
+6. `font.rs`: デフォルトフォント探索・読み込み
 
 ## 6. まず読む順番（おすすめ）
 
@@ -114,7 +122,7 @@ pub trait RunoApplication {
 2. `app/events.rs`
 3. `app/frame.rs`
 4. `ui/mod.rs`
-5. `retained/state.rs`
+5. `retained/state/mod.rs`
 6. `retained/input/mod.rs`
 7. `retained/paint/mod.rs`
 8. `widget/button.rs`

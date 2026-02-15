@@ -13,8 +13,9 @@
 
 1. ウィジェット生成: `ui.widgets().button()/label()/text_box()/combo_box()/checkbox()/radio_button()/slider()/div()`
 2. イベント取得: `ui.events().drain_events()`, `ui.events().next_event()`
-3. 状態変更: `ui.state().button().set_text()`, `ui.state().text_box().set_text()`, `ui.state().combo_box().set_selected_index()` など
+3. 状態変更: `ui.state().button().set_text()`, `ui.state().text_box().set_text()`, `ui.state().combo_box().set_selected_index()`, `ui.state().combo_box().set_items()` など
 4. 活性/非活性: `ui.state().*().set_enabled()` とビルダーの `enabled(...)`
+5. 色プリセット: `colors::GRAY_500` / `colors::Gray::gray_500()` / `colors::Semantic::success()`
 
 ## ライフサイクル
 

@@ -5,6 +5,8 @@ use vello::Glyph;
 use vello::peniko::FontData;
 
 const MAX_TEXT_LAYOUT_CACHE_ENTRIES: usize = 4096;
+type TextLayoutValue = (Vec<Glyph>, f32);
+type TextLayoutMap = HashMap<TextLayoutCacheKey, TextLayoutValue>;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct TextLayoutCacheKey {
@@ -15,7 +17,7 @@ struct TextLayoutCacheKey {
     font_size_bits: u32,
 }
 
-static TEXT_LAYOUT_CACHE: LazyLock<Mutex<HashMap<TextLayoutCacheKey, (Vec<Glyph>, f32)>>> =
+static TEXT_LAYOUT_CACHE: LazyLock<Mutex<TextLayoutMap>> =
     LazyLock::new(|| Mutex::new(HashMap::new()));
 
 pub(crate) fn get_or_insert_layout(

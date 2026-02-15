@@ -61,85 +61,74 @@ impl RetainedState {
         let mut pending_event: Option<UiEvent> = None;
         if let Some(id) = self.focused_text_box.clone()
             && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
+            && text_box.enabled
         {
-            if text_box.enabled {
-                text_box.focused = true;
+            text_box.focused = true;
 
-                if input.copy_pressed {
-                    self.text_clipboard = text_box.text.clone();
-                    write_system_clipboard(&self.text_clipboard);
-                }
+            if input.copy_pressed {
+                self.text_clipboard = text_box.text.clone();
+                write_system_clipboard(&self.text_clipboard);
+            }
 
-                if input.arrow_left_pressed {
-                    text_box.caret_index = text_box.caret_index.saturating_sub(1);
-                }
-                if input.arrow_right_pressed {
-                    let max = text_box.text.chars().count();
-                    text_box.caret_index = (text_box.caret_index + 1).min(max);
-                }
-                if input.arrow_up_pressed {
-                    text_box.caret_index =
-                        move_caret_vertical(&text_box.text, text_box.caret_index, -1);
-                }
-                if input.arrow_down_pressed {
-                    text_box.caret_index =
-                        move_caret_vertical(&text_box.text, text_box.caret_index, 1);
-                }
+            if input.arrow_left_pressed {
+                text_box.caret_index = text_box.caret_index.saturating_sub(1);
+            }
+            if input.arrow_right_pressed {
+                let max = text_box.text.chars().count();
+                text_box.caret_index = (text_box.caret_index + 1).min(max);
+            }
+            if input.arrow_up_pressed {
+                text_box.caret_index =
+                    move_caret_vertical(&text_box.text, text_box.caret_index, -1);
+            }
+            if input.arrow_down_pressed {
+                text_box.caret_index = move_caret_vertical(&text_box.text, text_box.caret_index, 1);
+            }
 
-                if input.backspace_pressed
-                    && remove_char_before_caret(&mut text_box.text, &mut text_box.caret_index)
-                {
+            if input.backspace_pressed
+                && remove_char_before_caret(&mut text_box.text, &mut text_box.caret_index)
+            {
+                text_box.changed = true;
+            }
+
+            if input.delete_pressed
+                && remove_char_at_caret(&mut text_box.text, text_box.caret_index)
+            {
+                text_box.changed = true;
+            }
+
+            if input.enter_pressed {
+                insert_text_at_caret(&mut text_box.text, &mut text_box.caret_index, "\n");
+                text_box.changed = true;
+            }
+
+            if input.paste_pressed {
+                let pasted = read_system_clipboard().unwrap_or_else(|| self.text_clipboard.clone());
+                if !pasted.is_empty() {
+                    insert_text_at_caret(&mut text_box.text, &mut text_box.caret_index, &pasted);
                     text_box.changed = true;
                 }
+            }
 
-                if input.delete_pressed
-                    && remove_char_at_caret(&mut text_box.text, text_box.caret_index)
-                {
+            if !input.text_input.is_empty() {
+                let sanitized: String = input
+                    .text_input
+                    .chars()
+                    .filter(|ch| !ch.is_control())
+                    .collect();
+                if !sanitized.is_empty() {
+                    insert_text_at_caret(&mut text_box.text, &mut text_box.caret_index, &sanitized);
                     text_box.changed = true;
                 }
+            }
 
-                if input.enter_pressed {
-                    insert_text_at_caret(&mut text_box.text, &mut text_box.caret_index, "\n");
-                    text_box.changed = true;
-                }
-
-                if input.paste_pressed {
-                    let pasted =
-                        read_system_clipboard().unwrap_or_else(|| self.text_clipboard.clone());
-                    if !pasted.is_empty() {
-                        insert_text_at_caret(
-                            &mut text_box.text,
-                            &mut text_box.caret_index,
-                            &pasted,
-                        );
-                        text_box.changed = true;
-                    }
-                }
-
-                if !input.text_input.is_empty() {
-                    let sanitized: String = input
-                        .text_input
-                        .chars()
-                        .filter(|ch| !ch.is_control())
-                        .collect();
-                    if !sanitized.is_empty() {
-                        insert_text_at_caret(
-                            &mut text_box.text,
-                            &mut text_box.caret_index,
-                            &sanitized,
-                        );
-                        text_box.changed = true;
-                    }
-                }
-
-                if text_box.changed {
-                    sync_text_box_text_advance(text_box, font);
-                    Self::keep_text_box_end_visible(text_box);
-                    pending_event = Some(UiEvent::TextBoxChanged {
-                        id,
-                        text: text_box.text.clone(),
-                    });
-                }
+            if text_box.changed {
+                sync_text_box_text_advance(text_box, font);
+                Self::keep_text_box_end_visible(text_box);
+                pending_event = Some(UiEvent::TextBoxChanged {
+                    id,
+                    text: text_box.text.clone(),
+                });
             }
         }
 

@@ -60,7 +60,7 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                         self.input.push_text_input(text);
                     }
                     if let Key::Named(named) = &event.logical_key {
-                        self.input.on_named_key_pressed(named.clone());
+                        self.input.on_named_key_pressed(*named);
                     }
                     if ctrl && let Key::Character(text) = &event.logical_key {
                         if text.eq_ignore_ascii_case("c") {

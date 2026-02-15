@@ -2,6 +2,7 @@ use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::ComboBoxResponse;
+use crate::retained::UpsertComboBoxArgs;
 use crate::ui::Ui;
 
 pub(crate) struct ShowComboBoxArgs {
@@ -33,7 +34,7 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_combo_box(
+        self.retained.upsert_combo_box(UpsertComboBoxArgs {
             id,
             rect,
             items,
@@ -42,7 +43,7 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
-            enabled_arg && self.current_enabled(),
-        )
+            enabled: enabled_arg && self.current_enabled(),
+        })
     }
 }

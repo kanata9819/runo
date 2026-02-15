@@ -2,6 +2,7 @@ use vello::kurbo::Rect;
 
 use crate::CheckboxResponse;
 use crate::Color;
+use crate::retained::UpsertCheckboxArgs;
 use crate::ui::Ui;
 
 pub(crate) struct ShowCheckboxArgs {
@@ -29,14 +30,14 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_checkbox(
+        self.retained.upsert_checkbox(UpsertCheckboxArgs {
             id,
             rect,
             text,
             checked,
             font_size,
             text_color,
-            enabled && self.current_enabled(),
-        )
+            enabled: enabled && self.current_enabled(),
+        })
     }
 }

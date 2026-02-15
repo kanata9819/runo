@@ -152,7 +152,7 @@ fn clip_glyphs_horizontally(
             draw_origin_x + total_advance
         };
         if next_x >= clip_left && x0 <= clip_right {
-            out.push(glyph.clone());
+            out.push(*glyph);
         }
     }
     out

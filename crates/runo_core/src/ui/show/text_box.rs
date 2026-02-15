@@ -1,6 +1,7 @@
 use vello::kurbo::Rect;
 use vello::peniko::Color;
 
+use crate::retained::UpsertTextBoxArgs;
 use crate::ui::Ui;
 use crate::widget::text_box::{Overflow, TextBoxResponse};
 
@@ -37,7 +38,7 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_text_box(
+        self.retained.upsert_text_box(UpsertTextBoxArgs {
             id,
             rect,
             text,
@@ -46,9 +47,9 @@ impl<'a> Ui<'a> {
             text_color,
             bg_color,
             border_color,
-            enabled_arg && self.current_enabled(),
+            enabled: enabled_arg && self.current_enabled(),
             overflow_x,
             overflow_y,
-        )
+        })
     }
 }

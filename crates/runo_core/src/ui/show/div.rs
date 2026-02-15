@@ -21,6 +21,16 @@ pub(crate) struct ShowDivArgs {
     pub(crate) radius: f64,
 }
 
+struct DivPaintArgs {
+    origin: (f64, f64),
+    size: (f64, f64),
+    radius: f64,
+    div_visible: bool,
+    bg_color: Option<Color>,
+    border_color: Option<Color>,
+    border_width: f64,
+}
+
 impl<'a> Ui<'a> {
     pub(crate) fn show_div<R>(&mut self, args: ShowDivArgs, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
         let ShowDivArgs {
@@ -55,15 +65,15 @@ impl<'a> Ui<'a> {
         let div_w = width.unwrap_or(auto_w);
         let div_h = height.unwrap_or(auto_h);
 
-        self.paint_div(
+        self.paint_div(DivPaintArgs {
             origin,
-            (div_w, div_h),
+            size: (div_w, div_h),
             radius,
             div_visible,
             bg_color,
             border_color,
             border_width,
-        );
+        });
 
         self.layout_stack.advance_current(div_w, div_h);
         result
@@ -100,16 +110,16 @@ impl<'a> Ui<'a> {
         (result, content_w, content_h)
     }
 
-    fn paint_div(
-        &mut self,
-        origin: (f64, f64),
-        size: (f64, f64),
-        radius: f64,
-        div_visible: bool,
-        bg_color: Option<Color>,
-        border_color: Option<Color>,
-        border_width: f64,
-    ) {
+    fn paint_div(&mut self, args: DivPaintArgs) {
+        let DivPaintArgs {
+            origin,
+            size,
+            radius,
+            div_visible,
+            bg_color,
+            border_color,
+            border_width,
+        } = args;
         let rect = Rect::new(origin.0, origin.1, origin.0 + size.0, origin.1 + size.1);
         let rounded = RoundedRect::from_rect(rect, radius);
 

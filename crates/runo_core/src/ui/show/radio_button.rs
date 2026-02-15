@@ -2,6 +2,7 @@ use vello::kurbo::Rect;
 
 use crate::Color;
 use crate::RadioButtonResponse;
+use crate::retained::UpsertRadioButtonArgs;
 use crate::ui::Ui;
 
 pub(crate) struct ShowRadioButtonArgs {
@@ -31,7 +32,7 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_radio_button(
+        self.retained.upsert_radio_button(UpsertRadioButtonArgs {
             id,
             group,
             rect,
@@ -39,7 +40,7 @@ impl<'a> Ui<'a> {
             selected,
             font_size,
             text_color,
-            enabled && self.current_enabled(),
-        )
+            enabled: enabled && self.current_enabled(),
+        })
     }
 }

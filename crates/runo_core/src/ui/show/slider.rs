@@ -2,6 +2,7 @@ use vello::kurbo::Rect;
 
 use crate::Color;
 use crate::SliderResponse;
+use crate::retained::UpsertSliderArgs;
 use crate::ui::Ui;
 
 pub(crate) struct ShowSliderArgs {
@@ -35,7 +36,7 @@ impl<'a> Ui<'a> {
         } = args;
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
-        self.retained.upsert_slider(
+        self.retained.upsert_slider(UpsertSliderArgs {
             id,
             rect,
             min,
@@ -45,7 +46,7 @@ impl<'a> Ui<'a> {
             text,
             font_size,
             text_color,
-            enabled && self.current_enabled(),
-        )
+            enabled: enabled && self.current_enabled(),
+        })
     }
 }

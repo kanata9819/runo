@@ -34,6 +34,66 @@ pub(crate) struct RetainedState {
     pub(super) div_background: HashMap<String, Color>,
 }
 
+pub(crate) struct UpsertCheckboxArgs {
+    pub(crate) id: String,
+    pub(crate) rect: Rect,
+    pub(crate) text: Option<String>,
+    pub(crate) checked: Option<bool>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
+}
+
+pub(crate) struct UpsertRadioButtonArgs {
+    pub(crate) id: String,
+    pub(crate) group: String,
+    pub(crate) rect: Rect,
+    pub(crate) text: Option<String>,
+    pub(crate) selected: Option<bool>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
+}
+
+pub(crate) struct UpsertSliderArgs {
+    pub(crate) id: String,
+    pub(crate) rect: Rect,
+    pub(crate) min: f64,
+    pub(crate) max: f64,
+    pub(crate) value: Option<f64>,
+    pub(crate) step: Option<f64>,
+    pub(crate) text: Option<String>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) enabled: bool,
+}
+
+pub(crate) struct UpsertTextBoxArgs {
+    pub(crate) id: String,
+    pub(crate) rect: Rect,
+    pub(crate) text: Option<String>,
+    pub(crate) placeholder: Option<String>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) bg_color: Color,
+    pub(crate) border_color: Color,
+    pub(crate) enabled: bool,
+    pub(crate) overflow_x: Overflow,
+    pub(crate) overflow_y: Overflow,
+}
+
+pub(crate) struct UpsertComboBoxArgs {
+    pub(crate) id: String,
+    pub(crate) rect: Rect,
+    pub(crate) items: Vec<String>,
+    pub(crate) selected_index: Option<usize>,
+    pub(crate) font_size: f32,
+    pub(crate) text_color: Color,
+    pub(crate) bg_color: Color,
+    pub(crate) border_color: Color,
+    pub(crate) enabled: bool,
+}
+
 impl RetainedState {
     pub(crate) fn new() -> Self {
         Self {
@@ -151,16 +211,16 @@ impl RetainedState {
         );
     }
 
-    pub(crate) fn upsert_checkbox(
-        &mut self,
-        id: String,
-        rect: Rect,
-        text: Option<String>,
-        checked: Option<bool>,
-        font_size: f32,
-        text_color: Color,
-        enabled: bool,
-    ) -> CheckboxResponse {
+    pub(crate) fn upsert_checkbox(&mut self, args: UpsertCheckboxArgs) -> CheckboxResponse {
+        let UpsertCheckboxArgs {
+            id,
+            rect,
+            text,
+            checked,
+            font_size,
+            text_color,
+            enabled,
+        } = args;
         let default_checked = checked.unwrap_or(false);
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
@@ -228,15 +288,18 @@ impl RetainedState {
 
     pub(crate) fn upsert_radio_button(
         &mut self,
-        id: String,
-        group: String,
-        rect: Rect,
-        text: Option<String>,
-        selected: Option<bool>,
-        font_size: f32,
-        text_color: Color,
-        enabled: bool,
+        args: UpsertRadioButtonArgs,
     ) -> RadioButtonResponse {
+        let UpsertRadioButtonArgs {
+            id,
+            group,
+            rect,
+            text,
+            selected,
+            font_size,
+            text_color,
+            enabled,
+        } = args;
         let default_selected = selected.unwrap_or(false);
         if !self.widgets.contains_key(&id) {
             if default_selected {
@@ -310,19 +373,19 @@ impl RetainedState {
         }
     }
 
-    pub(crate) fn upsert_slider(
-        &mut self,
-        id: String,
-        rect: Rect,
-        min: f64,
-        max: f64,
-        value: Option<f64>,
-        step: Option<f64>,
-        text: Option<String>,
-        font_size: f32,
-        text_color: Color,
-        enabled: bool,
-    ) -> SliderResponse {
+    pub(crate) fn upsert_slider(&mut self, args: UpsertSliderArgs) -> SliderResponse {
+        let UpsertSliderArgs {
+            id,
+            rect,
+            min,
+            max,
+            value,
+            step,
+            text,
+            font_size,
+            text_color,
+            enabled,
+        } = args;
         let (min, max) = normalize_range(min, max);
         let default_value = snap_and_clamp(value.unwrap_or(min), min, max, step);
         if !self.widgets.contains_key(&id) {
@@ -398,20 +461,20 @@ impl RetainedState {
         }
     }
 
-    pub(crate) fn upsert_text_box(
-        &mut self,
-        id: String,
-        rect: Rect,
-        text: Option<String>,
-        placeholder: Option<String>,
-        font_size: f32,
-        text_color: Color,
-        bg_color: Color,
-        border_color: Color,
-        enabled: bool,
-        overflow_x: Overflow,
-        overflow_y: Overflow,
-    ) -> TextBoxResponse {
+    pub(crate) fn upsert_text_box(&mut self, args: UpsertTextBoxArgs) -> TextBoxResponse {
+        let UpsertTextBoxArgs {
+            id,
+            rect,
+            text,
+            placeholder,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+            enabled,
+            overflow_x,
+            overflow_y,
+        } = args;
         if !self.widgets.contains_key(&id) {
             let text = text.unwrap_or_default();
             let text_advance = estimate_text_width(&text, font_size) as f64;
@@ -512,18 +575,18 @@ impl RetainedState {
         }
     }
 
-    pub(crate) fn upsert_combo_box(
-        &mut self,
-        id: String,
-        rect: Rect,
-        items: Vec<String>,
-        selected_index: Option<usize>,
-        font_size: f32,
-        text_color: Color,
-        bg_color: Color,
-        border_color: Color,
-        enabled: bool,
-    ) -> ComboBoxResponse {
+    pub(crate) fn upsert_combo_box(&mut self, args: UpsertComboBoxArgs) -> ComboBoxResponse {
+        let UpsertComboBoxArgs {
+            id,
+            rect,
+            items,
+            selected_index,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+            enabled,
+        } = args;
         let selected_index_override = selected_index;
         let initial_selected_index = if items.is_empty() {
             0
@@ -976,18 +1039,18 @@ mod tests {
     fn slider_set_value_respects_step_and_changed_flag() {
         let mut state = RetainedState::new();
         let color = Color::from_rgb8(255, 255, 255);
-        state.upsert_slider(
-            "s".to_string(),
-            rect(),
-            0.0,
-            1.0,
-            Some(0.0),
-            Some(0.25),
-            None,
-            14.0,
-            color,
-            true,
-        );
+        state.upsert_slider(UpsertSliderArgs {
+            id: "s".to_string(),
+            rect: rect(),
+            min: 0.0,
+            max: 1.0,
+            value: Some(0.0),
+            step: Some(0.25),
+            text: None,
+            font_size: 14.0,
+            text_color: color,
+            enabled: true,
+        });
 
         state.set_slider_value("s", 0.62);
         let response = state.slider_response("s");
@@ -999,17 +1062,17 @@ mod tests {
     fn combo_box_selected_index_is_clamped() {
         let mut state = RetainedState::new();
         let color = Color::from_rgb8(255, 255, 255);
-        state.upsert_combo_box(
-            "c".to_string(),
-            rect(),
-            vec!["a".to_string(), "b".to_string()],
-            Some(0),
-            14.0,
-            color,
-            color,
-            color,
-            true,
-        );
+        state.upsert_combo_box(UpsertComboBoxArgs {
+            id: "c".to_string(),
+            rect: rect(),
+            items: vec!["a".to_string(), "b".to_string()],
+            selected_index: Some(0),
+            font_size: 14.0,
+            text_color: color,
+            bg_color: color,
+            border_color: color,
+            enabled: true,
+        });
 
         state.set_combo_box_selected_index("c", 99);
         let response = state.combo_box_response("c");
@@ -1021,26 +1084,26 @@ mod tests {
     fn selecting_radio_button_clears_same_group_selection() {
         let mut state = RetainedState::new();
         let color = Color::from_rgb8(255, 255, 255);
-        state.upsert_radio_button(
-            "r1".to_string(),
-            "g".to_string(),
-            rect(),
-            None,
-            Some(true),
-            14.0,
-            color,
-            true,
-        );
-        state.upsert_radio_button(
-            "r2".to_string(),
-            "g".to_string(),
-            rect(),
-            None,
-            Some(false),
-            14.0,
-            color,
-            true,
-        );
+        state.upsert_radio_button(UpsertRadioButtonArgs {
+            id: "r1".to_string(),
+            group: "g".to_string(),
+            rect: rect(),
+            text: None,
+            selected: Some(true),
+            font_size: 14.0,
+            text_color: color,
+            enabled: true,
+        });
+        state.upsert_radio_button(UpsertRadioButtonArgs {
+            id: "r2".to_string(),
+            group: "g".to_string(),
+            rect: rect(),
+            text: None,
+            selected: Some(false),
+            font_size: 14.0,
+            text_color: color,
+            enabled: true,
+        });
 
         state.set_radio_button_selected("r2", true);
         assert!(!state.radio_button_response("r1").selected);

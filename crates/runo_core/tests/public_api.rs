@@ -46,7 +46,7 @@ fn runo_application_can_override_options() {
 
 #[test]
 fn ui_event_payloads_are_accessible_through_pattern_matching() {
-    let events = vec![
+    let events = [
         UiEvent::ButtonClicked {
             id: "btn".to_string(),
         },

@@ -74,6 +74,8 @@ fn main() {
 
 - Architecture: `crates/runo_core/docs/architecture.md`
 - Universal GUI knowledge notes: `crates/runo_core/docs/README.md`
+- Changelog: `CHANGELOG.md`
+- Versioning policy: `VERSIONING.md`
 - Language-specific docs:
   - Japanese: `crates/runo_core/docs/ja/README.md`
   - English: `crates/runo_core/docs/en/README.md`

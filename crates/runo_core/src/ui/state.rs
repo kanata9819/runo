@@ -182,6 +182,14 @@ impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
         self.ui.retained.set_combo_box_selected_index(id, index);
     }
 
+    pub fn set_items<I, T>(&mut self, id: impl AsRef<str>, items: I)
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        self.ui.retained.set_combo_box_items(id, items);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_combo_box_enabled(id, enabled);
     }

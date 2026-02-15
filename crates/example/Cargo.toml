@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-runo_core = { path = "../runo_core" }
+runo_core = { path = "../runo_core", version = "*" }

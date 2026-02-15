@@ -6,13 +6,13 @@ use crate::app::{AppRunner, RunoApplication};
 use crate::ui::Ui;
 
 impl<A: RunoApplication + 'static> AppRunner<A> {
-    pub(super) fn render(&mut self) {
+    pub(super) fn render(&mut self) -> bool {
         let Some((width, height)) = self.surface_size() else {
-            return;
+            return false;
         };
 
         self.compose_frame(width, height);
-        self.submit_frame(width, height);
+        self.submit_frame(width, height)
     }
 
     fn surface_size(&self) -> Option<(u32, u32)> {
@@ -26,23 +26,27 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.retained.render(&mut self.scene, self.font.as_ref());
     }
 
-    fn submit_frame(&mut self, width: u32, height: u32) {
+    fn submit_frame(&mut self, width: u32, height: u32) -> bool {
         let Some(surface) = self.surface.as_mut() else {
-            return;
+            return false;
         };
         let Some(renderer) = self.renderer.as_mut() else {
-            return;
+            return false;
         };
 
         let dev_id = surface.dev_id;
-        let Some(surface_texture) = Self::acquire_surface_texture(&mut self.render_cx, surface)
-        else {
-            return;
+        let surface_texture = match Self::acquire_surface_texture(&mut self.render_cx, surface) {
+            Ok(Some(texture)) => texture,
+            Ok(None) => return false,
+            Err(crate::app::gpu::GpuFatalError::OutOfMemory) => {
+                eprintln!("fatal gpu error: surface out of memory");
+                return true;
+            }
         };
         let device = &self.render_cx.devices[dev_id].device;
         let queue = &self.render_cx.devices[dev_id].queue;
 
-        Self::render_scene_to_target(
+        if let Err(err) = Self::render_scene_to_target(
             renderer,
             device,
             queue,
@@ -50,8 +54,12 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             &surface.target_view,
             width,
             height,
-        );
+        ) {
+            eprintln!("gpu render error: {err}");
+            return false;
+        }
         Self::blit_to_surface(surface, device, queue, surface_texture);
+        false
     }
 
     fn build_scene(&mut self, width: u32, height: u32) {

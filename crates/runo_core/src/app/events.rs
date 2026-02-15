@@ -85,7 +85,11 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 self.input.push_text_input(&text);
                 self.request_redraw();
             }
-            WindowEvent::RedrawRequested => self.render(),
+            WindowEvent::RedrawRequested => {
+                if self.render() {
+                    event_loop.exit();
+                }
+            }
             _ => {}
         }
     }

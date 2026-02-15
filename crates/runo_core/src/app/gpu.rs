@@ -5,20 +5,33 @@ use vello::{AaConfig, RenderParams, Renderer, Scene};
 use crate::Color;
 use crate::app::{AppRunner, RunoApplication};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum SurfaceAcquireAction {
+    SkipFrame,
+    FatalOutOfMemory,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum GpuFatalError {
+    OutOfMemory,
+}
+
 impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn acquire_surface_texture(
         render_cx: &mut RenderContext,
         surface: &mut RenderSurface<'static>,
-    ) -> Option<wgpu::SurfaceTexture> {
+    ) -> Result<Option<wgpu::SurfaceTexture>, GpuFatalError> {
         match surface.surface.get_current_texture() {
-            Ok(frame) => Some(frame),
-            Err(wgpu::SurfaceError::Outdated | wgpu::SurfaceError::Lost) => {
-                render_cx.resize_surface(surface, surface.config.width, surface.config.height);
-                None
-            }
-            Err(wgpu::SurfaceError::Timeout) => None,
-            Err(wgpu::SurfaceError::OutOfMemory) => panic!("out of memory"),
-            Err(wgpu::SurfaceError::Other) => None,
+            Ok(frame) => Ok(Some(frame)),
+            Err(err) => match map_surface_error(&err) {
+                SurfaceAcquireAction::SkipFrame => {
+                    if matches!(err, wgpu::SurfaceError::Outdated | wgpu::SurfaceError::Lost) {
+                        render_cx.resize_surface(surface, surface.config.width, surface.config.height);
+                    }
+                    Ok(None)
+                }
+                SurfaceAcquireAction::FatalOutOfMemory => Err(GpuFatalError::OutOfMemory),
+            },
         }
     }
 
@@ -30,7 +43,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         target_view: &wgpu::TextureView,
         width: u32,
         height: u32,
-    ) {
+    ) -> Result<(), String> {
         renderer
             .render_to_texture(
                 device,
@@ -44,7 +57,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                     antialiasing_method: AaConfig::Msaa16,
                 },
             )
-            .expect("render failed");
+            .map_err(|err| format!("{err:?}"))
     }
 
     pub(super) fn blit_to_surface(
@@ -67,5 +80,46 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
         queue.submit([encoder.finish()]);
         surface_texture.present();
+    }
+}
+
+fn map_surface_error(error: &wgpu::SurfaceError) -> SurfaceAcquireAction {
+    match error {
+        wgpu::SurfaceError::Outdated | wgpu::SurfaceError::Lost => SurfaceAcquireAction::SkipFrame,
+        wgpu::SurfaceError::Timeout | wgpu::SurfaceError::Other => SurfaceAcquireAction::SkipFrame,
+        wgpu::SurfaceError::OutOfMemory => SurfaceAcquireAction::FatalOutOfMemory,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn surface_error_mapping_marks_out_of_memory_as_fatal() {
+        assert_eq!(
+            map_surface_error(&wgpu::SurfaceError::OutOfMemory),
+            SurfaceAcquireAction::FatalOutOfMemory
+        );
+    }
+
+    #[test]
+    fn surface_error_mapping_skips_frame_for_recoverable_errors() {
+        assert_eq!(
+            map_surface_error(&wgpu::SurfaceError::Lost),
+            SurfaceAcquireAction::SkipFrame
+        );
+        assert_eq!(
+            map_surface_error(&wgpu::SurfaceError::Outdated),
+            SurfaceAcquireAction::SkipFrame
+        );
+        assert_eq!(
+            map_surface_error(&wgpu::SurfaceError::Timeout),
+            SurfaceAcquireAction::SkipFrame
+        );
+        assert_eq!(
+            map_surface_error(&wgpu::SurfaceError::Other),
+            SurfaceAcquireAction::SkipFrame
+        );
     }
 }

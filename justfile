@@ -1,10 +1,14 @@
 set shell := ["powershell", "-Command"]
 
+ci:
+    cargo fmt --all -- --check
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
+    cargo test --workspace
+
 r:
-    cargo check
-    cargo clippy
-    cargo fmt
+    just ci
     cargo run
+
 f:
     cargo fmt
 

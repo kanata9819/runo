@@ -7,3 +7,6 @@ r:
     cargo run
 f:
     cargo fmt
+
+t:
+    cargo test

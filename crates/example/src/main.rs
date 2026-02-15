@@ -236,11 +236,14 @@ impl RunoApplication for MyApp {
                     );
                 }
                 UiEvent::RadioButtonChanged { id, group, .. } if group == RADIO_CHANNEL_GROUP => {
-                    self.selected_channel = match id.as_str() {
-                        RADIO_CHANNEL_EMAIL_ID => "Email".to_string(),
-                        RADIO_CHANNEL_SMS_ID => "SMS".to_string(),
-                        RADIO_CHANNEL_PUSH_ID => "Push".to_string(),
-                        _ => self.selected_channel.clone(),
+                    self.selected_channel = if id == RADIO_CHANNEL_EMAIL_ID {
+                        "Email".to_string()
+                    } else if id == RADIO_CHANNEL_SMS_ID {
+                        "SMS".to_string()
+                    } else if id == RADIO_CHANNEL_PUSH_ID {
+                        "Push".to_string()
+                    } else {
+                        self.selected_channel.clone()
                     };
                     println!("selected channel: {}", self.selected_channel);
                 }

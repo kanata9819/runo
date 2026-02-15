@@ -947,3 +947,144 @@ fn snap_and_clamp(value: f64, min: f64, max: f64, step: Option<f64>) -> f64 {
     }
     clamped
 }
+
+#[cfg(test)]
+mod tests {
+    use vello::kurbo::Rect;
+    use vello::peniko::Color;
+
+    use super::*;
+
+    fn rect() -> Rect {
+        Rect::new(0.0, 0.0, 120.0, 40.0)
+    }
+
+    #[test]
+    fn normalize_range_swaps_when_min_greater_than_max() {
+        assert_eq!(normalize_range(10.0, 2.0), (2.0, 10.0));
+        assert_eq!(normalize_range(-1.0, 3.0), (-1.0, 3.0));
+    }
+
+    #[test]
+    fn snap_and_clamp_applies_step_and_bounds() {
+        assert!((snap_and_clamp(0.73, 0.0, 1.0, Some(0.25)) - 0.75).abs() < f64::EPSILON);
+        assert_eq!(snap_and_clamp(-3.0, 0.0, 1.0, Some(0.1)), 0.0);
+        assert_eq!(snap_and_clamp(3.0, 0.0, 1.0, Some(0.1)), 1.0);
+    }
+
+    #[test]
+    fn slider_set_value_respects_step_and_changed_flag() {
+        let mut state = RetainedState::new();
+        let color = Color::from_rgb8(255, 255, 255);
+        state.upsert_slider(
+            "s".to_string(),
+            rect(),
+            0.0,
+            1.0,
+            Some(0.0),
+            Some(0.25),
+            None,
+            14.0,
+            color,
+            true,
+        );
+
+        state.set_slider_value("s", 0.62);
+        let response = state.slider_response("s");
+        assert!((response.value - 0.5).abs() < f64::EPSILON);
+        assert!(response.changed);
+    }
+
+    #[test]
+    fn combo_box_selected_index_is_clamped() {
+        let mut state = RetainedState::new();
+        let color = Color::from_rgb8(255, 255, 255);
+        state.upsert_combo_box(
+            "c".to_string(),
+            rect(),
+            vec!["a".to_string(), "b".to_string()],
+            Some(0),
+            14.0,
+            color,
+            color,
+            color,
+            true,
+        );
+
+        state.set_combo_box_selected_index("c", 99);
+        let response = state.combo_box_response("c");
+        assert_eq!(response.selected_index, 1);
+        assert_eq!(response.selected_text, "b");
+    }
+
+    #[test]
+    fn selecting_radio_button_clears_same_group_selection() {
+        let mut state = RetainedState::new();
+        let color = Color::from_rgb8(255, 255, 255);
+        state.upsert_radio_button(
+            "r1".to_string(),
+            "g".to_string(),
+            rect(),
+            None,
+            Some(true),
+            14.0,
+            color,
+            true,
+        );
+        state.upsert_radio_button(
+            "r2".to_string(),
+            "g".to_string(),
+            rect(),
+            None,
+            Some(false),
+            14.0,
+            color,
+            true,
+        );
+
+        state.set_radio_button_selected("r2", true);
+        assert!(!state.radio_button_response("r1").selected);
+        assert!(state.radio_button_response("r2").selected);
+    }
+
+    #[test]
+    fn div_state_defaults_and_background_clear_work() {
+        let mut state = RetainedState::new();
+        assert!(state.div_visible("panel"));
+        assert!(state.div_enabled("panel"));
+        assert!(state.div_background("panel").is_none());
+
+        let bg = Color::from_rgb8(10, 20, 30);
+        state.set_div_visible("panel", false);
+        state.set_div_enabled("panel", false);
+        state.set_div_background("panel", bg);
+        assert!(!state.div_visible("panel"));
+        assert!(!state.div_enabled("panel"));
+        assert!(state.div_background("panel").is_some());
+
+        state.clear_div_background("panel");
+        assert!(state.div_background("panel").is_none());
+    }
+
+    #[test]
+    fn event_queue_pop_and_drain_preserve_order() {
+        let mut state = RetainedState::new();
+        state.push_event(UiEvent::ButtonClicked {
+            id: "a".to_string(),
+        });
+        state.push_event(UiEvent::ButtonClicked {
+            id: "b".to_string(),
+        });
+
+        match state.pop_event() {
+            Some(UiEvent::ButtonClicked { id }) => assert_eq!(id, "a"),
+            _ => panic!("unexpected event"),
+        }
+        let remaining = state.drain_events();
+        assert_eq!(remaining.len(), 1);
+        match &remaining[0] {
+            UiEvent::ButtonClicked { id } => assert_eq!(id, "b"),
+            _ => panic!("unexpected event"),
+        }
+    }
+}

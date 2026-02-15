@@ -112,3 +112,17 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::SliderResponse;
+
+    #[test]
+    fn slider_response_default_is_zero_and_idle() {
+        let response = SliderResponse::default();
+        assert_eq!(response.value, 0.0);
+        assert!(!response.hovered);
+        assert!(!response.pressed);
+        assert!(!response.changed);
+    }
+}

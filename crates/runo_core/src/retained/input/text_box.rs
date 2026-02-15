@@ -366,3 +366,110 @@ fn char_index_from_line_col(lines: &[&str], line: usize, col: usize) -> usize {
     }
     index
 }
+
+#[cfg(test)]
+mod tests {
+    use vello::kurbo::Rect;
+    use vello::peniko::Color;
+
+    use super::*;
+    use crate::retained::node::TextBoxNode;
+    use crate::widget::text_box::Overflow;
+
+    fn sample_text_box(text: &str) -> TextBoxNode {
+        TextBoxNode {
+            rect: Rect::new(0.0, 0.0, 120.0, 44.0),
+            text: text.to_string(),
+            placeholder: None,
+            font_size: 16.0,
+            text_color: Color::from_rgb8(255, 255, 255),
+            bg_color: Color::from_rgb8(30, 30, 30),
+            border_color: Color::from_rgb8(60, 60, 60),
+            enabled: true,
+            overflow_x: Overflow::Auto,
+            overflow_y: Overflow::Hidden,
+            text_advance: 0.0,
+            caret_index: 0,
+            scroll_x: 0.0,
+            scroll_y: 0.0,
+            hovered: false,
+            focused: false,
+            changed: false,
+        }
+    }
+
+    #[test]
+    fn char_to_byte_index_handles_multibyte_characters() {
+        let text = "AあB";
+        assert_eq!(char_to_byte_index(text, 0), 0);
+        assert_eq!(char_to_byte_index(text, 1), 1);
+        assert_eq!(char_to_byte_index(text, 2), 4);
+        assert_eq!(char_to_byte_index(text, 10), text.len());
+    }
+
+    #[test]
+    fn insert_text_at_caret_advances_caret_by_chars() {
+        let mut text = "ac".to_string();
+        let mut caret = 1;
+
+        insert_text_at_caret(&mut text, &mut caret, "あい");
+
+        assert_eq!(text, "aあいc");
+        assert_eq!(caret, 3);
+    }
+
+    #[test]
+    fn remove_char_before_and_at_caret_work_for_unicode() {
+        let mut text = "AあB".to_string();
+        let mut caret = 2;
+
+        let removed_before = remove_char_before_caret(&mut text, &mut caret);
+        assert!(removed_before);
+        assert_eq!(text, "AB");
+        assert_eq!(caret, 1);
+
+        let removed_at = remove_char_at_caret(&mut text, 1);
+        assert!(removed_at);
+        assert_eq!(text, "A");
+    }
+
+    #[test]
+    fn move_caret_vertical_clamps_column_on_shorter_lines() {
+        let text = "abcd\nef\nxyz";
+        let down = move_caret_vertical(text, 3, 1);
+        let up = move_caret_vertical(text, down, -1);
+
+        assert_eq!(down, 7);
+        assert_eq!(up, 2);
+    }
+
+    #[test]
+    fn line_col_and_char_index_round_trip() {
+        let text = "ab\ncde";
+        let (line, col) = line_col_from_char_index(text, 4);
+        let lines: Vec<&str> = text.split('\n').collect();
+        let index = char_index_from_line_col(&lines, line, col);
+        assert_eq!((line, col), (1, 1));
+        assert_eq!(index, 4);
+    }
+
+    #[test]
+    fn set_scroll_from_scrollbar_cursor_clamps_bounds() {
+        let mut text_box = sample_text_box("very long text that should exceed the box width");
+        text_box.text_advance = 800.0;
+
+        set_scroll_from_scrollbar_cursor(&mut text_box, -100.0);
+        assert_eq!(text_box.scroll_x, 0.0);
+
+        let max = text_box_max_scroll_x(&text_box);
+        set_scroll_from_scrollbar_cursor(&mut text_box, 1_000.0);
+        assert!((text_box.scroll_x - max).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn scrollbar_track_hit_test_uses_bottom_strip() {
+        let text_box = sample_text_box("text");
+        assert!(text_box_scrollbar_track_contains(&text_box, 20.0, 40.0));
+        assert!(!text_box_scrollbar_track_contains(&text_box, 20.0, 5.0));
+    }
+}

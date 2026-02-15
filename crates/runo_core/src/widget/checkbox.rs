@@ -92,3 +92,17 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::CheckboxResponse;
+
+    #[test]
+    fn checkbox_response_default_is_unchecked_and_idle() {
+        let response = CheckboxResponse::default();
+        assert!(!response.checked);
+        assert!(!response.hovered);
+        assert!(!response.pressed);
+        assert!(!response.changed);
+    }
+}

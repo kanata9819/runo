@@ -26,3 +26,24 @@ pub enum UiEvent {
         selected_text: String,
     },
 }
+
+#[cfg(test)]
+mod tests {
+    use super::UiEvent;
+
+    #[test]
+    fn ui_event_is_cloneable() {
+        let event = UiEvent::SliderChanged {
+            id: "s".to_string(),
+            value: 0.5,
+        };
+        let cloned = event.clone();
+        match cloned {
+            UiEvent::SliderChanged { id, value } => {
+                assert_eq!(id, "s");
+                assert!((value - 0.5).abs() < f64::EPSILON);
+            }
+            _ => panic!("unexpected variant"),
+        }
+    }
+}

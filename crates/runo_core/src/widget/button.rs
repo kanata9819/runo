@@ -88,3 +88,16 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::ButtonResponse;
+
+    #[test]
+    fn button_response_default_is_all_false() {
+        let response = ButtonResponse::default();
+        assert!(!response.hovered);
+        assert!(!response.pressed);
+        assert!(!response.clicked);
+    }
+}

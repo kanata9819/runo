@@ -141,3 +141,24 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Overflow;
+
+    #[test]
+    fn overflow_allows_scroll_only_for_scroll_and_auto() {
+        assert!(!Overflow::Visible.allows_scroll());
+        assert!(!Overflow::Hidden.allows_scroll());
+        assert!(Overflow::Scroll.allows_scroll());
+        assert!(Overflow::Auto.allows_scroll());
+    }
+
+    #[test]
+    fn overflow_clips_except_visible() {
+        assert!(!Overflow::Visible.clips());
+        assert!(Overflow::Hidden.clips());
+        assert!(Overflow::Scroll.clips());
+        assert!(Overflow::Auto.clips());
+    }
+}

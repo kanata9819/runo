@@ -100,3 +100,17 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::RadioButtonResponse;
+
+    #[test]
+    fn radio_button_response_default_is_unselected_and_idle() {
+        let response = RadioButtonResponse::default();
+        assert!(!response.selected);
+        assert!(!response.hovered);
+        assert!(!response.pressed);
+        assert!(!response.changed);
+    }
+}

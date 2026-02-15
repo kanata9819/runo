@@ -38,3 +38,28 @@ pub fn run<A: RunoApplication + 'static>(application: A) {
 
     event_loop.run_app(&mut app).expect("event loop failed");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    struct App;
+    impl RunoApplication for App {}
+
+    #[test]
+    fn run_options_default_values() {
+        let options = RunOptions::default();
+        assert_eq!(options.window_title, "runo app");
+        assert_eq!(options.window_width, 640);
+        assert_eq!(options.window_height, 480);
+    }
+
+    #[test]
+    fn application_default_options_delegate_to_run_options_default() {
+        let app = App;
+        let options = app.options();
+        assert_eq!(options.window_title, "runo app");
+        assert_eq!(options.window_width, 640);
+        assert_eq!(options.window_height, 480);
+    }
+}

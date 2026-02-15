@@ -60,3 +60,29 @@ pub(crate) fn draw_text_run(
 pub(crate) fn estimate_text_width(text: &str, font_size: f32) -> f32 {
     text.chars().count() as f32 * font_size * 0.56
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Arc;
+
+    use vello::peniko::{Blob, FontData};
+
+    use super::*;
+
+    #[test]
+    fn estimate_text_width_scales_with_chars_and_font_size() {
+        let short = estimate_text_width("ab", 10.0);
+        let longer = estimate_text_width("abcd", 10.0);
+        let bigger_font = estimate_text_width("ab", 20.0);
+        assert!(longer > short);
+        assert!(bigger_font > short);
+    }
+
+    #[test]
+    fn layout_text_returns_none_for_invalid_font_bytes() {
+        let bytes = vec![0_u8; 8];
+        let font = FontData::new(Blob::new(Arc::new(bytes.into_boxed_slice())), 0);
+        let layout = layout_text(&font, "hello", 16.0);
+        assert!(layout.is_none());
+    }
+}

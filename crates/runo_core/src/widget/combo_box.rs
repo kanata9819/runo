@@ -113,3 +113,19 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::ComboBoxResponse;
+
+    #[test]
+    fn combo_box_response_default_is_empty_and_closed() {
+        let response = ComboBoxResponse::default();
+        assert_eq!(response.selected_index, 0);
+        assert_eq!(response.selected_text, "");
+        assert!(!response.hovered);
+        assert!(!response.pressed);
+        assert!(!response.changed);
+        assert!(!response.is_open);
+    }
+}

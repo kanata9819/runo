@@ -26,7 +26,11 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             Err(err) => match map_surface_error(&err) {
                 SurfaceAcquireAction::SkipFrame => {
                     if matches!(err, wgpu::SurfaceError::Outdated | wgpu::SurfaceError::Lost) {
-                        render_cx.resize_surface(surface, surface.config.width, surface.config.height);
+                        render_cx.resize_surface(
+                            surface,
+                            surface.config.width,
+                            surface.config.height,
+                        );
                     }
                     Ok(None)
                 }

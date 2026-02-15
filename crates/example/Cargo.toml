@@ -2,6 +2,12 @@
 name = "example"
 version = "0.1.0"
 edition = "2024"
+description = "Example application for the runo_core GUI framework."
+license = "MIT"
+readme = "../../README.md"
+repository = "https://github.com/kanata9819/runo"
+homepage = "https://github.com/kanata9819/runo"
+documentation = "https://docs.rs/example"
 
 [dependencies]
 runo_core = { path = "../runo_core", version = "0.1.0" }

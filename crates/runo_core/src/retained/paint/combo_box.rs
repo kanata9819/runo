@@ -14,6 +14,7 @@ const COMBO_BOX_CORNER_RADIUS: f64 = 8.0;
 const ITEM_CORNER_RADIUS: f64 = 0.0;
 const BORDER_STROKE_WIDTH: f64 = 1.0;
 
+/// Returns the combo box border color based on enable/press/hover state priority.
 fn change_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
     if !combo_box.enabled {
         Color::from_rgb8(86, 92, 101)
@@ -26,6 +27,7 @@ fn change_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
     }
 }
 
+/// Returns the currently selected item text, or an empty string when index is out of range.
 fn get_selected_text(combo_box: &ComboBoxNode) -> &str {
     combo_box
         .items
@@ -35,6 +37,7 @@ fn get_selected_text(combo_box: &ComboBoxNode) -> &str {
 }
 
 #[inline]
+/// Computes the text baseline y-coordinate for a given rect and font size.
 fn baseline_y(rect: Rect, font_size: f32) -> f64 {
     rect.y0
         + rect.height() * BASELINE_VERTICAL_RATIO
@@ -42,6 +45,7 @@ fn baseline_y(rect: Rect, font_size: f32) -> f64 {
 }
 
 #[inline]
+/// Draws a pre-laid-out glyph run at x and computed baseline within the provided rect.
 fn draw_text_run_at(
     scene: &mut Scene,
     font: &FontData,
@@ -62,6 +66,7 @@ fn draw_text_run_at(
     );
 }
 
+/// Draws the selected value text for the main combo box body with state-aware text color.
 fn draw_text_run<'a>(
     scene: &'a mut Scene,
     font: &'a FontData,
@@ -84,6 +89,7 @@ fn draw_text_run<'a>(
     );
 }
 
+/// Renders the closed combo box body, border, selected text, and open/close arrow.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &ComboBoxNode) {
     let bg = RoundedRect::from_rect(combo_box.rect, COMBO_BOX_CORNER_RADIUS);
     scene.fill(
@@ -137,7 +143,12 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
     }
 }
 
-pub(super) fn render_overlay(scene: &mut Scene, font: Option<&FontData>, combo_box: &ComboBoxNode) {
+/// Renders the dropdown item list overlay when the combo box is open and enabled.
+pub(super) fn render_dropdown_overlay(
+    scene: &mut Scene,
+    font: Option<&FontData>,
+    combo_box: &ComboBoxNode,
+) {
     if !combo_box.enabled || !combo_box.is_open || combo_box.items.is_empty() {
         return;
     }
@@ -190,6 +201,7 @@ pub(super) fn render_overlay(scene: &mut Scene, font: Option<&FontData>, combo_b
 mod tests {
     use super::*;
 
+    /// Creates a reusable combo box fixture for paint helper tests.
     fn sample_combo_box() -> ComboBoxNode {
         ComboBoxNode {
             rect: Rect::new(10.0, 20.0, 210.0, 60.0),
@@ -209,12 +221,14 @@ mod tests {
     }
 
     #[test]
+    /// Verifies that selected_index resolves to the expected item text.
     fn get_selected_text_returns_selected_item() {
         let combo_box = sample_combo_box();
         assert_eq!(get_selected_text(&combo_box), "second");
     }
 
     #[test]
+    /// Verifies that out-of-range selected_index falls back to empty text.
     fn get_selected_text_returns_empty_when_out_of_bounds() {
         let mut combo_box = sample_combo_box();
         combo_box.selected_index = 99;
@@ -222,6 +236,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifies pressed state color is prioritized over hovered state color.
     fn change_color_prefers_pressed_over_hovered() {
         let mut combo_box = sample_combo_box();
         combo_box.pressed = true;
@@ -230,6 +245,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifies disabled color is returned regardless of other interaction states.
     fn change_color_uses_disabled_color_when_disabled() {
         let mut combo_box = sample_combo_box();
         combo_box.enabled = false;
@@ -239,6 +255,7 @@ mod tests {
     }
 
     #[test]
+    /// Verifies baseline y-coordinate formula output for a fixed input.
     fn baseline_y_matches_expected_formula() {
         let rect = Rect::new(10.0, 20.0, 210.0, 60.0);
         let font_size = 20.0;

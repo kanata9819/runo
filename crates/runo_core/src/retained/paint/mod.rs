@@ -37,7 +37,7 @@ impl RetainedState {
             };
             match node {
                 WidgetNode::ComboBox(combo_box) => {
-                    combo_box::render_overlay(scene, font, combo_box)
+                    combo_box::render_dropdown_overlay(scene, font, combo_box)
                 }
                 WidgetNode::Button(_)
                 | WidgetNode::Checkbox(_)

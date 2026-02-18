@@ -54,16 +54,16 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
         if text_box.enabled {
             text_box.bg_color
         } else {
-            color::rgb(color::widget::TEXT_BOX_DISABLED_BG)
+            color::Neutral::tone_45_49_55()
         },
         None,
         &bg,
     );
 
     let border_color = if !text_box.enabled {
-        color::rgb(color::widget::TEXT_BOX_DISABLED_BORDER)
+        color::Neutral::tone_86_92_101()
     } else if text_box.focused {
-        color::rgb(color::widget::TEXT_BOX_FOCUSED_BORDER)
+        color::AccentBlue::tone_89_176_255()
     } else {
         text_box.border_color
     };
@@ -79,9 +79,9 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
 /// Resolves text color for normal, placeholder, and disabled states.
 fn resolve_text_color(text_box: &TextBoxNode) -> Color {
     if !text_box.enabled {
-        color::rgb(color::widget::TEXT_BOX_DISABLED_TEXT)
+        color::Neutral::tone_147_153_161()
     } else if text_box.text.is_empty() {
-        color::rgb(color::widget::TEXT_BOX_PLACEHOLDER_TEXT)
+        color::Neutral::tone_142_151_163()
     } else {
         text_box.text_color
     }
@@ -193,7 +193,7 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
-            color::rgb(color::widget::TEXT_BOX_CARET),
+            color::SoftWhite::tone_220_228_240(),
             None,
             &caret,
         );
@@ -247,9 +247,9 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     let track = Rect::new(inner_left, track_y - track_height, inner_right, track_y);
     let track_shape = RoundedRect::from_rect(track, SCROLLBAR_CORNER_RADIUS);
     let track_color = if text_box.enabled {
-        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_TRACK_ENABLED)
+        color::WhiteAlpha::tone_255_255_255_35()
     } else {
-        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_TRACK_DISABLED)
+        color::WhiteAlpha::tone_255_255_255_20()
     };
     scene.fill(
         Fill::NonZero,
@@ -272,9 +272,9 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     );
     let thumb_shape = RoundedRect::from_rect(thumb, SCROLLBAR_CORNER_RADIUS);
     let thumb_color = if text_box.enabled {
-        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_THUMB_ENABLED)
+        color::WhiteAlpha::tone_255_255_255_150()
     } else {
-        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_THUMB_DISABLED)
+        color::WhiteAlpha::tone_255_255_255_90()
     };
     scene.fill(
         Fill::NonZero,

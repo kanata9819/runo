@@ -36,10 +36,10 @@ fn change_color(button: &ButtonNode) -> AlphaColor<Srgb> {
         button.enabled,
         button.pressed,
         button.hovered,
-        color::rgb(color::widget::BUTTON_DISABLED_BG),
-        color::rgb(color::widget::BUTTON_PRESSED_BG),
-        color::rgb(color::widget::BUTTON_HOVER_BG),
-        color::rgb(color::widget::BUTTON_ENABLED_BG),
+        color::Neutral::tone_83_90_100(),
+        color::AccentBlue::tone_31_122_205(),
+        color::AccentBlue::tone_69_160_242(),
+        color::AccentBlue::tone_50_144_229(),
     )
 }
 
@@ -66,7 +66,7 @@ fn draw_text_run(
         if button.enabled {
             button.text_color
         } else {
-            color::rgb(color::widget::BUTTON_DISABLED_TEXT)
+            color::Neutral::tone_178_184_192()
         },
     );
 }

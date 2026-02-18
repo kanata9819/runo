@@ -22,9 +22,9 @@ fn indicator_bg_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
         combo_box.enabled,
         combo_box.pressed,
         combo_box.hovered,
-        color::rgb(color::widget::COMBO_DISABLED_BORDER),
-        color::rgb(color::widget::COMBO_PRESSED_BORDER),
-        color::rgb(color::widget::COMBO_HOVER_BORDER),
+        color::Neutral::tone_86_92_101(),
+        color::AccentBlue::tone_89_176_255(),
+        color::AccentBlue::tone_124_177_230(),
         combo_box.border_color,
     )
 }
@@ -86,7 +86,7 @@ fn draw_text_run<'a>(
         if combo_box.enabled {
             combo_box.text_color
         } else {
-            color::rgb(color::widget::COMBO_DISABLED_TEXT)
+            color::Neutral::tone_147_153_161()
         },
     );
 }
@@ -100,7 +100,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
         if combo_box.enabled {
             combo_box.bg_color
         } else {
-            color::rgb(color::widget::COMBO_DISABLED_BG)
+            color::Neutral::tone_45_49_55()
         },
         None,
         &bg,
@@ -137,9 +137,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
             combo_box.rect,
             combo_box.font_size * ARROW_FONT_SCALE,
             if combo_box.enabled {
-                color::rgb(color::widget::COMBO_ARROW_ENABLED)
+                color::SoftWhite::tone_186_196_210()
             } else {
-                color::rgb(color::widget::COMBO_ARROW_DISABLED)
+                color::Neutral::tone_141_147_154()
             },
         );
     }
@@ -165,9 +165,9 @@ pub(super) fn render_dropdown_overlay(
         let item_bg = RoundedRect::from_rect(item_rect, ITEM_CORNER_RADIUS);
 
         let bg_color = if combo_box.hovered_item == Some(index) {
-            color::rgb(color::widget::COMBO_ITEM_HOVER_BG)
+            color::Neutral::tone_63_80_102()
         } else if combo_box.selected_index == index {
-            color::rgb(color::widget::COMBO_ITEM_SELECTED_BG)
+            color::Neutral::tone_46_64_86()
         } else {
             combo_box.bg_color
         };

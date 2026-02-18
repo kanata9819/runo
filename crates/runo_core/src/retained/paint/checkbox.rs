@@ -52,9 +52,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
         if checkbox.enabled {
-            color::rgb(color::widget::CHECKBOX_BORDER_ENABLED)
+            color::Neutral::tone_130_145_163()
         } else {
-            color::rgb(color::widget::CHECKBOX_BORDER_DISABLED)
+            color::Neutral::tone_88_94_102()
         },
         None,
         &indicator_rect,
@@ -62,9 +62,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
 
     if checkbox.checked {
         let check_color = if checkbox.enabled {
-            color::rgb(color::widget::CHECKBOX_MARK_ENABLED)
+            color::SoftWhite::tone_240_246_255()
         } else {
-            color::rgb(color::widget::CHECKBOX_MARK_DISABLED)
+            color::Neutral::tone_167_173_181()
         };
         let x0 = indicator_x + indicator_size * CHECK_X0_RATIO;
         let y0 = indicator_y + indicator_size * CHECK_Y0_RATIO;
@@ -112,7 +112,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         if checkbox.enabled {
             checkbox.text_color
         } else {
-            color::rgb(color::widget::CHECKBOX_TEXT_DISABLED)
+            color::Neutral::tone_146_152_160()
         },
     );
 }
@@ -128,13 +128,13 @@ fn indicator_bg_color(checkbox: &CheckboxNode) -> AlphaColor<Srgb> {
         checkbox.enabled,
         checkbox.pressed,
         checkbox.hovered,
-        color::rgb(color::widget::CHECKBOX_DISABLED_BG),
-        color::rgb(color::widget::CHECKBOX_PRESSED_BG),
-        color::rgb(color::widget::CHECKBOX_HOVER_BG),
+        color::Neutral::tone_43_47_53(),
+        color::AccentBlue::tone_45_129_205(),
+        color::AccentBlue::tone_53_141_221(),
         if checkbox.checked {
-            color::rgb(color::widget::CHECKBOX_CHECKED_BG)
+            color::AccentBlue::tone_50_144_229()
         } else {
-            color::rgb(color::widget::CHECKBOX_UNCHECKED_BG)
+            color::Neutral::tone_36_42_50()
         },
     )
 }

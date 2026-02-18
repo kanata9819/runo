@@ -40,9 +40,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
         if radio_button.enabled {
-            color::rgb(color::widget::RADIO_BORDER_ENABLED)
+            color::Neutral::tone_130_145_163()
         } else {
-            color::rgb(color::widget::RADIO_BORDER_DISABLED)
+            color::Neutral::tone_88_94_102()
         },
         None,
         &outer_circle,
@@ -55,9 +55,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
             Fill::NonZero,
             Affine::IDENTITY,
             if radio_button.enabled {
-                color::rgb(color::widget::RADIO_MARK_ENABLED)
+                color::SoftWhite::tone_240_246_255()
             } else {
-                color::rgb(color::widget::RADIO_MARK_DISABLED)
+                color::Neutral::tone_167_173_181()
             },
             None,
             &inner_circle,
@@ -88,7 +88,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         if radio_button.enabled {
             radio_button.text_color
         } else {
-            color::rgb(color::widget::RADIO_TEXT_DISABLED)
+            color::Neutral::tone_146_152_160()
         },
     );
 }
@@ -104,10 +104,10 @@ fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
         radio_button.enabled,
         radio_button.pressed,
         radio_button.hovered,
-        color::rgb(color::widget::RADIO_DISABLED_BG),
-        color::rgb(color::widget::RADIO_PRESSED_BG),
-        color::rgb(color::widget::RADIO_HOVER_BG),
-        color::rgb(color::widget::RADIO_ENABLED_BG),
+        color::Neutral::tone_43_47_53(),
+        color::AccentBlue::tone_45_129_205(),
+        color::AccentBlue::tone_53_141_221(),
+        color::Neutral::tone_36_42_50(),
     )
 }
 

@@ -25,7 +25,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNo
         if label.enabled {
             label.text_color
         } else {
-            color::rgb(color::widget::LABEL_DISABLED_TEXT)
+            color::Neutral::tone_142_148_156()
         },
     );
 }

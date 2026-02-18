@@ -51,9 +51,9 @@ fn draw_track(scene: &mut Scene, slider: &SliderNode, track_rect: &RoundedRect) 
         Fill::NonZero,
         Affine::IDENTITY,
         if slider.enabled {
-            color::rgb(color::widget::SLIDER_TRACK_ENABLED)
+            color::Neutral::tone_56_63_74()
         } else {
-            color::rgb(color::widget::SLIDER_TRACK_DISABLED)
+            color::Neutral::tone_48_52_58()
         },
         None,
         track_rect,
@@ -80,13 +80,13 @@ fn draw_active_fill(
         Fill::NonZero,
         Affine::IDENTITY,
         if !slider.enabled {
-            color::rgb(color::widget::SLIDER_ACTIVE_DISABLED)
+            color::Neutral::tone_78_82_90()
         } else if slider.pressed {
-            color::rgb(color::widget::SLIDER_ACTIVE_PRESSED)
+            color::AccentBlue::tone_37_132_214()
         } else if slider.hovered {
-            color::rgb(color::widget::SLIDER_ACTIVE_HOVER)
+            color::AccentBlue::tone_62_154_234()
         } else {
-            color::rgb(color::widget::SLIDER_ACTIVE_ENABLED)
+            color::AccentBlue::tone_50_144_229()
         },
         None,
         &active_rect,
@@ -100,9 +100,9 @@ fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64
         Fill::NonZero,
         Affine::IDENTITY,
         if slider.enabled {
-            color::rgb(color::widget::SLIDER_THUMB_ENABLED)
+            color::SoftWhite::tone_240_246_255()
         } else {
-            color::rgb(color::widget::SLIDER_THUMB_DISABLED)
+            color::Neutral::tone_163_169_177()
         },
         None,
         &thumb,
@@ -110,7 +110,7 @@ fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64
     scene.stroke(
         &Stroke::new(THUMB_BORDER_WIDTH),
         Affine::IDENTITY,
-        color::rgb(color::widget::SLIDER_THUMB_BORDER),
+        color::Neutral::tone_78_89_104(),
         None,
         &thumb,
     );
@@ -132,7 +132,7 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
             if slider.enabled {
                 slider.text_color
             } else {
-                color::rgb(color::widget::SLIDER_TEXT_DISABLED)
+                color::Neutral::tone_146_152_160()
             },
         );
     }
@@ -153,7 +153,7 @@ fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_
             if slider.enabled {
                 slider.text_color
             } else {
-                color::rgb(color::widget::SLIDER_TEXT_DISABLED)
+                color::Neutral::tone_146_152_160()
             },
         );
     }

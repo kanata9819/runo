@@ -6,8 +6,32 @@ use vello::peniko::{Color, Fill, FontData};
 use crate::retained::node::TextBoxNode;
 use crate::widget::text;
 
+#[derive(Clone, Copy)]
+struct TextMetrics {
+    text_x: f64,
+    first_line_baseline: f64,
+    line_height: f64,
+    inner_left: f64,
+    inner_right: f64,
+}
+
 /// Renders text box background, border, text/placeholder, caret, and horizontal scrollbar.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut TextBoxNode) {
+    draw_background_and_border(scene, text_box);
+
+    let Some(font) = font else {
+        return;
+    };
+
+    let metrics = text_metrics(text_box);
+    let text_color = resolve_text_color(text_box);
+    draw_text_content(scene, font, text_box, text_color, metrics);
+    draw_caret(scene, font, text_box, metrics);
+    render_horizontal_scrollbar(scene, text_box);
+}
+
+/// Draws text box background fill and border stroke.
+fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
     let bg = RoundedRect::from_rect(text_box.rect, 8.0);
     scene.fill(
         Fill::NonZero,
@@ -35,31 +59,50 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
         None,
         &bg,
     );
+}
 
-    let Some(font) = font else {
-        return;
-    };
-
-    let text_color = if !text_box.enabled {
+/// Resolves text color for normal, placeholder, and disabled states.
+fn resolve_text_color(text_box: &TextBoxNode) -> Color {
+    if !text_box.enabled {
         Color::from_rgb8(147, 153, 161)
     } else if text_box.text.is_empty() {
         Color::from_rgb8(142, 151, 163)
     } else {
         text_box.text_color
-    };
+    }
+}
 
-    let text_x = text_box.rect.x0 + 12.0 - text_box.scroll_x;
-    let first_line_baseline =
-        text_box.rect.y0 + 12.0 + text_box.font_size as f64 - text_box.scroll_y;
-    let line_height = text_box.font_size as f64 * 1.35;
-    let inner_left = text_box.rect.x0 + 12.0;
-    let inner_right = text_box.rect.x1 - 12.0;
+/// Computes shared text layout metrics used by content and caret painting.
+fn text_metrics(text_box: &TextBoxNode) -> TextMetrics {
+    TextMetrics {
+        text_x: text_box.rect.x0 + 12.0 - text_box.scroll_x,
+        first_line_baseline: text_box.rect.y0 + 12.0 + text_box.font_size as f64
+            - text_box.scroll_y,
+        line_height: text_box.font_size as f64 * 1.35,
+        inner_left: text_box.rect.x0 + 12.0,
+        inner_right: text_box.rect.x1 - 12.0,
+    }
+}
 
+/// Draws placeholder or text lines and updates cached text advance.
+fn draw_text_content(
+    scene: &mut Scene,
+    font: &FontData,
+    text_box: &mut TextBoxNode,
+    text_color: Color,
+    metrics: TextMetrics,
+) {
     if text_box.text.is_empty() {
         let placeholder = text_box.placeholder.as_deref().unwrap_or("");
         if let Some((glyphs, advance)) = text::layout_text(font, placeholder, text_box.font_size) {
             let visible_glyphs = if text_box.overflow_x.clips() {
-                clip_glyphs_horizontally(glyphs, advance as f64, text_x, inner_left, inner_right)
+                clip_glyphs_horizontally(
+                    glyphs,
+                    advance as f64,
+                    metrics.text_x,
+                    metrics.inner_left,
+                    metrics.inner_right,
+                )
             } else {
                 glyphs
             };
@@ -68,8 +111,8 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
                     scene,
                     font,
                     visible_glyphs,
-                    text_x,
-                    first_line_baseline,
+                    metrics.text_x,
+                    metrics.first_line_baseline,
                     text_box.font_size,
                     text_color,
                 );
@@ -79,14 +122,20 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
     } else {
         let mut max_advance = 0.0_f64;
         for (line_index, line_text) in text_box.text.split('\n').enumerate() {
-            let baseline_y = first_line_baseline + line_index as f64 * line_height;
+            let baseline_y = metrics.first_line_baseline + line_index as f64 * metrics.line_height;
             let Some((glyphs, advance)) = text::layout_text(font, line_text, text_box.font_size)
             else {
                 continue;
             };
             max_advance = max_advance.max(advance as f64);
             let visible_glyphs = if text_box.overflow_x.clips() {
-                clip_glyphs_horizontally(glyphs, advance as f64, text_x, inner_left, inner_right)
+                clip_glyphs_horizontally(
+                    glyphs,
+                    advance as f64,
+                    metrics.text_x,
+                    metrics.inner_left,
+                    metrics.inner_right,
+                )
             } else {
                 glyphs
             };
@@ -95,7 +144,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
                     scene,
                     font,
                     visible_glyphs,
-                    text_x,
+                    metrics.text_x,
                     baseline_y,
                     text_box.font_size,
                     text_color,
@@ -104,7 +153,10 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
         }
         text_box.text_advance = max_advance;
     }
+}
 
+/// Draws caret when focused and enabled using the current text metrics.
+fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metrics: TextMetrics) {
     if text_box.focused && text_box.enabled {
         let (caret_line, caret_col) =
             line_col_from_char_index(&text_box.text, text_box.caret_index);
@@ -113,13 +165,13 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
         let prefix_advance = text::layout_text(font, &prefix, text_box.font_size)
             .map(|(_, advance)| advance as f64)
             .unwrap_or(0.0);
-        let caret_x = text_x + prefix_advance + 1.0;
+        let caret_x = metrics.text_x + prefix_advance + 1.0;
         let caret_x = if text_box.overflow_x.clips() {
-            caret_x.clamp(inner_left, inner_right)
+            caret_x.clamp(metrics.inner_left, metrics.inner_right)
         } else {
             caret_x
         };
-        let baseline_y = first_line_baseline + caret_line as f64 * line_height;
+        let baseline_y = metrics.first_line_baseline + caret_line as f64 * metrics.line_height;
         let caret_h = text_box.font_size as f64 * 1.1;
         let caret_y0 = baseline_y - text_box.font_size as f64 * 0.9;
         let caret = Rect::new(caret_x, caret_y0, caret_x + 1.5, caret_y0 + caret_h);
@@ -131,8 +183,6 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
             &caret,
         );
     }
-
-    render_horizontal_scrollbar(scene, text_box);
 }
 
 /// Returns glyphs that intersect the horizontal clip region in draw-space.

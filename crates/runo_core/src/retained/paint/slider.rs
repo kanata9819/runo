@@ -3,7 +3,7 @@ use vello::kurbo::{Affine, Circle, RoundedRect, Stroke};
 use vello::peniko::{Color, Fill, FontData};
 
 use crate::retained::node::SliderNode;
-use crate::widget::text::{draw_text_run, layout_text};
+use crate::widget::text;
 
 /// Renders slider track, active fill, thumb, optional label, and current numeric value.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, slider: &SliderNode) {
@@ -109,10 +109,10 @@ fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64
 /// Draws the optional left-aligned slider label text.
 fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_x: f64) {
     if let Some(text) = slider.text.as_deref()
-        && let Some((glyphs, _)) = layout_text(font, text, slider.font_size)
+        && let Some((glyphs, _)) = text::layout_text(font, text, slider.font_size)
     {
         let baseline_y = slider.rect.y0 + slider.font_size as f64;
-        draw_text_run(
+        text::draw_text_run(
             scene,
             font,
             glyphs,
@@ -131,9 +131,9 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
 /// Draws the right-aligned numeric value text.
 fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_x: f64) {
     let value_text = format!("{:.2}", slider.value);
-    if let Some((glyphs, w)) = layout_text(font, &value_text, slider.font_size) {
+    if let Some((glyphs, w)) = text::layout_text(font, &value_text, slider.font_size) {
         let baseline_y = slider.rect.y0 + slider.font_size as f64;
-        draw_text_run(
+        text::draw_text_run(
             scene,
             font,
             glyphs,

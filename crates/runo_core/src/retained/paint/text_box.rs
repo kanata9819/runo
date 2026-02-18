@@ -4,7 +4,7 @@ use vello::kurbo::{Affine, Rect, RoundedRect};
 use vello::peniko::{Color, Fill, FontData};
 
 use crate::retained::node::TextBoxNode;
-use crate::widget::text::{draw_text_run, estimate_text_width, layout_text};
+use crate::widget::text;
 
 /// Renders text box background, border, text/placeholder, caret, and horizontal scrollbar.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut TextBoxNode) {
@@ -57,14 +57,14 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
 
     if text_box.text.is_empty() {
         let placeholder = text_box.placeholder.as_deref().unwrap_or("");
-        if let Some((glyphs, advance)) = layout_text(font, placeholder, text_box.font_size) {
+        if let Some((glyphs, advance)) = text::layout_text(font, placeholder, text_box.font_size) {
             let visible_glyphs = if text_box.overflow_x.clips() {
                 clip_glyphs_horizontally(glyphs, advance as f64, text_x, inner_left, inner_right)
             } else {
                 glyphs
             };
             if !visible_glyphs.is_empty() {
-                draw_text_run(
+                text::draw_text_run(
                     scene,
                     font,
                     visible_glyphs,
@@ -80,7 +80,8 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
         let mut max_advance = 0.0_f64;
         for (line_index, line_text) in text_box.text.split('\n').enumerate() {
             let baseline_y = first_line_baseline + line_index as f64 * line_height;
-            let Some((glyphs, advance)) = layout_text(font, line_text, text_box.font_size) else {
+            let Some((glyphs, advance)) = text::layout_text(font, line_text, text_box.font_size)
+            else {
                 continue;
             };
             max_advance = max_advance.max(advance as f64);
@@ -90,7 +91,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
                 glyphs
             };
             if !visible_glyphs.is_empty() {
-                draw_text_run(
+                text::draw_text_run(
                     scene,
                     font,
                     visible_glyphs,
@@ -109,7 +110,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
             line_col_from_char_index(&text_box.text, text_box.caret_index);
         let caret_line_text = text_box.text.split('\n').nth(caret_line).unwrap_or("");
         let prefix: String = caret_line_text.chars().take(caret_col).collect();
-        let prefix_advance = layout_text(font, &prefix, text_box.font_size)
+        let prefix_advance = text::layout_text(font, &prefix, text_box.font_size)
             .map(|(_, advance)| advance as f64)
             .unwrap_or(0.0);
         let caret_x = text_x + prefix_advance + 1.0;
@@ -224,7 +225,7 @@ fn text_box_content_width(text_box: &TextBoxNode) -> f64 {
     if text_box.text_advance > 0.0 {
         text_box.text_advance
     } else {
-        estimate_text_width(&text_box.text, text_box.font_size) as f64
+        text::estimate_text_width(&text_box.text, text_box.font_size) as f64
     }
 }
 

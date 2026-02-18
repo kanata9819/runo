@@ -3,9 +3,9 @@ use vello::kurbo::{Affine, Circle, Stroke};
 use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Color, Fill, FontData};
 
-use super::interaction_color::resolve_interaction_color;
+use super::interaction_color;
 use crate::retained::node::RadioButtonNode;
-use crate::widget::text::{draw_text_run, layout_text};
+use crate::widget::text;
 
 /// Renders radio button indicator, selected dot, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioButtonNode) {
@@ -58,14 +58,15 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
     let Some(text) = radio_button.text.as_deref() else {
         return;
     };
-    let Some((glyphs, _)) = layout_text(font, text, radio_button.font_size) else {
+    let Some((glyphs, _)) = text::layout_text(font, text, radio_button.font_size) else {
         return;
     };
     let text_x = center_x + indicator_radius + 10.0;
     let baseline_y = radio_button.rect.y0
         + radio_button.rect.height() * 0.5
         + radio_button.font_size as f64 * 0.35;
-    draw_text_run(
+
+    text::draw_text_run(
         scene,
         font,
         glyphs,
@@ -87,7 +88,7 @@ fn indicator_size(height: f64) -> f64 {
 
 /// Resolves radio outer indicator color from enabled/pressed/hovered state priority.
 fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
-    resolve_interaction_color(
+    interaction_color::resolve_interaction_color(
         radio_button.enabled,
         radio_button.pressed,
         radio_button.hovered,

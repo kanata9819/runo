@@ -4,7 +4,7 @@ use vello::kurbo::{Affine, RoundedRect};
 use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Color, Fill, FontData};
 
-use super::interaction_color::resolve_interaction_color;
+use super::interaction_color;
 use crate::retained::node::ButtonNode;
 use crate::widget::text;
 
@@ -27,7 +27,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &Button
 
 /// Resolves button background color from enabled/pressed/hovered state priority.
 fn change_color(button: &ButtonNode) -> AlphaColor<Srgb> {
-    resolve_interaction_color(
+    interaction_color::resolve_interaction_color(
         button.enabled,
         button.pressed,
         button.hovered,

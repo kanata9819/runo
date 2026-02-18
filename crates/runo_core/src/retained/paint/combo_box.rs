@@ -3,7 +3,7 @@ use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Color, Fill, FontData};
 use vello::{Glyph, Scene};
 
-use super::interaction_color::resolve_interaction_color;
+use super::interaction_color;
 use crate::retained::node::ComboBoxNode;
 use crate::widget::text;
 
@@ -16,8 +16,8 @@ const ITEM_CORNER_RADIUS: f64 = 0.0;
 const BORDER_STROKE_WIDTH: f64 = 1.0;
 
 /// Returns the combo box border color based on enable/press/hover state priority.
-fn change_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
-    resolve_interaction_color(
+fn indicator_bg_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
+    interaction_color::resolve_interaction_color(
         combo_box.enabled,
         combo_box.pressed,
         combo_box.hovered,
@@ -105,7 +105,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
         &bg,
     );
 
-    let border_color = change_color(combo_box);
+    let border_color = indicator_bg_color(combo_box);
     scene.stroke(
         &vello::kurbo::Stroke::new(BORDER_STROKE_WIDTH),
         Affine::IDENTITY,
@@ -242,7 +242,10 @@ mod tests {
         let mut combo_box = sample_combo_box();
         combo_box.pressed = true;
         combo_box.hovered = true;
-        assert_eq!(change_color(&combo_box), Color::from_rgb8(89, 176, 255));
+        assert_eq!(
+            indicator_bg_color(&combo_box),
+            Color::from_rgb8(89, 176, 255)
+        );
     }
 
     #[test]
@@ -252,7 +255,10 @@ mod tests {
         combo_box.enabled = false;
         combo_box.pressed = true;
         combo_box.hovered = true;
-        assert_eq!(change_color(&combo_box), Color::from_rgb8(86, 92, 101));
+        assert_eq!(
+            indicator_bg_color(&combo_box),
+            Color::from_rgb8(86, 92, 101)
+        );
     }
 
     #[test]

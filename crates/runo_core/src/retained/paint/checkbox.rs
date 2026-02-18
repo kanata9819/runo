@@ -3,9 +3,9 @@ use vello::kurbo::{Affine, Line, RoundedRect, Stroke};
 use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Color, Fill, FontData};
 
-use super::interaction_color::resolve_interaction_color;
+use super::interaction_color;
 use crate::retained::node::CheckboxNode;
-use crate::widget::text::{draw_text_run, layout_text};
+use crate::widget::text;
 
 /// Renders checkbox indicator, optional check mark, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &CheckboxNode) {
@@ -75,14 +75,14 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
     let Some(text) = checkbox.text.as_deref() else {
         return;
     };
-    let Some((glyphs, _)) = layout_text(font, text, checkbox.font_size) else {
+    let Some((glyphs, _)) = text::layout_text(font, text, checkbox.font_size) else {
         return;
     };
 
     let text_x = indicator_x + indicator_size + 10.0;
     let baseline_y =
         checkbox.rect.y0 + checkbox.rect.height() * 0.5 + checkbox.font_size as f64 * 0.35;
-    draw_text_run(
+    text::draw_text_run(
         scene,
         font,
         glyphs,
@@ -104,7 +104,7 @@ fn indicator_size(height: f64) -> f64 {
 
 /// Resolves indicator background color from enabled/pressed/hovered/checked state priority.
 fn indicator_bg_color(checkbox: &CheckboxNode) -> AlphaColor<Srgb> {
-    resolve_interaction_color(
+    interaction_color::resolve_interaction_color(
         checkbox.enabled,
         checkbox.pressed,
         checkbox.hovered,

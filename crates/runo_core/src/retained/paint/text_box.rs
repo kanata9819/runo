@@ -1,3 +1,4 @@
+use vello::Glyph;
 use vello::Scene;
 use vello::kurbo::{Affine, Rect, RoundedRect};
 use vello::peniko::{Color, Fill, FontData};
@@ -5,6 +6,7 @@ use vello::peniko::{Color, Fill, FontData};
 use crate::retained::node::TextBoxNode;
 use crate::widget::text::{draw_text_run, estimate_text_width, layout_text};
 
+/// Renders text box background, border, text/placeholder, caret, and horizontal scrollbar.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut TextBoxNode) {
     let bg = RoundedRect::from_rect(text_box.rect, 8.0);
     scene.fill(
@@ -132,13 +134,14 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
     render_horizontal_scrollbar(scene, text_box);
 }
 
+/// Returns glyphs that intersect the horizontal clip region in draw-space.
 fn clip_glyphs_horizontally(
-    glyphs: Vec<vello::Glyph>,
+    glyphs: Vec<Glyph>,
     total_advance: f64,
     draw_origin_x: f64,
     clip_left: f64,
     clip_right: f64,
-) -> Vec<vello::Glyph> {
+) -> Vec<Glyph> {
     if glyphs.is_empty() || clip_right <= clip_left {
         return Vec::new();
     }
@@ -158,6 +161,7 @@ fn clip_glyphs_horizontally(
     out
 }
 
+/// Renders the bottom horizontal scrollbar when overflow mode allows scrolling.
 fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     if !text_box.overflow_x.allows_scroll() {
         return;
@@ -215,6 +219,7 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     );
 }
 
+/// Returns content width from cached layout advance or estimated text width fallback.
 fn text_box_content_width(text_box: &TextBoxNode) -> f64 {
     if text_box.text_advance > 0.0 {
         text_box.text_advance
@@ -223,6 +228,7 @@ fn text_box_content_width(text_box: &TextBoxNode) -> f64 {
     }
 }
 
+/// Converts a caret character index into zero-based `(line, column)` coordinates.
 fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
     let mut line = 0;
     let mut col = 0;
@@ -238,4 +244,93 @@ fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
         }
     }
     (line, col)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::widget::text_box::Overflow;
+    use vello::kurbo::Rect;
+
+    /// Builds a minimal text box fixture for helper-function tests.
+    fn sample_text_box() -> TextBoxNode {
+        TextBoxNode {
+            rect: Rect::new(0.0, 0.0, 240.0, 44.0),
+            text: "hello".to_string(),
+            placeholder: Some("placeholder".to_string()),
+            font_size: 16.0,
+            text_color: Color::from_rgb8(230, 230, 230),
+            bg_color: Color::from_rgb8(30, 30, 30),
+            border_color: Color::from_rgb8(80, 80, 80),
+            enabled: true,
+            overflow_x: Overflow::Auto,
+            overflow_y: Overflow::Hidden,
+            text_advance: 0.0,
+            caret_index: 0,
+            scroll_x: 0.0,
+            scroll_y: 0.0,
+            hovered: false,
+            focused: false,
+            changed: false,
+        }
+    }
+
+    #[test]
+    /// Keeps only glyphs that overlap the horizontal clip interval.
+    fn clip_glyphs_horizontally_filters_outside_glyphs() {
+        let glyphs = vec![
+            Glyph {
+                id: 1,
+                x: 0.0,
+                y: 0.0,
+            },
+            Glyph {
+                id: 2,
+                x: 10.0,
+                y: 0.0,
+            },
+            Glyph {
+                id: 3,
+                x: 20.0,
+                y: 0.0,
+            },
+        ];
+
+        let visible = clip_glyphs_horizontally(glyphs, 30.0, 0.0, 8.0, 18.0);
+        assert_eq!(visible.len(), 2);
+        assert_eq!(visible[0].id, 1);
+        assert_eq!(visible[1].id, 2);
+    }
+
+    #[test]
+    /// Returns empty output when clip region is invalid.
+    fn clip_glyphs_horizontally_returns_empty_for_invalid_clip_region() {
+        let glyphs = vec![Glyph {
+            id: 1,
+            x: 0.0,
+            y: 0.0,
+        }];
+        let visible = clip_glyphs_horizontally(glyphs, 10.0, 0.0, 10.0, 10.0);
+        assert!(visible.is_empty());
+    }
+
+    #[test]
+    /// Uses cached advance when a positive text_advance is available.
+    fn text_box_content_width_uses_cached_advance() {
+        let mut text_box = sample_text_box();
+        text_box.text_advance = 123.0;
+        assert_eq!(text_box_content_width(&text_box), 123.0);
+    }
+
+    #[test]
+    /// Converts character index into expected line and column for multiline text.
+    fn line_col_from_char_index_handles_multiline_text() {
+        assert_eq!(line_col_from_char_index("ab\ncde", 4), (1, 1));
+    }
+
+    #[test]
+    /// Returns final line/column when index is past text end.
+    fn line_col_from_char_index_returns_end_for_out_of_range_index() {
+        assert_eq!(line_col_from_char_index("ab\nc", 99), (1, 1));
+    }
 }

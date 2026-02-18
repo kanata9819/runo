@@ -5,6 +5,7 @@ use vello::peniko::FontData;
 use crate::retained::node::LabelNode;
 use crate::widget::text::{draw_text_run, layout_text};
 
+/// Renders single-line label text at the label rectangle origin.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNode) {
     let Some(font) = font else {
         return;

@@ -1,26 +1,21 @@
 use vello::Scene;
 use vello::kurbo::{Affine, Circle, Stroke};
+use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Color, Fill, FontData};
 
+use super::interaction_color::resolve_interaction_color;
 use crate::retained::node::RadioButtonNode;
 use crate::widget::text::{draw_text_run, layout_text};
 
+/// Renders radio button indicator, selected dot, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioButtonNode) {
-    let indicator_size = (radio_button.rect.height() - 8.0).clamp(14.0, 24.0);
+    let indicator_size = indicator_size(radio_button.rect.height());
     let indicator_radius = indicator_size * 0.5;
     let center_x = radio_button.rect.x0 + 2.0 + indicator_radius;
     let center_y = radio_button.rect.y0 + radio_button.rect.height() * 0.5;
     let outer_circle = Circle::new((center_x, center_y), indicator_radius);
 
-    let outer_bg = if !radio_button.enabled {
-        Color::from_rgb8(43, 47, 53)
-    } else if radio_button.pressed {
-        Color::from_rgb8(45, 129, 205)
-    } else if radio_button.hovered {
-        Color::from_rgb8(53, 141, 221)
-    } else {
-        Color::from_rgb8(36, 42, 50)
-    };
+    let outer_bg = outer_bg_color(radio_button);
 
     scene.fill(
         Fill::NonZero,
@@ -83,4 +78,78 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
             Color::from_rgb8(146, 152, 160)
         },
     );
+}
+
+/// Computes radio indicator diameter from widget height with clamped bounds.
+fn indicator_size(height: f64) -> f64 {
+    (height - 8.0).clamp(14.0, 24.0)
+}
+
+/// Resolves radio outer indicator color from enabled/pressed/hovered state priority.
+fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
+    resolve_interaction_color(
+        radio_button.enabled,
+        radio_button.pressed,
+        radio_button.hovered,
+        Color::from_rgb8(43, 47, 53),
+        Color::from_rgb8(45, 129, 205),
+        Color::from_rgb8(53, 141, 221),
+        Color::from_rgb8(36, 42, 50),
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vello::kurbo::Rect;
+
+    /// Creates a reusable radio button fixture for helper-function tests.
+    fn sample_radio_button() -> RadioButtonNode {
+        RadioButtonNode {
+            rect: Rect::new(0.0, 0.0, 180.0, 24.0),
+            group: "group".to_string(),
+            text: Some("Radio".to_string()),
+            selected: false,
+            font_size: 14.0,
+            text_color: Color::from_rgb8(255, 255, 255),
+            enabled: true,
+            hovered: false,
+            pressed: false,
+            changed: false,
+        }
+    }
+
+    #[test]
+    /// Clamps indicator size to minimum when control is short.
+    fn indicator_size_clamps_to_min() {
+        assert_eq!(indicator_size(10.0), 14.0);
+    }
+
+    #[test]
+    /// Clamps indicator size to maximum when control is tall.
+    fn indicator_size_clamps_to_max() {
+        assert_eq!(indicator_size(100.0), 24.0);
+    }
+
+    #[test]
+    /// Prioritizes pressed color over hovered color.
+    fn outer_bg_color_prefers_pressed() {
+        let mut radio_button = sample_radio_button();
+        radio_button.pressed = true;
+        radio_button.hovered = true;
+        assert_eq!(
+            outer_bg_color(&radio_button),
+            Color::from_rgb8(45, 129, 205)
+        );
+    }
+
+    #[test]
+    /// Uses disabled color regardless of interaction states.
+    fn outer_bg_color_uses_disabled_color() {
+        let mut radio_button = sample_radio_button();
+        radio_button.enabled = false;
+        radio_button.pressed = true;
+        radio_button.hovered = true;
+        assert_eq!(outer_bg_color(&radio_button), Color::from_rgb8(43, 47, 53));
+    }
 }

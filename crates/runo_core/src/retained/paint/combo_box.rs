@@ -3,6 +3,7 @@ use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Color, Fill, FontData};
 use vello::{Glyph, Scene};
 
+use super::interaction_color::resolve_interaction_color;
 use crate::retained::node::ComboBoxNode;
 use crate::widget::text;
 
@@ -16,15 +17,15 @@ const BORDER_STROKE_WIDTH: f64 = 1.0;
 
 /// Returns the combo box border color based on enable/press/hover state priority.
 fn change_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
-    if !combo_box.enabled {
-        Color::from_rgb8(86, 92, 101)
-    } else if combo_box.pressed {
-        Color::from_rgb8(89, 176, 255)
-    } else if combo_box.hovered {
-        Color::from_rgb8(124, 177, 230)
-    } else {
-        combo_box.border_color
-    }
+    resolve_interaction_color(
+        combo_box.enabled,
+        combo_box.pressed,
+        combo_box.hovered,
+        Color::from_rgb8(86, 92, 101),
+        Color::from_rgb8(89, 176, 255),
+        Color::from_rgb8(124, 177, 230),
+        combo_box.border_color,
+    )
 }
 
 /// Returns the currently selected item text, or an empty string when index is out of range.

@@ -1,6 +1,7 @@
 mod button;
 mod checkbox;
 mod combo_box;
+mod interaction_color;
 mod label;
 mod radio_button;
 mod slider;
@@ -13,6 +14,7 @@ use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
 
 impl RetainedState {
+    /// Renders base widgets first, then paints overlay layers that must appear on top.
     pub(crate) fn render(&mut self, scene: &mut Scene, font: Option<&FontData>) {
         for id in &self.order {
             let Some(node) = self.widgets.get_mut(id) else {

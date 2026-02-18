@@ -13,4 +13,5 @@ f:
     cargo fmt
 
 t:
+    cargo fmt
     cargo test

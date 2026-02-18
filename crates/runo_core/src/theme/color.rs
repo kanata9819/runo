@@ -1,6 +1,72 @@
 use crate::Color;
 
 pub type Rgb = (u8, u8, u8);
+pub type Rgba = (u8, u8, u8, u8);
+
+pub mod widget {
+    use super::{Rgb, Rgba};
+
+    pub const BUTTON_DISABLED_BG: Rgb = (83, 90, 100);
+    pub const BUTTON_PRESSED_BG: Rgb = (31, 122, 205);
+    pub const BUTTON_HOVER_BG: Rgb = (69, 160, 242);
+    pub const BUTTON_ENABLED_BG: Rgb = (50, 144, 229);
+    pub const BUTTON_DISABLED_TEXT: Rgb = (178, 184, 192);
+
+    pub const LABEL_DISABLED_TEXT: Rgb = (142, 148, 156);
+
+    pub const CHECKBOX_DISABLED_BG: Rgb = (43, 47, 53);
+    pub const CHECKBOX_PRESSED_BG: Rgb = (45, 129, 205);
+    pub const CHECKBOX_HOVER_BG: Rgb = (53, 141, 221);
+    pub const CHECKBOX_CHECKED_BG: Rgb = (50, 144, 229);
+    pub const CHECKBOX_UNCHECKED_BG: Rgb = (36, 42, 50);
+    pub const CHECKBOX_BORDER_ENABLED: Rgb = (130, 145, 163);
+    pub const CHECKBOX_BORDER_DISABLED: Rgb = (88, 94, 102);
+    pub const CHECKBOX_MARK_ENABLED: Rgb = (240, 246, 255);
+    pub const CHECKBOX_MARK_DISABLED: Rgb = (167, 173, 181);
+    pub const CHECKBOX_TEXT_DISABLED: Rgb = (146, 152, 160);
+
+    pub const RADIO_DISABLED_BG: Rgb = (43, 47, 53);
+    pub const RADIO_PRESSED_BG: Rgb = (45, 129, 205);
+    pub const RADIO_HOVER_BG: Rgb = (53, 141, 221);
+    pub const RADIO_ENABLED_BG: Rgb = (36, 42, 50);
+    pub const RADIO_BORDER_ENABLED: Rgb = (130, 145, 163);
+    pub const RADIO_BORDER_DISABLED: Rgb = (88, 94, 102);
+    pub const RADIO_MARK_ENABLED: Rgb = (240, 246, 255);
+    pub const RADIO_MARK_DISABLED: Rgb = (167, 173, 181);
+    pub const RADIO_TEXT_DISABLED: Rgb = (146, 152, 160);
+
+    pub const COMBO_DISABLED_BORDER: Rgb = (86, 92, 101);
+    pub const COMBO_PRESSED_BORDER: Rgb = (89, 176, 255);
+    pub const COMBO_HOVER_BORDER: Rgb = (124, 177, 230);
+    pub const COMBO_DISABLED_TEXT: Rgb = (147, 153, 161);
+    pub const COMBO_DISABLED_BG: Rgb = (45, 49, 55);
+    pub const COMBO_ARROW_ENABLED: Rgb = (186, 196, 210);
+    pub const COMBO_ARROW_DISABLED: Rgb = (141, 147, 154);
+    pub const COMBO_ITEM_HOVER_BG: Rgb = (63, 80, 102);
+    pub const COMBO_ITEM_SELECTED_BG: Rgb = (46, 64, 86);
+
+    pub const SLIDER_TRACK_ENABLED: Rgb = (56, 63, 74);
+    pub const SLIDER_TRACK_DISABLED: Rgb = (48, 52, 58);
+    pub const SLIDER_ACTIVE_DISABLED: Rgb = (78, 82, 90);
+    pub const SLIDER_ACTIVE_PRESSED: Rgb = (37, 132, 214);
+    pub const SLIDER_ACTIVE_HOVER: Rgb = (62, 154, 234);
+    pub const SLIDER_ACTIVE_ENABLED: Rgb = (50, 144, 229);
+    pub const SLIDER_THUMB_ENABLED: Rgb = (240, 246, 255);
+    pub const SLIDER_THUMB_DISABLED: Rgb = (163, 169, 177);
+    pub const SLIDER_THUMB_BORDER: Rgb = (78, 89, 104);
+    pub const SLIDER_TEXT_DISABLED: Rgb = (146, 152, 160);
+
+    pub const TEXT_BOX_DISABLED_BG: Rgb = (45, 49, 55);
+    pub const TEXT_BOX_DISABLED_BORDER: Rgb = (86, 92, 101);
+    pub const TEXT_BOX_FOCUSED_BORDER: Rgb = (89, 176, 255);
+    pub const TEXT_BOX_DISABLED_TEXT: Rgb = (147, 153, 161);
+    pub const TEXT_BOX_PLACEHOLDER_TEXT: Rgb = (142, 151, 163);
+    pub const TEXT_BOX_CARET: Rgb = (220, 228, 240);
+    pub const TEXT_BOX_SCROLLBAR_TRACK_ENABLED: Rgba = (255, 255, 255, 35);
+    pub const TEXT_BOX_SCROLLBAR_TRACK_DISABLED: Rgba = (255, 255, 255, 20);
+    pub const TEXT_BOX_SCROLLBAR_THUMB_ENABLED: Rgba = (255, 255, 255, 150);
+    pub const TEXT_BOX_SCROLLBAR_THUMB_DISABLED: Rgba = (255, 255, 255, 90);
+}
 
 pub const WHITE: Rgb = (255, 255, 255);
 pub const BLACK: Rgb = (0, 0, 0);
@@ -563,6 +629,10 @@ pub fn rgb(rgb: Rgb) -> Color {
     Color::from_rgb8(rgb.0, rgb.1, rgb.2)
 }
 
+pub fn rgba(rgba: Rgba) -> Color {
+    Color::from_rgba8(rgba.0, rgba.1, rgba.2, rgba.3)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -571,6 +641,13 @@ mod tests {
     fn rgb_uses_exact_components() {
         let a = rgb((12, 34, 56));
         let b = Color::from_rgb8(12, 34, 56);
+        assert_eq!(format!("{a:?}"), format!("{b:?}"));
+    }
+
+    #[test]
+    fn rgba_uses_exact_components() {
+        let a = rgba((12, 34, 56, 78));
+        let b = Color::from_rgba8(12, 34, 56, 78);
         assert_eq!(format!("{a:?}"), format!("{b:?}"));
     }
 

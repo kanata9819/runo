@@ -1,10 +1,11 @@
 use vello::Scene;
 use vello::kurbo::{Affine, Line, RoundedRect, Stroke};
 use vello::peniko::color::{AlphaColor, Srgb};
-use vello::peniko::{Color, Fill, FontData};
+use vello::peniko::{Fill, FontData};
 
 use super::interaction_color;
 use crate::retained::node::CheckboxNode;
+use crate::theme::color;
 use crate::widget::text;
 
 const INDICATOR_X_OFFSET: f64 = 2.0;
@@ -23,16 +24,6 @@ const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 const INDICATOR_SIZE_OFFSET: f64 = 8.0;
 const INDICATOR_SIZE_MIN: f64 = 14.0;
 const INDICATOR_SIZE_MAX: f64 = 24.0;
-const ENABLED_BORDER_RGB: (u8, u8, u8) = (130, 145, 163);
-const DISABLED_BORDER_RGB: (u8, u8, u8) = (88, 94, 102);
-const ENABLED_CHECK_RGB: (u8, u8, u8) = (240, 246, 255);
-const DISABLED_CHECK_RGB: (u8, u8, u8) = (167, 173, 181);
-const DISABLED_TEXT_RGB: (u8, u8, u8) = (146, 152, 160);
-const DISABLED_BG_RGB: (u8, u8, u8) = (43, 47, 53);
-const PRESSED_BG_RGB: (u8, u8, u8) = (45, 129, 205);
-const HOVER_BG_RGB: (u8, u8, u8) = (53, 141, 221);
-const CHECKED_BG_RGB: (u8, u8, u8) = (50, 144, 229);
-const UNCHECKED_BG_RGB: (u8, u8, u8) = (36, 42, 50);
 
 /// Renders checkbox indicator, optional check mark, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &CheckboxNode) {
@@ -61,17 +52,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
         if checkbox.enabled {
-            Color::from_rgb8(
-                ENABLED_BORDER_RGB.0,
-                ENABLED_BORDER_RGB.1,
-                ENABLED_BORDER_RGB.2,
-            )
+            color::rgb(color::widget::CHECKBOX_BORDER_ENABLED)
         } else {
-            Color::from_rgb8(
-                DISABLED_BORDER_RGB.0,
-                DISABLED_BORDER_RGB.1,
-                DISABLED_BORDER_RGB.2,
-            )
+            color::rgb(color::widget::CHECKBOX_BORDER_DISABLED)
         },
         None,
         &indicator_rect,
@@ -79,17 +62,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
 
     if checkbox.checked {
         let check_color = if checkbox.enabled {
-            Color::from_rgb8(
-                ENABLED_CHECK_RGB.0,
-                ENABLED_CHECK_RGB.1,
-                ENABLED_CHECK_RGB.2,
-            )
+            color::rgb(color::widget::CHECKBOX_MARK_ENABLED)
         } else {
-            Color::from_rgb8(
-                DISABLED_CHECK_RGB.0,
-                DISABLED_CHECK_RGB.1,
-                DISABLED_CHECK_RGB.2,
-            )
+            color::rgb(color::widget::CHECKBOX_MARK_DISABLED)
         };
         let x0 = indicator_x + indicator_size * CHECK_X0_RATIO;
         let y0 = indicator_y + indicator_size * CHECK_Y0_RATIO;
@@ -124,10 +99,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
     };
 
     let text_x = indicator_x + indicator_size + LABEL_TEXT_SPACING;
-    let baseline_y =
-        checkbox.rect.y0
-            + checkbox.rect.height() * BASELINE_VERTICAL_RATIO
-            + checkbox.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
+    let baseline_y = checkbox.rect.y0
+        + checkbox.rect.height() * BASELINE_VERTICAL_RATIO
+        + checkbox.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
     text::draw_text_run(
         scene,
         font,
@@ -138,11 +112,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         if checkbox.enabled {
             checkbox.text_color
         } else {
-            Color::from_rgb8(
-                DISABLED_TEXT_RGB.0,
-                DISABLED_TEXT_RGB.1,
-                DISABLED_TEXT_RGB.2,
-            )
+            color::rgb(color::widget::CHECKBOX_TEXT_DISABLED)
         },
     );
 }
@@ -158,13 +128,13 @@ fn indicator_bg_color(checkbox: &CheckboxNode) -> AlphaColor<Srgb> {
         checkbox.enabled,
         checkbox.pressed,
         checkbox.hovered,
-        Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2),
-        Color::from_rgb8(PRESSED_BG_RGB.0, PRESSED_BG_RGB.1, PRESSED_BG_RGB.2),
-        Color::from_rgb8(HOVER_BG_RGB.0, HOVER_BG_RGB.1, HOVER_BG_RGB.2),
+        color::rgb(color::widget::CHECKBOX_DISABLED_BG),
+        color::rgb(color::widget::CHECKBOX_PRESSED_BG),
+        color::rgb(color::widget::CHECKBOX_HOVER_BG),
         if checkbox.checked {
-            Color::from_rgb8(CHECKED_BG_RGB.0, CHECKED_BG_RGB.1, CHECKED_BG_RGB.2)
+            color::rgb(color::widget::CHECKBOX_CHECKED_BG)
         } else {
-            Color::from_rgb8(UNCHECKED_BG_RGB.0, UNCHECKED_BG_RGB.1, UNCHECKED_BG_RGB.2)
+            color::rgb(color::widget::CHECKBOX_UNCHECKED_BG)
         },
     )
 }
@@ -173,6 +143,7 @@ fn indicator_bg_color(checkbox: &CheckboxNode) -> AlphaColor<Srgb> {
 mod tests {
     use super::*;
     use vello::kurbo::Rect;
+    use vello::peniko::Color;
 
     /// Creates a reusable checkbox fixture for helper-function tests.
     fn sample_checkbox() -> CheckboxNode {

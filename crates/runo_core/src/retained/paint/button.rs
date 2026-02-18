@@ -2,20 +2,16 @@ use vello::Glyph;
 use vello::Scene;
 use vello::kurbo::{Affine, RoundedRect};
 use vello::peniko::color::{AlphaColor, Srgb};
-use vello::peniko::{Color, Fill, FontData};
+use vello::peniko::{Fill, FontData};
 
 use super::interaction_color;
 use crate::retained::node::ButtonNode;
+use crate::theme::color;
 use crate::widget::text;
 
 const BUTTON_CORNER_RADIUS: f64 = 10.0;
 const TEXT_CENTER_RATIO: f64 = 0.5;
 const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
-const DISABLED_BG_RGB: (u8, u8, u8) = (83, 90, 100);
-const PRESSED_BG_RGB: (u8, u8, u8) = (31, 122, 205);
-const HOVER_BG_RGB: (u8, u8, u8) = (69, 160, 242);
-const ENABLED_BG_RGB: (u8, u8, u8) = (50, 144, 229);
-const DISABLED_TEXT_RGB: (u8, u8, u8) = (178, 184, 192);
 
 /// Renders a button body and optional centered label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &ButtonNode) {
@@ -40,10 +36,10 @@ fn change_color(button: &ButtonNode) -> AlphaColor<Srgb> {
         button.enabled,
         button.pressed,
         button.hovered,
-        Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2),
-        Color::from_rgb8(PRESSED_BG_RGB.0, PRESSED_BG_RGB.1, PRESSED_BG_RGB.2),
-        Color::from_rgb8(HOVER_BG_RGB.0, HOVER_BG_RGB.1, HOVER_BG_RGB.2),
-        Color::from_rgb8(ENABLED_BG_RGB.0, ENABLED_BG_RGB.1, ENABLED_BG_RGB.2),
+        color::rgb(color::widget::BUTTON_DISABLED_BG),
+        color::rgb(color::widget::BUTTON_PRESSED_BG),
+        color::rgb(color::widget::BUTTON_HOVER_BG),
+        color::rgb(color::widget::BUTTON_ENABLED_BG),
     )
 }
 
@@ -70,11 +66,7 @@ fn draw_text_run(
         if button.enabled {
             button.text_color
         } else {
-            Color::from_rgb8(
-                DISABLED_TEXT_RGB.0,
-                DISABLED_TEXT_RGB.1,
-                DISABLED_TEXT_RGB.2,
-            )
+            color::rgb(color::widget::BUTTON_DISABLED_TEXT)
         },
     );
 }
@@ -83,6 +75,7 @@ fn draw_text_run(
 mod tests {
     use super::*;
     use vello::kurbo::Rect;
+    use vello::peniko::Color;
 
     /// Builds a reusable button fixture for paint helper tests.
     fn sample_button() -> ButtonNode {

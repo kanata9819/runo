@@ -6,13 +6,14 @@ mod hooks;
 mod input;
 mod layout;
 mod retained;
+mod theme;
 mod ui;
 mod widget;
 
 pub use app::{RunOptions, RunoApplication, run};
 pub use event::UiEvent;
 pub use hooks::effect::EffectCleanup;
-pub use ui::colors;
+pub use theme::color as colors;
 pub use ui::{
     Ui, UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiEvents, UiLabelState,
     UiRadioButtonState, UiSliderState, UiState, UiTextBoxState, UiWidgets,

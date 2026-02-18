@@ -1,4 +1,3 @@
-pub mod colors;
 mod events;
 mod show;
 mod state;

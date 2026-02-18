@@ -4,6 +4,7 @@ use vello::kurbo::{Affine, Rect, RoundedRect};
 use vello::peniko::{Color, Fill, FontData};
 
 use crate::retained::node::TextBoxNode;
+use crate::theme::color;
 use crate::widget::text;
 
 const BOX_CORNER_RADIUS: f64 = 8.0;
@@ -19,17 +20,6 @@ const SCROLLBAR_TRACK_BOTTOM_OFFSET: f64 = 6.0;
 const SCROLLBAR_CORNER_RADIUS: f64 = 2.0;
 const SCROLLBAR_THUMB_MIN_WIDTH: f64 = 18.0;
 const MIN_INNER_WIDTH: f64 = 1.0;
-const DISABLED_BG_RGB: (u8, u8, u8) = (45, 49, 55);
-const DISABLED_BORDER_RGB: (u8, u8, u8) = (86, 92, 101);
-const FOCUSED_BORDER_RGB: (u8, u8, u8) = (89, 176, 255);
-const DISABLED_TEXT_RGB: (u8, u8, u8) = (147, 153, 161);
-const PLACEHOLDER_TEXT_RGB: (u8, u8, u8) = (142, 151, 163);
-const CARET_RGB: (u8, u8, u8) = (220, 228, 240);
-const SCROLLBAR_RGB: (u8, u8, u8) = (255, 255, 255);
-const SCROLLBAR_TRACK_ENABLED_ALPHA: u8 = 35;
-const SCROLLBAR_TRACK_DISABLED_ALPHA: u8 = 20;
-const SCROLLBAR_THUMB_ENABLED_ALPHA: u8 = 150;
-const SCROLLBAR_THUMB_DISABLED_ALPHA: u8 = 90;
 
 #[derive(Clone, Copy)]
 struct TextMetrics {
@@ -64,20 +54,16 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
         if text_box.enabled {
             text_box.bg_color
         } else {
-            Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2)
+            color::rgb(color::widget::TEXT_BOX_DISABLED_BG)
         },
         None,
         &bg,
     );
 
     let border_color = if !text_box.enabled {
-        Color::from_rgb8(
-            DISABLED_BORDER_RGB.0,
-            DISABLED_BORDER_RGB.1,
-            DISABLED_BORDER_RGB.2,
-        )
+        color::rgb(color::widget::TEXT_BOX_DISABLED_BORDER)
     } else if text_box.focused {
-        Color::from_rgb8(FOCUSED_BORDER_RGB.0, FOCUSED_BORDER_RGB.1, FOCUSED_BORDER_RGB.2)
+        color::rgb(color::widget::TEXT_BOX_FOCUSED_BORDER)
     } else {
         text_box.border_color
     };
@@ -93,17 +79,9 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
 /// Resolves text color for normal, placeholder, and disabled states.
 fn resolve_text_color(text_box: &TextBoxNode) -> Color {
     if !text_box.enabled {
-        Color::from_rgb8(
-            DISABLED_TEXT_RGB.0,
-            DISABLED_TEXT_RGB.1,
-            DISABLED_TEXT_RGB.2,
-        )
+        color::rgb(color::widget::TEXT_BOX_DISABLED_TEXT)
     } else if text_box.text.is_empty() {
-        Color::from_rgb8(
-            PLACEHOLDER_TEXT_RGB.0,
-            PLACEHOLDER_TEXT_RGB.1,
-            PLACEHOLDER_TEXT_RGB.2,
-        )
+        color::rgb(color::widget::TEXT_BOX_PLACEHOLDER_TEXT)
     } else {
         text_box.text_color
     }
@@ -215,7 +193,7 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
-            Color::from_rgb8(CARET_RGB.0, CARET_RGB.1, CARET_RGB.2),
+            color::rgb(color::widget::TEXT_BOX_CARET),
             None,
             &caret,
         );
@@ -269,19 +247,9 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     let track = Rect::new(inner_left, track_y - track_height, inner_right, track_y);
     let track_shape = RoundedRect::from_rect(track, SCROLLBAR_CORNER_RADIUS);
     let track_color = if text_box.enabled {
-        Color::from_rgba8(
-            SCROLLBAR_RGB.0,
-            SCROLLBAR_RGB.1,
-            SCROLLBAR_RGB.2,
-            SCROLLBAR_TRACK_ENABLED_ALPHA,
-        )
+        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_TRACK_ENABLED)
     } else {
-        Color::from_rgba8(
-            SCROLLBAR_RGB.0,
-            SCROLLBAR_RGB.1,
-            SCROLLBAR_RGB.2,
-            SCROLLBAR_TRACK_DISABLED_ALPHA,
-        )
+        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_TRACK_DISABLED)
     };
     scene.fill(
         Fill::NonZero,
@@ -304,19 +272,9 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     );
     let thumb_shape = RoundedRect::from_rect(thumb, SCROLLBAR_CORNER_RADIUS);
     let thumb_color = if text_box.enabled {
-        Color::from_rgba8(
-            SCROLLBAR_RGB.0,
-            SCROLLBAR_RGB.1,
-            SCROLLBAR_RGB.2,
-            SCROLLBAR_THUMB_ENABLED_ALPHA,
-        )
+        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_THUMB_ENABLED)
     } else {
-        Color::from_rgba8(
-            SCROLLBAR_RGB.0,
-            SCROLLBAR_RGB.1,
-            SCROLLBAR_RGB.2,
-            SCROLLBAR_THUMB_DISABLED_ALPHA,
-        )
+        color::rgba(color::widget::TEXT_BOX_SCROLLBAR_THUMB_DISABLED)
     };
     scene.fill(
         Fill::NonZero,

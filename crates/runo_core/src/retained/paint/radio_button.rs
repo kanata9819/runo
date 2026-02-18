@@ -1,10 +1,11 @@
 use vello::Scene;
 use vello::kurbo::{Affine, Circle, Stroke};
 use vello::peniko::color::{AlphaColor, Srgb};
-use vello::peniko::{Color, Fill, FontData};
+use vello::peniko::{Fill, FontData};
 
 use super::interaction_color;
 use crate::retained::node::RadioButtonNode;
+use crate::theme::color;
 use crate::widget::text;
 
 const INDICATOR_X_OFFSET: f64 = 2.0;
@@ -17,15 +18,6 @@ const INNER_RADIUS_RATIO: f64 = 0.45;
 const BASELINE_VERTICAL_RATIO: f64 = 0.5;
 const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 const LABEL_TEXT_SPACING: f64 = 10.0;
-const ENABLED_BORDER_RGB: (u8, u8, u8) = (130, 145, 163);
-const DISABLED_BORDER_RGB: (u8, u8, u8) = (88, 94, 102);
-const ENABLED_INNER_RGB: (u8, u8, u8) = (240, 246, 255);
-const DISABLED_INNER_RGB: (u8, u8, u8) = (167, 173, 181);
-const DISABLED_TEXT_RGB: (u8, u8, u8) = (146, 152, 160);
-const DISABLED_BG_RGB: (u8, u8, u8) = (43, 47, 53);
-const PRESSED_BG_RGB: (u8, u8, u8) = (45, 129, 205);
-const HOVER_BG_RGB: (u8, u8, u8) = (53, 141, 221);
-const ENABLED_BG_RGB: (u8, u8, u8) = (36, 42, 50);
 
 /// Renders radio button indicator, selected dot, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioButtonNode) {
@@ -48,17 +40,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
         if radio_button.enabled {
-            Color::from_rgb8(
-                ENABLED_BORDER_RGB.0,
-                ENABLED_BORDER_RGB.1,
-                ENABLED_BORDER_RGB.2,
-            )
+            color::rgb(color::widget::RADIO_BORDER_ENABLED)
         } else {
-            Color::from_rgb8(
-                DISABLED_BORDER_RGB.0,
-                DISABLED_BORDER_RGB.1,
-                DISABLED_BORDER_RGB.2,
-            )
+            color::rgb(color::widget::RADIO_BORDER_DISABLED)
         },
         None,
         &outer_circle,
@@ -71,17 +55,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
             Fill::NonZero,
             Affine::IDENTITY,
             if radio_button.enabled {
-                Color::from_rgb8(
-                    ENABLED_INNER_RGB.0,
-                    ENABLED_INNER_RGB.1,
-                    ENABLED_INNER_RGB.2,
-                )
+                color::rgb(color::widget::RADIO_MARK_ENABLED)
             } else {
-                Color::from_rgb8(
-                    DISABLED_INNER_RGB.0,
-                    DISABLED_INNER_RGB.1,
-                    DISABLED_INNER_RGB.2,
-                )
+                color::rgb(color::widget::RADIO_MARK_DISABLED)
             },
             None,
             &inner_circle,
@@ -112,11 +88,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         if radio_button.enabled {
             radio_button.text_color
         } else {
-            Color::from_rgb8(
-                DISABLED_TEXT_RGB.0,
-                DISABLED_TEXT_RGB.1,
-                DISABLED_TEXT_RGB.2,
-            )
+            color::rgb(color::widget::RADIO_TEXT_DISABLED)
         },
     );
 }
@@ -132,10 +104,10 @@ fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
         radio_button.enabled,
         radio_button.pressed,
         radio_button.hovered,
-        Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2),
-        Color::from_rgb8(PRESSED_BG_RGB.0, PRESSED_BG_RGB.1, PRESSED_BG_RGB.2),
-        Color::from_rgb8(HOVER_BG_RGB.0, HOVER_BG_RGB.1, HOVER_BG_RGB.2),
-        Color::from_rgb8(ENABLED_BG_RGB.0, ENABLED_BG_RGB.1, ENABLED_BG_RGB.2),
+        color::rgb(color::widget::RADIO_DISABLED_BG),
+        color::rgb(color::widget::RADIO_PRESSED_BG),
+        color::rgb(color::widget::RADIO_HOVER_BG),
+        color::rgb(color::widget::RADIO_ENABLED_BG),
     )
 }
 
@@ -143,6 +115,7 @@ fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
 mod tests {
     use super::*;
     use vello::kurbo::Rect;
+    use vello::peniko::Color;
 
     /// Creates a reusable radio button fixture for helper-function tests.
     fn sample_radio_button() -> RadioButtonNode {

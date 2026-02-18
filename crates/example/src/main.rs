@@ -158,12 +158,15 @@ impl RunoApplication for MyApp {
                     } else {
                         colors::rgb(colors::PANEL_BG)
                     };
+
                     ui.state().div().set_background(MAIN_PANEL_ID, panel_color);
+
                     let label = if self.toggled {
                         "Toggle: ON"
                     } else {
                         "Toggle: OFF"
                     };
+
                     if self.input_text.is_empty() {
                         ui.state().button().set_text(TOGGLE_BUTTON_ID, label);
                     } else {
@@ -172,6 +175,7 @@ impl RunoApplication for MyApp {
                             .set_text(TOGGLE_BUTTON_ID, format!("{} ({})", label, self.input_text));
                     }
                 }
+
                 UiEvent::TextBoxChanged { id, text } if id == INPUT_NAME_ID => {
                     self.input_text = text;
                     let label = if self.toggled {

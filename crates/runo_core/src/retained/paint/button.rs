@@ -8,10 +8,19 @@ use super::interaction_color;
 use crate::retained::node::ButtonNode;
 use crate::widget::text;
 
+const BUTTON_CORNER_RADIUS: f64 = 10.0;
+const TEXT_CENTER_RATIO: f64 = 0.5;
+const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
+const DISABLED_BG_RGB: (u8, u8, u8) = (83, 90, 100);
+const PRESSED_BG_RGB: (u8, u8, u8) = (31, 122, 205);
+const HOVER_BG_RGB: (u8, u8, u8) = (69, 160, 242);
+const ENABLED_BG_RGB: (u8, u8, u8) = (50, 144, 229);
+const DISABLED_TEXT_RGB: (u8, u8, u8) = (178, 184, 192);
+
 /// Renders a button body and optional centered label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &ButtonNode) {
     let color = change_color(button);
-    let rounded = RoundedRect::from_rect(button.rect, 10.0);
+    let rounded = RoundedRect::from_rect(button.rect, BUTTON_CORNER_RADIUS);
 
     scene.fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
 
@@ -31,10 +40,10 @@ fn change_color(button: &ButtonNode) -> AlphaColor<Srgb> {
         button.enabled,
         button.pressed,
         button.hovered,
-        Color::from_rgb8(83, 90, 100),
-        Color::from_rgb8(31, 122, 205),
-        Color::from_rgb8(69, 160, 242),
-        Color::from_rgb8(50, 144, 229),
+        Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2),
+        Color::from_rgb8(PRESSED_BG_RGB.0, PRESSED_BG_RGB.1, PRESSED_BG_RGB.2),
+        Color::from_rgb8(HOVER_BG_RGB.0, HOVER_BG_RGB.1, HOVER_BG_RGB.2),
+        Color::from_rgb8(ENABLED_BG_RGB.0, ENABLED_BG_RGB.1, ENABLED_BG_RGB.2),
     )
 }
 
@@ -46,8 +55,10 @@ fn draw_text_run(
     glyphs: Vec<Glyph>,
     total_advance: f32,
 ) {
-    let text_x = button.rect.x0 + (button.rect.width() - total_advance as f64) * 0.5;
-    let text_y = button.rect.y0 + button.rect.height() * 0.5 + button.font_size as f64 * 0.35;
+    let text_x = button.rect.x0 + (button.rect.width() - total_advance as f64) * TEXT_CENTER_RATIO;
+    let text_y = button.rect.y0
+        + button.rect.height() * TEXT_CENTER_RATIO
+        + button.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
 
     text::draw_text_run(
         scene,
@@ -59,7 +70,11 @@ fn draw_text_run(
         if button.enabled {
             button.text_color
         } else {
-            Color::from_rgb8(178, 184, 192)
+            Color::from_rgb8(
+                DISABLED_TEXT_RGB.0,
+                DISABLED_TEXT_RGB.1,
+                DISABLED_TEXT_RGB.2,
+            )
         },
     );
 }

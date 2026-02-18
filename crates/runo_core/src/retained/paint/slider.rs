@@ -5,19 +5,38 @@ use vello::peniko::{Color, Fill, FontData};
 use crate::retained::node::SliderNode;
 use crate::widget::text;
 
+const TRACK_HEIGHT: f64 = 6.0;
+const TRACK_HORIZONTAL_PADDING: f64 = 12.0;
+const TRACK_VERTICAL_RATIO: f64 = 0.62;
+const HALF_RATIO: f64 = 0.5;
+const TRACK_CORNER_RADIUS: f64 = 3.0;
+const THUMB_RADIUS: f64 = 8.0;
+const THUMB_BORDER_WIDTH: f64 = 1.0;
+const VALUE_DECIMALS: usize = 2;
+const ENABLED_TRACK_RGB: (u8, u8, u8) = (56, 63, 74);
+const DISABLED_TRACK_RGB: (u8, u8, u8) = (48, 52, 58);
+const DISABLED_ACTIVE_RGB: (u8, u8, u8) = (78, 82, 90);
+const PRESSED_ACTIVE_RGB: (u8, u8, u8) = (37, 132, 214);
+const HOVER_ACTIVE_RGB: (u8, u8, u8) = (62, 154, 234);
+const ENABLED_ACTIVE_RGB: (u8, u8, u8) = (50, 144, 229);
+const ENABLED_THUMB_RGB: (u8, u8, u8) = (240, 246, 255);
+const DISABLED_THUMB_RGB: (u8, u8, u8) = (163, 169, 177);
+const THUMB_BORDER_RGB: (u8, u8, u8) = (78, 89, 104);
+const DISABLED_TEXT_RGB: (u8, u8, u8) = (146, 152, 160);
+
 /// Renders slider track, active fill, thumb, optional label, and current numeric value.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, slider: &SliderNode) {
-    let track_h = 6.0;
-    let pad_x = 12.0;
+    let track_h = TRACK_HEIGHT;
+    let pad_x = TRACK_HORIZONTAL_PADDING;
     let track_x0 = slider.rect.x0 + pad_x;
     let track_x1 = slider.rect.x1 - pad_x;
-    let track_y = slider.rect.y0 + slider.rect.height() * 0.62;
+    let track_y = slider.rect.y0 + slider.rect.height() * TRACK_VERTICAL_RATIO;
     let track_rect = RoundedRect::new(
         track_x0,
-        track_y - track_h * 0.5,
+        track_y - track_h * HALF_RATIO,
         track_x1,
-        track_y + track_h * 0.5,
-        3.0,
+        track_y + track_h * HALF_RATIO,
+        TRACK_CORNER_RADIUS,
     );
 
     let ratio = value_ratio(slider.value, slider.min, slider.max);
@@ -41,9 +60,17 @@ fn draw_track(scene: &mut Scene, slider: &SliderNode, track_rect: &RoundedRect) 
         Fill::NonZero,
         Affine::IDENTITY,
         if slider.enabled {
-            Color::from_rgb8(56, 63, 74)
+            Color::from_rgb8(
+                ENABLED_TRACK_RGB.0,
+                ENABLED_TRACK_RGB.1,
+                ENABLED_TRACK_RGB.2,
+            )
         } else {
-            Color::from_rgb8(48, 52, 58)
+            Color::from_rgb8(
+                DISABLED_TRACK_RGB.0,
+                DISABLED_TRACK_RGB.1,
+                DISABLED_TRACK_RGB.2,
+            )
         },
         None,
         track_rect,
@@ -61,22 +88,38 @@ fn draw_active_fill(
 ) {
     let active_rect = RoundedRect::new(
         track_x0,
-        track_y - track_h * 0.5,
+        track_y - track_h * HALF_RATIO,
         thumb_x,
-        track_y + track_h * 0.5,
-        3.0,
+        track_y + track_h * HALF_RATIO,
+        TRACK_CORNER_RADIUS,
     );
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
         if !slider.enabled {
-            Color::from_rgb8(78, 82, 90)
+            Color::from_rgb8(
+                DISABLED_ACTIVE_RGB.0,
+                DISABLED_ACTIVE_RGB.1,
+                DISABLED_ACTIVE_RGB.2,
+            )
         } else if slider.pressed {
-            Color::from_rgb8(37, 132, 214)
+            Color::from_rgb8(
+                PRESSED_ACTIVE_RGB.0,
+                PRESSED_ACTIVE_RGB.1,
+                PRESSED_ACTIVE_RGB.2,
+            )
         } else if slider.hovered {
-            Color::from_rgb8(62, 154, 234)
+            Color::from_rgb8(
+                HOVER_ACTIVE_RGB.0,
+                HOVER_ACTIVE_RGB.1,
+                HOVER_ACTIVE_RGB.2,
+            )
         } else {
-            Color::from_rgb8(50, 144, 229)
+            Color::from_rgb8(
+                ENABLED_ACTIVE_RGB.0,
+                ENABLED_ACTIVE_RGB.1,
+                ENABLED_ACTIVE_RGB.2,
+            )
         },
         None,
         &active_rect,
@@ -85,22 +128,34 @@ fn draw_active_fill(
 
 /// Draws the slider thumb circle.
 fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64) {
-    let thumb = Circle::new((thumb_x, track_y), 8.0);
+    let thumb = Circle::new((thumb_x, track_y), THUMB_RADIUS);
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
         if slider.enabled {
-            Color::from_rgb8(240, 246, 255)
+            Color::from_rgb8(
+                ENABLED_THUMB_RGB.0,
+                ENABLED_THUMB_RGB.1,
+                ENABLED_THUMB_RGB.2,
+            )
         } else {
-            Color::from_rgb8(163, 169, 177)
+            Color::from_rgb8(
+                DISABLED_THUMB_RGB.0,
+                DISABLED_THUMB_RGB.1,
+                DISABLED_THUMB_RGB.2,
+            )
         },
         None,
         &thumb,
     );
     scene.stroke(
-        &Stroke::new(1.0),
+        &Stroke::new(THUMB_BORDER_WIDTH),
         Affine::IDENTITY,
-        Color::from_rgb8(78, 89, 104),
+        Color::from_rgb8(
+            THUMB_BORDER_RGB.0,
+            THUMB_BORDER_RGB.1,
+            THUMB_BORDER_RGB.2,
+        ),
         None,
         &thumb,
     );
@@ -122,7 +177,11 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
             if slider.enabled {
                 slider.text_color
             } else {
-                Color::from_rgb8(146, 152, 160)
+                Color::from_rgb8(
+                    DISABLED_TEXT_RGB.0,
+                    DISABLED_TEXT_RGB.1,
+                    DISABLED_TEXT_RGB.2,
+                )
             },
         );
     }
@@ -130,7 +189,7 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
 
 /// Draws the right-aligned numeric value text.
 fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_x: f64) {
-    let value_text = format!("{:.2}", slider.value);
+    let value_text = format!("{:.*}", VALUE_DECIMALS, slider.value);
     if let Some((glyphs, w)) = text::layout_text(font, &value_text, slider.font_size) {
         let baseline_y = slider.rect.y0 + slider.font_size as f64;
         text::draw_text_run(
@@ -143,7 +202,11 @@ fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_
             if slider.enabled {
                 slider.text_color
             } else {
-                Color::from_rgb8(146, 152, 160)
+                Color::from_rgb8(
+                    DISABLED_TEXT_RGB.0,
+                    DISABLED_TEXT_RGB.1,
+                    DISABLED_TEXT_RGB.2,
+                )
             },
         );
     }

@@ -7,12 +7,32 @@ use super::interaction_color;
 use crate::retained::node::RadioButtonNode;
 use crate::widget::text;
 
+const INDICATOR_X_OFFSET: f64 = 2.0;
+const INDICATOR_BORDER_WIDTH: f64 = 1.0;
+const INDICATOR_SIZE_OFFSET: f64 = 8.0;
+const INDICATOR_SIZE_MIN: f64 = 14.0;
+const INDICATOR_SIZE_MAX: f64 = 24.0;
+const OUTER_RADIUS_RATIO: f64 = 0.5;
+const INNER_RADIUS_RATIO: f64 = 0.45;
+const BASELINE_VERTICAL_RATIO: f64 = 0.5;
+const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
+const LABEL_TEXT_SPACING: f64 = 10.0;
+const ENABLED_BORDER_RGB: (u8, u8, u8) = (130, 145, 163);
+const DISABLED_BORDER_RGB: (u8, u8, u8) = (88, 94, 102);
+const ENABLED_INNER_RGB: (u8, u8, u8) = (240, 246, 255);
+const DISABLED_INNER_RGB: (u8, u8, u8) = (167, 173, 181);
+const DISABLED_TEXT_RGB: (u8, u8, u8) = (146, 152, 160);
+const DISABLED_BG_RGB: (u8, u8, u8) = (43, 47, 53);
+const PRESSED_BG_RGB: (u8, u8, u8) = (45, 129, 205);
+const HOVER_BG_RGB: (u8, u8, u8) = (53, 141, 221);
+const ENABLED_BG_RGB: (u8, u8, u8) = (36, 42, 50);
+
 /// Renders radio button indicator, selected dot, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioButtonNode) {
     let indicator_size = indicator_size(radio_button.rect.height());
-    let indicator_radius = indicator_size * 0.5;
-    let center_x = radio_button.rect.x0 + 2.0 + indicator_radius;
-    let center_y = radio_button.rect.y0 + radio_button.rect.height() * 0.5;
+    let indicator_radius = indicator_size * OUTER_RADIUS_RATIO;
+    let center_x = radio_button.rect.x0 + INDICATOR_X_OFFSET + indicator_radius;
+    let center_y = radio_button.rect.y0 + radio_button.rect.height() * BASELINE_VERTICAL_RATIO;
     let outer_circle = Circle::new((center_x, center_y), indicator_radius);
 
     let outer_bg = outer_bg_color(radio_button);
@@ -25,27 +45,43 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         &outer_circle,
     );
     scene.stroke(
-        &Stroke::new(1.0),
+        &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
         if radio_button.enabled {
-            Color::from_rgb8(130, 145, 163)
+            Color::from_rgb8(
+                ENABLED_BORDER_RGB.0,
+                ENABLED_BORDER_RGB.1,
+                ENABLED_BORDER_RGB.2,
+            )
         } else {
-            Color::from_rgb8(88, 94, 102)
+            Color::from_rgb8(
+                DISABLED_BORDER_RGB.0,
+                DISABLED_BORDER_RGB.1,
+                DISABLED_BORDER_RGB.2,
+            )
         },
         None,
         &outer_circle,
     );
 
     if radio_button.selected {
-        let inner_radius = indicator_radius * 0.45;
+        let inner_radius = indicator_radius * INNER_RADIUS_RATIO;
         let inner_circle = Circle::new((center_x, center_y), inner_radius);
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
             if radio_button.enabled {
-                Color::from_rgb8(240, 246, 255)
+                Color::from_rgb8(
+                    ENABLED_INNER_RGB.0,
+                    ENABLED_INNER_RGB.1,
+                    ENABLED_INNER_RGB.2,
+                )
             } else {
-                Color::from_rgb8(167, 173, 181)
+                Color::from_rgb8(
+                    DISABLED_INNER_RGB.0,
+                    DISABLED_INNER_RGB.1,
+                    DISABLED_INNER_RGB.2,
+                )
             },
             None,
             &inner_circle,
@@ -61,10 +97,10 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
     let Some((glyphs, _)) = text::layout_text(font, text, radio_button.font_size) else {
         return;
     };
-    let text_x = center_x + indicator_radius + 10.0;
+    let text_x = center_x + indicator_radius + LABEL_TEXT_SPACING;
     let baseline_y = radio_button.rect.y0
-        + radio_button.rect.height() * 0.5
-        + radio_button.font_size as f64 * 0.35;
+        + radio_button.rect.height() * BASELINE_VERTICAL_RATIO
+        + radio_button.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
 
     text::draw_text_run(
         scene,
@@ -76,14 +112,18 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         if radio_button.enabled {
             radio_button.text_color
         } else {
-            Color::from_rgb8(146, 152, 160)
+            Color::from_rgb8(
+                DISABLED_TEXT_RGB.0,
+                DISABLED_TEXT_RGB.1,
+                DISABLED_TEXT_RGB.2,
+            )
         },
     );
 }
 
 /// Computes radio indicator diameter from widget height with clamped bounds.
 fn indicator_size(height: f64) -> f64 {
-    (height - 8.0).clamp(14.0, 24.0)
+    (height - INDICATOR_SIZE_OFFSET).clamp(INDICATOR_SIZE_MIN, INDICATOR_SIZE_MAX)
 }
 
 /// Resolves radio outer indicator color from enabled/pressed/hovered state priority.
@@ -92,10 +132,10 @@ fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
         radio_button.enabled,
         radio_button.pressed,
         radio_button.hovered,
-        Color::from_rgb8(43, 47, 53),
-        Color::from_rgb8(45, 129, 205),
-        Color::from_rgb8(53, 141, 221),
-        Color::from_rgb8(36, 42, 50),
+        Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2),
+        Color::from_rgb8(PRESSED_BG_RGB.0, PRESSED_BG_RGB.1, PRESSED_BG_RGB.2),
+        Color::from_rgb8(HOVER_BG_RGB.0, HOVER_BG_RGB.1, HOVER_BG_RGB.2),
+        Color::from_rgb8(ENABLED_BG_RGB.0, ENABLED_BG_RGB.1, ENABLED_BG_RGB.2),
     )
 }
 

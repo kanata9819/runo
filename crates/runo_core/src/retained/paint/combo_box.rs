@@ -14,6 +14,15 @@ const ARROW_FONT_SCALE: f32 = 0.85;
 const COMBO_BOX_CORNER_RADIUS: f64 = 8.0;
 const ITEM_CORNER_RADIUS: f64 = 0.0;
 const BORDER_STROKE_WIDTH: f64 = 1.0;
+const DISABLED_BORDER_RGB: (u8, u8, u8) = (86, 92, 101);
+const PRESSED_BORDER_RGB: (u8, u8, u8) = (89, 176, 255);
+const HOVER_BORDER_RGB: (u8, u8, u8) = (124, 177, 230);
+const DISABLED_TEXT_RGB: (u8, u8, u8) = (147, 153, 161);
+const DISABLED_BG_RGB: (u8, u8, u8) = (45, 49, 55);
+const ENABLED_ARROW_RGB: (u8, u8, u8) = (186, 196, 210);
+const DISABLED_ARROW_RGB: (u8, u8, u8) = (141, 147, 154);
+const HOVERED_ITEM_BG_RGB: (u8, u8, u8) = (63, 80, 102);
+const SELECTED_ITEM_BG_RGB: (u8, u8, u8) = (46, 64, 86);
 
 /// Returns the combo box border color based on enable/press/hover state priority.
 fn indicator_bg_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
@@ -21,9 +30,17 @@ fn indicator_bg_color(combo_box: &ComboBoxNode) -> AlphaColor<Srgb> {
         combo_box.enabled,
         combo_box.pressed,
         combo_box.hovered,
-        Color::from_rgb8(86, 92, 101),
-        Color::from_rgb8(89, 176, 255),
-        Color::from_rgb8(124, 177, 230),
+        Color::from_rgb8(
+            DISABLED_BORDER_RGB.0,
+            DISABLED_BORDER_RGB.1,
+            DISABLED_BORDER_RGB.2,
+        ),
+        Color::from_rgb8(
+            PRESSED_BORDER_RGB.0,
+            PRESSED_BORDER_RGB.1,
+            PRESSED_BORDER_RGB.2,
+        ),
+        Color::from_rgb8(HOVER_BORDER_RGB.0, HOVER_BORDER_RGB.1, HOVER_BORDER_RGB.2),
         combo_box.border_color,
     )
 }
@@ -85,7 +102,11 @@ fn draw_text_run<'a>(
         if combo_box.enabled {
             combo_box.text_color
         } else {
-            Color::from_rgb8(147, 153, 161)
+            Color::from_rgb8(
+                DISABLED_TEXT_RGB.0,
+                DISABLED_TEXT_RGB.1,
+                DISABLED_TEXT_RGB.2,
+            )
         },
     );
 }
@@ -99,7 +120,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
         if combo_box.enabled {
             combo_box.bg_color
         } else {
-            Color::from_rgb8(45, 49, 55)
+            Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2)
         },
         None,
         &bg,
@@ -136,9 +157,17 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
             combo_box.rect,
             combo_box.font_size * ARROW_FONT_SCALE,
             if combo_box.enabled {
-                Color::from_rgb8(186, 196, 210)
+                Color::from_rgb8(
+                    ENABLED_ARROW_RGB.0,
+                    ENABLED_ARROW_RGB.1,
+                    ENABLED_ARROW_RGB.2,
+                )
             } else {
-                Color::from_rgb8(141, 147, 154)
+                Color::from_rgb8(
+                    DISABLED_ARROW_RGB.0,
+                    DISABLED_ARROW_RGB.1,
+                    DISABLED_ARROW_RGB.2,
+                )
             },
         );
     }
@@ -164,9 +193,17 @@ pub(super) fn render_dropdown_overlay(
         let item_bg = RoundedRect::from_rect(item_rect, ITEM_CORNER_RADIUS);
 
         let bg_color = if combo_box.hovered_item == Some(index) {
-            Color::from_rgb8(63, 80, 102)
+            Color::from_rgb8(
+                HOVERED_ITEM_BG_RGB.0,
+                HOVERED_ITEM_BG_RGB.1,
+                HOVERED_ITEM_BG_RGB.2,
+            )
         } else if combo_box.selected_index == index {
-            Color::from_rgb8(46, 64, 86)
+            Color::from_rgb8(
+                SELECTED_ITEM_BG_RGB.0,
+                SELECTED_ITEM_BG_RGB.1,
+                SELECTED_ITEM_BG_RGB.2,
+            )
         } else {
             combo_box.bg_color
         };

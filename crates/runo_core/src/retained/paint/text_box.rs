@@ -6,6 +6,31 @@ use vello::peniko::{Color, Fill, FontData};
 use crate::retained::node::TextBoxNode;
 use crate::widget::text;
 
+const BOX_CORNER_RADIUS: f64 = 8.0;
+const BORDER_STROKE_WIDTH: f64 = 1.0;
+const INNER_PADDING: f64 = 12.0;
+const LINE_HEIGHT_RATIO: f64 = 1.35;
+const CARET_X_OFFSET: f64 = 1.0;
+const CARET_HEIGHT_RATIO: f64 = 1.1;
+const CARET_TOP_OFFSET_RATIO: f64 = 0.9;
+const CARET_WIDTH: f64 = 1.5;
+const SCROLLBAR_TRACK_HEIGHT: f64 = 4.0;
+const SCROLLBAR_TRACK_BOTTOM_OFFSET: f64 = 6.0;
+const SCROLLBAR_CORNER_RADIUS: f64 = 2.0;
+const SCROLLBAR_THUMB_MIN_WIDTH: f64 = 18.0;
+const MIN_INNER_WIDTH: f64 = 1.0;
+const DISABLED_BG_RGB: (u8, u8, u8) = (45, 49, 55);
+const DISABLED_BORDER_RGB: (u8, u8, u8) = (86, 92, 101);
+const FOCUSED_BORDER_RGB: (u8, u8, u8) = (89, 176, 255);
+const DISABLED_TEXT_RGB: (u8, u8, u8) = (147, 153, 161);
+const PLACEHOLDER_TEXT_RGB: (u8, u8, u8) = (142, 151, 163);
+const CARET_RGB: (u8, u8, u8) = (220, 228, 240);
+const SCROLLBAR_RGB: (u8, u8, u8) = (255, 255, 255);
+const SCROLLBAR_TRACK_ENABLED_ALPHA: u8 = 35;
+const SCROLLBAR_TRACK_DISABLED_ALPHA: u8 = 20;
+const SCROLLBAR_THUMB_ENABLED_ALPHA: u8 = 150;
+const SCROLLBAR_THUMB_DISABLED_ALPHA: u8 = 90;
+
 #[derive(Clone, Copy)]
 struct TextMetrics {
     text_x: f64,
@@ -32,28 +57,32 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
 
 /// Draws text box background fill and border stroke.
 fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
-    let bg = RoundedRect::from_rect(text_box.rect, 8.0);
+    let bg = RoundedRect::from_rect(text_box.rect, BOX_CORNER_RADIUS);
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
         if text_box.enabled {
             text_box.bg_color
         } else {
-            Color::from_rgb8(45, 49, 55)
+            Color::from_rgb8(DISABLED_BG_RGB.0, DISABLED_BG_RGB.1, DISABLED_BG_RGB.2)
         },
         None,
         &bg,
     );
 
     let border_color = if !text_box.enabled {
-        Color::from_rgb8(86, 92, 101)
+        Color::from_rgb8(
+            DISABLED_BORDER_RGB.0,
+            DISABLED_BORDER_RGB.1,
+            DISABLED_BORDER_RGB.2,
+        )
     } else if text_box.focused {
-        Color::from_rgb8(89, 176, 255)
+        Color::from_rgb8(FOCUSED_BORDER_RGB.0, FOCUSED_BORDER_RGB.1, FOCUSED_BORDER_RGB.2)
     } else {
         text_box.border_color
     };
     scene.stroke(
-        &vello::kurbo::Stroke::new(1.0),
+        &vello::kurbo::Stroke::new(BORDER_STROKE_WIDTH),
         Affine::IDENTITY,
         border_color,
         None,
@@ -64,9 +93,17 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
 /// Resolves text color for normal, placeholder, and disabled states.
 fn resolve_text_color(text_box: &TextBoxNode) -> Color {
     if !text_box.enabled {
-        Color::from_rgb8(147, 153, 161)
+        Color::from_rgb8(
+            DISABLED_TEXT_RGB.0,
+            DISABLED_TEXT_RGB.1,
+            DISABLED_TEXT_RGB.2,
+        )
     } else if text_box.text.is_empty() {
-        Color::from_rgb8(142, 151, 163)
+        Color::from_rgb8(
+            PLACEHOLDER_TEXT_RGB.0,
+            PLACEHOLDER_TEXT_RGB.1,
+            PLACEHOLDER_TEXT_RGB.2,
+        )
     } else {
         text_box.text_color
     }
@@ -75,12 +112,12 @@ fn resolve_text_color(text_box: &TextBoxNode) -> Color {
 /// Computes shared text layout metrics used by content and caret painting.
 fn text_metrics(text_box: &TextBoxNode) -> TextMetrics {
     TextMetrics {
-        text_x: text_box.rect.x0 + 12.0 - text_box.scroll_x,
-        first_line_baseline: text_box.rect.y0 + 12.0 + text_box.font_size as f64
+        text_x: text_box.rect.x0 + INNER_PADDING - text_box.scroll_x,
+        first_line_baseline: text_box.rect.y0 + INNER_PADDING + text_box.font_size as f64
             - text_box.scroll_y,
-        line_height: text_box.font_size as f64 * 1.35,
-        inner_left: text_box.rect.x0 + 12.0,
-        inner_right: text_box.rect.x1 - 12.0,
+        line_height: text_box.font_size as f64 * LINE_HEIGHT_RATIO,
+        inner_left: text_box.rect.x0 + INNER_PADDING,
+        inner_right: text_box.rect.x1 - INNER_PADDING,
     }
 }
 
@@ -165,20 +202,20 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
         let prefix_advance = text::layout_text(font, &prefix, text_box.font_size)
             .map(|(_, advance)| advance as f64)
             .unwrap_or(0.0);
-        let caret_x = metrics.text_x + prefix_advance + 1.0;
+        let caret_x = metrics.text_x + prefix_advance + CARET_X_OFFSET;
         let caret_x = if text_box.overflow_x.clips() {
             caret_x.clamp(metrics.inner_left, metrics.inner_right)
         } else {
             caret_x
         };
         let baseline_y = metrics.first_line_baseline + caret_line as f64 * metrics.line_height;
-        let caret_h = text_box.font_size as f64 * 1.1;
-        let caret_y0 = baseline_y - text_box.font_size as f64 * 0.9;
-        let caret = Rect::new(caret_x, caret_y0, caret_x + 1.5, caret_y0 + caret_h);
+        let caret_h = text_box.font_size as f64 * CARET_HEIGHT_RATIO;
+        let caret_y0 = baseline_y - text_box.font_size as f64 * CARET_TOP_OFFSET_RATIO;
+        let caret = Rect::new(caret_x, caret_y0, caret_x + CARET_WIDTH, caret_y0 + caret_h);
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
-            Color::from_rgb8(220, 228, 240),
+            Color::from_rgb8(CARET_RGB.0, CARET_RGB.1, CARET_RGB.2),
             None,
             &caret,
         );
@@ -218,23 +255,33 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
         return;
     }
 
-    let inner_left = text_box.rect.x0 + 12.0;
-    let inner_right = text_box.rect.x1 - 12.0;
-    let inner_width = (inner_right - inner_left).max(1.0);
+    let inner_left = text_box.rect.x0 + INNER_PADDING;
+    let inner_right = text_box.rect.x1 - INNER_PADDING;
+    let inner_width = (inner_right - inner_left).max(MIN_INNER_WIDTH);
     let content_width = text_box_content_width(text_box);
     let max_scroll = (content_width - inner_width).max(0.0);
     if max_scroll <= 0.0 {
         return;
     }
 
-    let track_height = 4.0;
-    let track_y = text_box.rect.y1 - 6.0;
+    let track_height = SCROLLBAR_TRACK_HEIGHT;
+    let track_y = text_box.rect.y1 - SCROLLBAR_TRACK_BOTTOM_OFFSET;
     let track = Rect::new(inner_left, track_y - track_height, inner_right, track_y);
-    let track_shape = RoundedRect::from_rect(track, 2.0);
+    let track_shape = RoundedRect::from_rect(track, SCROLLBAR_CORNER_RADIUS);
     let track_color = if text_box.enabled {
-        Color::from_rgba8(255, 255, 255, 35)
+        Color::from_rgba8(
+            SCROLLBAR_RGB.0,
+            SCROLLBAR_RGB.1,
+            SCROLLBAR_RGB.2,
+            SCROLLBAR_TRACK_ENABLED_ALPHA,
+        )
     } else {
-        Color::from_rgba8(255, 255, 255, 20)
+        Color::from_rgba8(
+            SCROLLBAR_RGB.0,
+            SCROLLBAR_RGB.1,
+            SCROLLBAR_RGB.2,
+            SCROLLBAR_TRACK_DISABLED_ALPHA,
+        )
     };
     scene.fill(
         Fill::NonZero,
@@ -245,7 +292,7 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     );
 
     let thumb_w = ((inner_width / content_width) * inner_width)
-        .clamp(18.0, inner_width)
+        .clamp(SCROLLBAR_THUMB_MIN_WIDTH, inner_width)
         .min(inner_width);
     let ratio = (text_box.scroll_x / max_scroll).clamp(0.0, 1.0);
     let thumb_x0 = inner_left + ratio * (inner_width - thumb_w);
@@ -255,11 +302,21 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
         thumb_x0 + thumb_w,
         track_y,
     );
-    let thumb_shape = RoundedRect::from_rect(thumb, 2.0);
+    let thumb_shape = RoundedRect::from_rect(thumb, SCROLLBAR_CORNER_RADIUS);
     let thumb_color = if text_box.enabled {
-        Color::from_rgba8(255, 255, 255, 150)
+        Color::from_rgba8(
+            SCROLLBAR_RGB.0,
+            SCROLLBAR_RGB.1,
+            SCROLLBAR_RGB.2,
+            SCROLLBAR_THUMB_ENABLED_ALPHA,
+        )
     } else {
-        Color::from_rgba8(255, 255, 255, 90)
+        Color::from_rgba8(
+            SCROLLBAR_RGB.0,
+            SCROLLBAR_RGB.1,
+            SCROLLBAR_RGB.2,
+            SCROLLBAR_THUMB_DISABLED_ALPHA,
+        )
     };
     scene.fill(
         Fill::NonZero,

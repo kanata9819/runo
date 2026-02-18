@@ -5,6 +5,8 @@ use vello::peniko::FontData;
 use crate::retained::node::LabelNode;
 use crate::widget::text;
 
+const DISABLED_TEXT_RGB: (u8, u8, u8) = (142, 148, 156);
+
 /// Renders single-line label text at the label rectangle origin.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNode) {
     let Some(font) = font else {
@@ -25,7 +27,11 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNo
         if label.enabled {
             label.text_color
         } else {
-            Color::from_rgb8(142, 148, 156)
+            Color::from_rgb8(
+                DISABLED_TEXT_RGB.0,
+                DISABLED_TEXT_RGB.1,
+                DISABLED_TEXT_RGB.2,
+            )
         },
     );
 }

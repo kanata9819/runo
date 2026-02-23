@@ -1,10 +1,13 @@
 pub(crate) mod events;
 pub(crate) mod frame;
 pub(crate) mod gpu;
+pub(crate) mod gpu_runtime;
 pub(crate) mod runner;
+pub(crate) mod runtime;
 
 use crate::ui::Ui;
 pub(crate) use runner::AppRunner;
+pub use runtime::run;
 
 #[derive(Clone, Debug)]
 pub struct RunOptions {
@@ -33,12 +36,9 @@ pub trait RunoApplication {
     }
 }
 
-pub fn run<A: RunoApplication + 'static>(application: A) {
+pub(crate) fn build_runner<A: RunoApplication + 'static>(application: A) -> AppRunner<A> {
     let options = application.options();
-    let event_loop = winit::event_loop::EventLoop::new().expect("failed to create event loop");
-    let mut app = AppRunner::new(application, options);
-
-    event_loop.run_app(&mut app).expect("event loop failed");
+    AppRunner::new(application, options)
 }
 
 #[cfg(test)]
@@ -90,5 +90,22 @@ mod tests {
         assert_eq!(options.window_width, 111);
         assert_eq!(options.window_height, 222);
         assert!(!options.window_resizable);
+    }
+
+    #[test]
+    fn build_runner_uses_application_options() {
+        let runner = build_runner(CustomApp);
+        let options = runner.window_options();
+        assert_eq!(options.window_title, "custom");
+        assert_eq!(options.window_width, 111);
+        assert_eq!(options.window_height, 222);
+        assert!(!options.window_resizable);
+    }
+
+    #[test]
+    fn run_symbol_points_to_runtime_run() {
+        let run_fn: fn(App) = run::<App>;
+        let runtime_fn: fn(App) = runtime::run::<App>;
+        let _ = (run_fn, runtime_fn);
     }
 }

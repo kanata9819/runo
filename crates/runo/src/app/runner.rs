@@ -21,6 +21,16 @@ fn sanitize_window_size(width: u32, height: u32) -> (u32, u32) {
     (width.max(1), height.max(1))
 }
 
+fn window_attributes_from_options(options: &RunOptions) -> WindowAttributes {
+    Window::default_attributes()
+        .with_title(options.window_title.clone())
+        .with_inner_size(LogicalSize::new(
+            options.window_width as f64,
+            options.window_height as f64,
+        ))
+        .with_resizable(options.window_resizable)
+}
+
 pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) user_app: A,
     pub(super) window: Option<Arc<Window>>,
@@ -59,13 +69,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     pub(super) fn init_window_and_gpu(&mut self, event_loop: &ActiveEventLoop) {
-        let attributes: WindowAttributes = Window::default_attributes()
-            .with_title(self.window_options.window_title.clone())
-            .with_inner_size(LogicalSize::new(
-                self.window_options.window_width as f64,
-                self.window_options.window_height as f64,
-            ))
-            .with_resizable(self.window_options.window_resizable);
+        let attributes = window_attributes_from_options(&self.window_options);
 
         let window = Arc::new(
             event_loop
@@ -116,6 +120,12 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             window.request_redraw();
         }
     }
+
+    #[cfg(test)]
+    #[cfg(test)]
+    pub(super) fn window_options(&self) -> &RunOptions {
+        &self.window_options
+    }
 }
 
 #[cfg(test)]
@@ -158,5 +168,19 @@ mod tests {
         runner.resize(100, 100);
         // no panic and no surface mutation path is enough for this unit test
         assert!(runner.surface.is_none());
+    }
+
+    #[test]
+    fn window_attributes_follow_run_options() {
+        let options = RunOptions {
+            window_title: "My Window".to_string(),
+            window_width: 123,
+            window_height: 456,
+            window_resizable: false,
+        };
+        let attrs = window_attributes_from_options(&options);
+        assert_eq!(attrs.title, "My Window");
+        assert!(!attrs.resizable);
+        assert!(attrs.inner_size.is_some());
     }
 }

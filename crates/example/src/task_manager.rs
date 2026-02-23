@@ -85,7 +85,7 @@ impl RunoApplication for TaskApp {
             ui.widgets()
                 .div()
                 .id(PANEL_ID)
-                .width(760)
+                .width(860)
                 .padding(16)
                 .gap(12)
                 .background(colors::rgb(colors::PANEL_BG))
@@ -199,6 +199,26 @@ impl RunoApplication for TaskApp {
                 _ => {}
             }
         }
+
+        let total = self.tasks.len();
+        let done = self.tasks.iter().filter(|task| task.done).count();
+
+        // use_effect is for side effects, not for deriving UI text values.
+        ui.use_effect("task_stats_logger", (total, done), move || {
+            println!("[effect] stats changed: total={}, done={}", total, done);
+            Some(Box::new(move || {
+                println!("[cleanup] previous stats: total={}, done={}", total, done);
+            }))
+        });
+
+        let draft_is_empty = self.draft.trim().is_empty();
+        ui.use_effect("draft_status_logger", draft_is_empty, move || {
+            println!(
+                "[effect] draft status changed: {}",
+                if draft_is_empty { "empty" } else { "typing" }
+            );
+            None
+        });
     }
 }
 

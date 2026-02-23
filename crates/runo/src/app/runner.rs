@@ -13,6 +13,7 @@ use winit::window::{Window, WindowAttributes, WindowId};
 use crate::app::{RunOptions, RunoApplication};
 use crate::font::load_default_font;
 use crate::hooks::effect::EffectStore;
+use crate::hooks::state::StateStore;
 use crate::input::InputState;
 use crate::retained::RetainedState;
 
@@ -27,6 +28,7 @@ pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) input: InputState,
     pub(super) font: Option<FontData>,
     pub(super) effects: EffectStore,
+    pub(super) states: StateStore,
     pub(super) retained: RetainedState,
     window_options: RunOptions,
 }
@@ -46,6 +48,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             input: InputState::default(),
             font: load_default_font(),
             effects: EffectStore::new(),
+            states: StateStore::new(),
             retained: RetainedState::new(),
             window_options,
         }

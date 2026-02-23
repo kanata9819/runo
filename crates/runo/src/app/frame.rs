@@ -76,12 +76,14 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
     fn run_ui_frame(&mut self) {
         self.effects.begin_frame();
+        self.states.begin_frame();
 
         {
             let mut ui = Ui::new(
                 &mut self.scene,
                 self.font.clone(),
                 &mut self.effects,
+                &mut self.states,
                 &mut self.retained,
             );
             self.user_app.build(&mut ui);
@@ -94,12 +96,17 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 &mut self.scene,
                 self.font.clone(),
                 &mut self.effects,
+                &mut self.states,
                 &mut self.retained,
             );
             self.user_app.update(&mut ui);
         }
 
         self.effects.end_frame();
+        self.states.end_frame();
+        if self.states.take_changed() {
+            self.request_redraw();
+        }
         self.input.end_frame();
     }
 }

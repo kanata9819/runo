@@ -3,6 +3,8 @@ mod show;
 mod state;
 mod widgets;
 
+use std::marker::PhantomData;
+
 pub use events::UiEvents;
 pub use state::{
     UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiRadioButtonState,
@@ -25,6 +27,7 @@ use vello::peniko::{Fill, FontData};
 
 use crate::Color;
 use crate::hooks::effect::{EffectCleanup, EffectStore};
+use crate::hooks::state::StateStore;
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
@@ -33,10 +36,34 @@ pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
     pub(crate) font: Option<FontData>,
     effects: &'a mut EffectStore,
+    states: &'a mut StateStore,
     retained: &'a mut RetainedState,
     layout_stack: LayoutStack,
     enabled_stack: Vec<bool>,
     auto_id_counter: u64,
+}
+
+pub struct UiStateSetter<T> {
+    id: String,
+    marker: PhantomData<T>,
+}
+
+impl<T> UiStateSetter<T> {
+    fn new(id: String) -> Self {
+        Self {
+            id,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T> UiStateSetter<T>
+where
+    T: Clone + PartialEq + 'static,
+{
+    pub fn set(&self, ui: &mut Ui<'_>, value: T) -> bool {
+        ui.set_state(self.id.clone(), value)
+    }
 }
 
 impl<'a> Ui<'a> {
@@ -44,12 +71,14 @@ impl<'a> Ui<'a> {
         scene: &'a mut Scene,
         font: Option<FontData>,
         effects: &'a mut EffectStore,
+        states: &'a mut StateStore,
         retained: &'a mut RetainedState,
     ) -> Self {
         Self {
             scene,
             font,
             effects,
+            states,
             retained,
             layout_stack: LayoutStack::new((24.0, 24.0), LayoutDirection::Vertical, 12.0),
             enabled_stack: vec![true],
@@ -89,6 +118,23 @@ impl<'a> Ui<'a> {
         F: FnOnce() -> Option<EffectCleanup>,
     {
         self.effects.use_effect(id, deps, effect);
+    }
+
+    pub fn use_state<T, F>(&mut self, id: impl Into<String>, init: F) -> (T, UiStateSetter<T>)
+    where
+        T: Clone + 'static,
+        F: FnOnce() -> T,
+    {
+        let id = id.into();
+        let value = self.states.use_state(id.clone(), init);
+        (value, UiStateSetter::new(id))
+    }
+
+    pub fn set_state<T>(&mut self, id: impl Into<String>, value: T) -> bool
+    where
+        T: Clone + PartialEq + 'static,
+    {
+        self.states.set_state(id, value)
     }
 
     pub(crate) fn button(&mut self) -> crate::widget::button::ButtonBuilder<'_, 'a> {

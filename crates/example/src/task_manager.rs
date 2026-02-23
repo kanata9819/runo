@@ -12,6 +12,7 @@ const CLEAR_DONE_BUTTON_ID: &str = "task.clear_done";
 const TASK_CHECK_PREFIX: &str = "task.item.check.";
 const TASK_DELETE_PREFIX: &str = "task.item.delete.";
 const TASK_ROW_PREFIX: &str = "task.item.row.";
+const SUMMARY_STATE_ID: &str = "state.task.summary";
 
 #[derive(Clone)]
 struct Task {
@@ -67,6 +68,8 @@ impl RunoApplication for TaskApp {
     }
 
     fn build(&mut self, ui: &mut Ui<'_>) {
+        let (summary, _) = ui.use_state(SUMMARY_STATE_ID, || self.summary_text());
+
         ui.vertical(|ui| {
             ui.widgets()
                 .label()
@@ -78,7 +81,7 @@ impl RunoApplication for TaskApp {
             ui.widgets()
                 .label()
                 .id(SUMMARY_ID)
-                .text(self.summary_text())
+                .text(summary)
                 .font_size(16)
                 .text_color(colors::rgb(colors::TEXT_SECONDARY))
                 .show();
@@ -220,6 +223,9 @@ impl RunoApplication for TaskApp {
             );
             None
         });
+
+        let (_, set_summary) = ui.use_state(SUMMARY_STATE_ID, String::new);
+        set_summary.set(ui, self.summary_text());
     }
 }
 

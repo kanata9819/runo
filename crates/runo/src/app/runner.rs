@@ -57,7 +57,8 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             .with_inner_size(LogicalSize::new(
                 self.window_options.window_width as f64,
                 self.window_options.window_height as f64,
-            ));
+            ))
+            .with_resizable(self.window_options.window_resizable);
 
         let window = Arc::new(
             event_loop

@@ -14,6 +14,7 @@ impl RunoApplication for CustomOptionsApp {
             window_title: "custom".to_string(),
             window_width: 1280,
             window_height: 720,
+            window_resizable: true,
         }
     }
 }

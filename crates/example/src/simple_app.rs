@@ -122,6 +122,7 @@ impl RunoApplication for MyApp {
             window_title: "runo example".to_string(),
             window_width: 1200,
             window_height: 700,
+            window_resizable: true,
         }
     }
 

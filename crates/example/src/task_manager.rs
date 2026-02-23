@@ -62,6 +62,7 @@ impl RunoApplication for TaskApp {
             window_title: "runo task manager example".to_string(),
             window_width: 1100,
             window_height: 760,
+            window_resizable: false,
         }
     }
 

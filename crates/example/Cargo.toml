@@ -9,5 +9,13 @@ repository = "https://github.com/kanata9819/runo"
 homepage = "https://github.com/kanata9819/runo"
 documentation = "https://docs.rs/example"
 
+[[bin]]
+name = "simple_app"
+path = "src/simple_app.rs"
+
+[[bin]]
+name = "task_manager"
+path = "src/task_manager.rs"
+
 [dependencies]
 runo_core = { path = "../runo_core", version = "0.1.0" }

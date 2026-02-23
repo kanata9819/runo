@@ -175,7 +175,6 @@ impl RunoApplication for MyApp {
                             .set_text(TOGGLE_BUTTON_ID, format!("{} ({})", label, self.input_text));
                     }
                 }
-
                 UiEvent::TextBoxChanged { id, text } if id == INPUT_NAME_ID => {
                     self.input_text = text;
                     let label = if self.toggled {

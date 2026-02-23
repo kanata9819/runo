@@ -7,7 +7,7 @@ ci:
 
 r:
     just ci
-    cargo run
+    cargo run -p example --bin task_manager
 
 f:
     cargo fmt

@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/runo_core", "crates/example"]
+members = ["crates/runo", "crates/example"]
 resolver = "3"
 
 [profile.dev]

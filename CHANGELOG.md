@@ -8,7 +8,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Added
 - CI workflow for `fmt`, `clippy`, and `test`.
-- Integration test scaffold for public API (`crates/runo_core/tests/public_api.rs`).
+- Integration test scaffold for public API (`crates/runo/tests/public_api.rs`).
 - Expanded unit tests for state/input/cache/widget helpers.
 
 ### Changed

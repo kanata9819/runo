@@ -2,7 +2,7 @@
 name = "example"
 version = "0.1.0"
 edition = "2024"
-description = "Example application for the runo_core GUI framework."
+description = "Example application for the runo GUI framework."
 license = "MIT"
 readme = "../../README.md"
 repository = "https://github.com/kanata9819/runo"
@@ -18,4 +18,4 @@ name = "task_manager"
 path = "src/task_manager.rs"
 
 [dependencies]
-runo_core = { path = "../runo_core", version = "0.1.0" }
+runo = { path = "../runo", version = "0.1.0" }

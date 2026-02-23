@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use runo_core::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
+use runo::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
 
 const TITLE_ID: &str = "title";
 const INPUT_NAME_ID: &str = "input.name";
@@ -41,7 +41,7 @@ impl MyApp {
             .height(44)
             .font_size(20)
             .placeholder("Type here...")
-            .overflow_x(runo_core::Overflow::Auto)
+            .overflow_x(runo::Overflow::Auto)
             .show();
     }
 

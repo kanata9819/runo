@@ -1,6 +1,6 @@
 # Runo Core README
 
-`runo_core` は、`winit + wgpu + vello` で構成した、保持型（retained mode）寄りの GUI コアです。
+`runo` は、`winit + wgpu + vello` で構成した、保持型（retained mode）寄りの GUI コアです。
 
 ## 役割の要約
 
@@ -24,4 +24,4 @@
 
 ## 詳細ドキュメント
 
-- `crates/runo_core/docs/README.md`
+- `crates/runo/docs/README.md`

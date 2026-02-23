@@ -4,7 +4,7 @@ This project uses Semantic Versioning (`MAJOR.MINOR.PATCH`) for published crates
 
 ## Scope
 
-- Primary scope: `crates/runo_core`.
+- Primary scope: `crates/runo`.
 - `crates/example` is not treated as a stable public API.
 
 ## SemVer Rules
@@ -43,6 +43,6 @@ When a breaking change is introduced:
 1. `cargo fmt --all -- --check`
 2. `cargo clippy --workspace --all-targets --all-features -- -D warnings`
 3. `cargo test --workspace`
-4. `cargo package -p runo_core`
-5. `cargo publish --dry-run -p runo_core`
+4. `cargo package -p runo`
+5. `cargo publish --dry-run -p runo`
 6. Update `CHANGELOG.md` and move relevant entries from `Unreleased` to a tagged version.

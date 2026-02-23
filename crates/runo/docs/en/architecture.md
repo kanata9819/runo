@@ -1,10 +1,10 @@
 # Runo Core Architecture
 
-This document explains the internal structure of `runo_core`.
+This document explains the internal structure of `runo`.
 
 ## 1. Core stack
 
-`runo_core` uses:
+`runo` uses:
 
 1. `winit` for windowing and event loop
 2. `wgpu` for GPU execution

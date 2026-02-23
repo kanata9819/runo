@@ -2,7 +2,7 @@
 
 This section contains implementation-agnostic knowledge for building GUI libraries.
 
-## Current `runo_core` implementation notes
+## Current `runo` implementation notes
 
 1. Built-in widgets
    `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
@@ -18,7 +18,7 @@ This section contains implementation-agnostic knowledge for building GUI librari
 ## Documents
 
 1. `architecture.md`
-   Current architecture of `runo_core`
+   Current architecture of `runo`
 2. `knowledge-fundamentals.md`
    Core concepts of GUI library design
 3. `knowledge-event-input.md`

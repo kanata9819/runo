@@ -1,4 +1,4 @@
-use runo_core::{
+use runo::{
     ButtonResponse, Color, Overflow, RunOptions, RunoApplication, TextBoxResponse, UiEvent, colors,
 };
 

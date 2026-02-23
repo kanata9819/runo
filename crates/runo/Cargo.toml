@@ -1,5 +1,5 @@
 [package]
-name = "runo_core"
+name = "runo"
 version = "0.1.0"
 edition = "2024"
 description = "Experimental retained-mode GUI framework core built with winit, wgpu, and vello."
@@ -7,7 +7,7 @@ license = "MIT"
 readme = "../../README.md"
 repository = "https://github.com/kanata9819/runo"
 homepage = "https://github.com/kanata9819/runo"
-documentation = "https://docs.rs/runo_core"
+documentation = "https://docs.rs/runo"
 
 [dependencies]
 vello = "0.7"

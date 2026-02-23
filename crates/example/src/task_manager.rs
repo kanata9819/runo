@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use runo_core::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
+use runo::{RunOptions, RunoApplication, Ui, UiEvent, colors};
 
 const TITLE_ID: &str = "task.title";
 const SUMMARY_ID: &str = "task.summary";
@@ -223,11 +223,11 @@ impl RunoApplication for TaskApp {
 }
 
 fn main() {
-    run(TaskApp {
+    runo::run(TaskApp {
         tasks: vec![
             Task {
                 id: 0,
-                title: "Read runo_core docs".to_string(),
+                title: "Read runo docs".to_string(),
                 done: true,
             },
             Task {

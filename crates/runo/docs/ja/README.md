@@ -2,7 +2,7 @@
 
 GUI ライブラリを作るときに必要になる、実装非依存の基礎知識をまとめています。
 
-## 現在の `runo_core` 実装メモ
+## 現在の `runo` 実装メモ
 
 1. 組み込みウィジェット
    `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
@@ -18,7 +18,7 @@ GUI ライブラリを作るときに必要になる、実装非依存の基礎�
 ## ドキュメント
 
 1. `architecture.md`
-   `runo_core` の現在実装アーキテクチャ
+   `runo` の現在実装アーキテクチャ
 2. `knowledge-fundamentals.md`
    GUI ライブラリ設計の基礎概念
 3. `knowledge-event-input.md`

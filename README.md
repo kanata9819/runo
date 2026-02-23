@@ -15,7 +15,7 @@
 
 ## Current Workspace
 
-- `crates/runo_core`
+- `crates/runo`
   Core GUI framework implementation
 - `crates/example`
   Example app that demonstrates how to build and update UI
@@ -41,7 +41,7 @@ just ci
 ## Example Usage
 
 ```rust
-use runo_core::{RunoApplication, Ui, UiEvent, run};
+use runo::{RunoApplication, Ui, UiEvent, run};
 
 struct MyApp {
     count: u32,
@@ -79,13 +79,13 @@ fn main() {
 
 ## Documentation
 
-- Architecture: `crates/runo_core/docs/architecture.md`
-- Universal GUI knowledge notes: `crates/runo_core/docs/README.md`
+- Architecture: `crates/runo/docs/architecture.md`
+- Universal GUI knowledge notes: `crates/runo/docs/README.md`
 - Changelog: `CHANGELOG.md`
 - Versioning policy: `VERSIONING.md`
 - Language-specific docs:
-  - Japanese: `crates/runo_core/docs/ja/README.md`
-  - English: `crates/runo_core/docs/en/README.md`
+  - Japanese: `crates/runo/docs/ja/README.md`
+  - English: `crates/runo/docs/en/README.md`
 
 ## License
 

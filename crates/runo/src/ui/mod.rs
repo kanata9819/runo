@@ -215,10 +215,10 @@ mod tests {
 
     use vello::Scene;
 
+    use crate::Color;
     use crate::hooks::effect::EffectStore;
     use crate::hooks::state::StateStore;
     use crate::retained::RetainedState;
-    use crate::Color;
 
     use super::Ui;
 

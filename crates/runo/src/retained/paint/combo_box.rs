@@ -298,7 +298,11 @@ mod tests {
         draw_text_run_at(
             &mut scene,
             &font,
-            vec![Glyph { id: 1, x: 0.0, y: 0.0 }],
+            vec![Glyph {
+                id: 1,
+                x: 0.0,
+                y: 0.0,
+            }],
             10.0,
             combo_box.rect,
             combo_box.font_size,
@@ -307,7 +311,11 @@ mod tests {
         draw_text_run(
             &mut scene,
             &font,
-            vec![Glyph { id: 2, x: 0.0, y: 0.0 }],
+            vec![Glyph {
+                id: 2,
+                x: 0.0,
+                y: 0.0,
+            }],
             &combo_box,
         );
     }

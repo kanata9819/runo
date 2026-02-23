@@ -60,7 +60,9 @@ mod tests {
 
     use super::*;
     use crate::font::load_default_font;
-    use crate::retained::{UpsertCheckboxArgs, UpsertRadioButtonArgs, UpsertSliderArgs, UpsertTextBoxArgs};
+    use crate::retained::{
+        UpsertCheckboxArgs, UpsertRadioButtonArgs, UpsertSliderArgs, UpsertTextBoxArgs,
+    };
     use crate::widget::text_box::Overflow;
 
     #[test]

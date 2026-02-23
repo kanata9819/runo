@@ -246,7 +246,12 @@ mod tests {
             .group("g")
             .selected(false)
             .show();
-        ui.widgets().slider().id("sl").range(0.0, 1.0).value(0.2).show();
+        ui.widgets()
+            .slider()
+            .id("sl")
+            .range(0.0, 1.0)
+            .value(0.2)
+            .show();
         ui.widgets()
             .combo_box()
             .id("co")

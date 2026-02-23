@@ -1,5 +1,5 @@
-use vello::Scene;
 use vello::Glyph;
+use vello::Scene;
 use vello::peniko::FontData;
 
 use crate::retained::node::LabelNode;

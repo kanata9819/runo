@@ -298,8 +298,14 @@ mod tests {
 
     #[test]
     fn parse_task_id_and_summary_text_work() {
-        assert_eq!(TaskApp::parse_task_id("task.item.delete.42", TASK_DELETE_PREFIX), Some(42));
-        assert_eq!(TaskApp::parse_task_id("task.item.delete.x", TASK_DELETE_PREFIX), None);
+        assert_eq!(
+            TaskApp::parse_task_id("task.item.delete.42", TASK_DELETE_PREFIX),
+            Some(42)
+        );
+        assert_eq!(
+            TaskApp::parse_task_id("task.item.delete.x", TASK_DELETE_PREFIX),
+            None
+        );
         assert_eq!(TaskApp::parse_task_id("other.42", TASK_DELETE_PREFIX), None);
 
         let app = sample_app();

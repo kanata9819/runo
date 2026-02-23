@@ -141,7 +141,11 @@ mod tests {
             &mut scene,
             &button,
             &font,
-            vec![Glyph { id: 1, x: 0.0, y: 0.0 }],
+            vec![Glyph {
+                id: 1,
+                x: 0.0,
+                y: 0.0,
+            }],
             10.0,
         );
     }

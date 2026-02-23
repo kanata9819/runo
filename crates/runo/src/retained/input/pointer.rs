@@ -464,7 +464,10 @@ mod tests {
 
     use super::*;
     use crate::retained::node::{ComboBoxNode, SliderNode, WidgetNode};
-    use crate::retained::{RetainedState, UpsertCheckboxArgs, UpsertComboBoxArgs, UpsertRadioButtonArgs, UpsertSliderArgs};
+    use crate::retained::{
+        RetainedState, UpsertCheckboxArgs, UpsertComboBoxArgs, UpsertRadioButtonArgs,
+        UpsertSliderArgs,
+    };
 
     fn sample_combo_box(is_open: bool) -> ComboBoxNode {
         ComboBoxNode {
@@ -546,7 +549,14 @@ mod tests {
         let mut state = RetainedState::new();
         let rect = Rect::new(0.0, 0.0, 140.0, 36.0);
         let color = Color::from_rgb8(240, 240, 240);
-        state.upsert_button("btn".to_string(), rect, Some("b".to_string()), 14.0, color, true);
+        state.upsert_button(
+            "btn".to_string(),
+            rect,
+            Some("b".to_string()),
+            14.0,
+            color,
+            true,
+        );
         state.upsert_checkbox(UpsertCheckboxArgs {
             id: "cb".to_string(),
             rect,
@@ -629,7 +639,11 @@ mod tests {
         state.update_button_states(false, false, true);
 
         let events = state.drain_events();
-        assert!(events.iter().any(|e| matches!(e, UiEvent::ButtonClicked { id } if id == "btn")));
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, UiEvent::ButtonClicked { id } if id == "btn"))
+        );
         assert!(state.active_button.is_none());
     }
 
@@ -653,9 +667,25 @@ mod tests {
         state.update_combo_box_states(true, true); // select
 
         let events = state.drain_events();
-        assert!(events.iter().any(|e| matches!(e, UiEvent::CheckboxChanged { id, .. } if id == "cb")));
-        assert!(events.iter().any(|e| matches!(e, UiEvent::RadioButtonChanged { id, .. } if id == "rb")));
-        assert!(events.iter().any(|e| matches!(e, UiEvent::SliderChanged { id, .. } if id == "sl")));
-        assert!(events.iter().any(|e| matches!(e, UiEvent::ComboBoxChanged { id, .. } if id == "co")));
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, UiEvent::CheckboxChanged { id, .. } if id == "cb"))
+        );
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, UiEvent::RadioButtonChanged { id, .. } if id == "rb"))
+        );
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, UiEvent::SliderChanged { id, .. } if id == "sl"))
+        );
+        assert!(
+            events
+                .iter()
+                .any(|e| matches!(e, UiEvent::ComboBoxChanged { id, .. } if id == "co"))
+        );
     }
 }

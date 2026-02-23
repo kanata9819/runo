@@ -364,9 +364,9 @@ mod tests {
     use super::*;
     use crate::event::UiEvent;
     use crate::input::InputFrame;
+    use crate::retained::RetainedState;
     use crate::retained::node::{TextBoxNode, WidgetNode};
     use crate::retained::state::UpsertTextBoxArgs;
-    use crate::retained::RetainedState;
     use crate::widget::text_box::Overflow;
 
     fn sample_text_box(text: &str) -> TextBoxNode {

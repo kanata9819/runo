@@ -415,13 +415,7 @@ mod tests {
         if let Some(font) = load_default_font() {
             let color = text_box.text_color;
             let metrics = text_metrics(&text_box);
-            draw_text_content(
-                &mut scene,
-                &font,
-                &mut text_box,
-                color,
-                metrics,
-            );
+            draw_text_content(&mut scene, &font, &mut text_box, color, metrics);
             text_box.focused = true;
             draw_caret(&mut scene, &font, &text_box, text_metrics(&text_box));
             render(&mut scene, Some(&font), &mut text_box);

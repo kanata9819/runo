@@ -51,3 +51,49 @@ impl RetainedState {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use vello::Scene;
+    use vello::kurbo::Rect;
+    use vello::peniko::Color;
+
+    use super::*;
+
+    #[test]
+    fn render_with_empty_state_is_noop() {
+        let mut state = RetainedState::new();
+        let mut scene = Scene::new();
+        state.render(&mut scene, None);
+    }
+
+    #[test]
+    fn render_visits_base_and_overlay_passes() {
+        let mut state = RetainedState::new();
+        let mut scene = Scene::new();
+        let rect = Rect::new(0.0, 0.0, 140.0, 40.0);
+        let color = Color::from_rgb8(240, 240, 240);
+
+        state.upsert_label(
+            "lbl".to_string(),
+            rect,
+            "label".to_string(),
+            16.0,
+            color,
+            true,
+        );
+        state.upsert_combo_box(crate::retained::UpsertComboBoxArgs {
+            id: "combo".to_string(),
+            rect,
+            items: vec!["a".to_string(), "b".to_string()],
+            selected_index: Some(0),
+            font_size: 16.0,
+            text_color: color,
+            bg_color: Color::from_rgb8(30, 30, 30),
+            border_color: color,
+            enabled: true,
+        });
+
+        state.render(&mut scene, None);
+    }
+}

@@ -202,6 +202,7 @@ pub(super) fn render_dropdown_overlay(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::font::load_default_font;
     use vello::peniko::Color;
 
     /// Creates a reusable combo box fixture for paint helper tests.
@@ -270,5 +271,44 @@ mod tests {
         let font_size = 20.0;
         let y = baseline_y(rect, font_size);
         assert_eq!(y, 47.0);
+    }
+
+    #[test]
+    fn render_and_overlay_are_callable_for_open_and_closed_states() {
+        let mut scene = Scene::new();
+        let mut combo_box = sample_combo_box();
+        render(&mut scene, None, &combo_box);
+        render_dropdown_overlay(&mut scene, None, &combo_box);
+
+        if let Some(font) = load_default_font() {
+            render(&mut scene, Some(&font), &combo_box);
+            combo_box.is_open = true;
+            combo_box.hovered_item = Some(0);
+            render_dropdown_overlay(&mut scene, Some(&font), &combo_box);
+        }
+    }
+
+    #[test]
+    fn draw_text_helpers_are_callable() {
+        let Some(font) = load_default_font() else {
+            return;
+        };
+        let mut scene = Scene::new();
+        let combo_box = sample_combo_box();
+        draw_text_run_at(
+            &mut scene,
+            &font,
+            vec![Glyph { id: 1, x: 0.0, y: 0.0 }],
+            10.0,
+            combo_box.rect,
+            combo_box.font_size,
+            Color::from_rgb8(255, 255, 255),
+        );
+        draw_text_run(
+            &mut scene,
+            &font,
+            vec![Glyph { id: 2, x: 0.0, y: 0.0 }],
+            &combo_box,
+        );
     }
 }

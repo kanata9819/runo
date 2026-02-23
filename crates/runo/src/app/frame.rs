@@ -110,3 +110,40 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.input.end_frame();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::RunOptions;
+
+    #[derive(Default)]
+    struct DummyApp {
+        build_calls: usize,
+        update_calls: usize,
+    }
+
+    impl RunoApplication for DummyApp {
+        fn build(&mut self, _ui: &mut Ui<'_>) {
+            self.build_calls += 1;
+        }
+
+        fn update(&mut self, _ui: &mut Ui<'_>) {
+            self.update_calls += 1;
+        }
+    }
+
+    #[test]
+    fn render_returns_false_when_surface_is_missing() {
+        let mut runner = AppRunner::new(DummyApp::default(), RunOptions::default());
+        assert!(!runner.render());
+    }
+
+    #[test]
+    fn build_scene_and_run_ui_frame_execute_without_gpu() {
+        let mut runner = AppRunner::new(DummyApp::default(), RunOptions::default());
+        runner.build_scene(320, 180);
+        runner.run_ui_frame();
+        assert_eq!(runner.user_app.build_calls, 1);
+        assert_eq!(runner.user_app.update_calls, 1);
+    }
+}

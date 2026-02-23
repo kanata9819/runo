@@ -315,6 +315,7 @@ fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::font::load_default_font;
     use crate::widget::text_box::Overflow;
     use vello::kurbo::Rect;
 
@@ -398,5 +399,45 @@ mod tests {
     /// Returns final line/column when index is past text end.
     fn line_col_from_char_index_returns_end_for_out_of_range_index() {
         assert_eq!(line_col_from_char_index("ab\nc", 99), (1, 1));
+    }
+
+    #[test]
+    fn render_and_internal_helpers_are_callable() {
+        let mut scene = Scene::new();
+        let mut text_box = sample_text_box();
+        render(&mut scene, None, &mut text_box);
+        draw_background_and_border(&mut scene, &text_box);
+        let metrics = text_metrics(&text_box);
+        assert!(metrics.inner_right > metrics.inner_left);
+        let _ = resolve_text_color(&text_box);
+        render_horizontal_scrollbar(&mut scene, &text_box);
+
+        if let Some(font) = load_default_font() {
+            let color = text_box.text_color;
+            let metrics = text_metrics(&text_box);
+            draw_text_content(
+                &mut scene,
+                &font,
+                &mut text_box,
+                color,
+                metrics,
+            );
+            text_box.focused = true;
+            draw_caret(&mut scene, &font, &text_box, text_metrics(&text_box));
+            render(&mut scene, Some(&font), &mut text_box);
+        }
+    }
+
+    #[test]
+    fn horizontal_scrollbar_draws_only_when_scrollable() {
+        let mut scene = Scene::new();
+        let mut text_box = sample_text_box();
+        text_box.overflow_x = Overflow::Visible;
+        render_horizontal_scrollbar(&mut scene, &text_box);
+
+        text_box.overflow_x = Overflow::Auto;
+        text_box.text_advance = 1000.0;
+        text_box.scroll_x = 100.0;
+        render_horizontal_scrollbar(&mut scene, &text_box);
     }
 }

@@ -54,12 +54,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 queue,
                 scene,
                 target_view,
-                &RenderParams {
-                    base_color: Color::from_rgb8(0, 0, 0),
-                    width,
-                    height,
-                    antialiasing_method: AaConfig::Msaa16,
-                },
+                &render_params(width, height),
             )
             .map_err(|err| format!("{err:?}"))
     }
@@ -84,6 +79,15 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
         queue.submit([encoder.finish()]);
         surface_texture.present();
+    }
+}
+
+fn render_params(width: u32, height: u32) -> RenderParams {
+    RenderParams {
+        base_color: Color::from_rgb8(0, 0, 0),
+        width,
+        height,
+        antialiasing_method: AaConfig::Msaa16,
     }
 }
 
@@ -125,5 +129,14 @@ mod tests {
             map_surface_error(&wgpu::SurfaceError::Other),
             SurfaceAcquireAction::SkipFrame
         );
+    }
+
+    #[test]
+    fn render_params_use_expected_defaults() {
+        let params = render_params(640, 480);
+        assert_eq!(params.width, 640);
+        assert_eq!(params.height, 480);
+        assert_eq!(params.base_color, Color::from_rgb8(0, 0, 0));
+        assert!(matches!(params.antialiasing_method, AaConfig::Msaa16));
     }
 }

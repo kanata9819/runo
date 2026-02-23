@@ -103,7 +103,14 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
 
 #[cfg(test)]
 mod tests {
+    use vello::Scene;
+    use vello::peniko::Color;
+
     use super::RadioButtonResponse;
+    use crate::hooks::effect::EffectStore;
+    use crate::hooks::state::StateStore;
+    use crate::retained::RetainedState;
+    use crate::ui::Ui;
 
     #[test]
     fn radio_button_response_default_is_unselected_and_idle() {
@@ -112,5 +119,33 @@ mod tests {
         assert!(!response.hovered);
         assert!(!response.pressed);
         assert!(!response.changed);
+    }
+
+    #[test]
+    fn radio_button_builder_methods_and_show_work() {
+        let mut scene = Scene::new();
+        let mut effects = EffectStore::new();
+        let mut states = StateStore::new();
+        let mut retained = RetainedState::new();
+        let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+
+        let response = ui
+            .widgets()
+            .radio_button()
+            .id("r1")
+            .group("g")
+            .width(240)
+            .height(32)
+            .text("one")
+            .selected(true)
+            .font_size(17)
+            .text_color(Color::from_rgb8(240, 240, 240))
+            .enabled(false)
+            .show();
+        assert!(response.selected);
+
+        ui.state().radio_button().set_enabled("r1", true);
+        ui.state().radio_button().set_selected("r1", false);
+        assert!(!ui.state().radio_button().selected("r1"));
     }
 }

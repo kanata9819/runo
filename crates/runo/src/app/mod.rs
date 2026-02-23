@@ -64,4 +64,31 @@ mod tests {
         assert_eq!(options.window_width, 640);
         assert_eq!(options.window_height, 480);
     }
+
+    struct CustomApp;
+    impl RunoApplication for CustomApp {
+        fn options(&self) -> RunOptions {
+            RunOptions {
+                window_title: "custom".to_string(),
+                window_width: 111,
+                window_height: 222,
+                window_resizable: false,
+            }
+        }
+    }
+
+    #[test]
+    fn run_options_default_sets_resizable_true() {
+        assert!(RunOptions::default().window_resizable);
+    }
+
+    #[test]
+    fn application_can_override_options() {
+        let app = CustomApp;
+        let options = app.options();
+        assert_eq!(options.window_title, "custom");
+        assert_eq!(options.window_width, 111);
+        assert_eq!(options.window_height, 222);
+        assert!(!options.window_resizable);
+    }
 }

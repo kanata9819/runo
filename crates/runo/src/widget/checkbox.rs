@@ -95,7 +95,14 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
 
 #[cfg(test)]
 mod tests {
+    use vello::Scene;
+    use vello::peniko::Color;
+
     use super::CheckboxResponse;
+    use crate::hooks::effect::EffectStore;
+    use crate::hooks::state::StateStore;
+    use crate::retained::RetainedState;
+    use crate::ui::Ui;
 
     #[test]
     fn checkbox_response_default_is_unchecked_and_idle() {
@@ -104,5 +111,32 @@ mod tests {
         assert!(!response.hovered);
         assert!(!response.pressed);
         assert!(!response.changed);
+    }
+
+    #[test]
+    fn checkbox_builder_methods_and_show_work() {
+        let mut scene = Scene::new();
+        let mut effects = EffectStore::new();
+        let mut states = StateStore::new();
+        let mut retained = RetainedState::new();
+        let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+
+        let response = ui
+            .widgets()
+            .checkbox()
+            .id("cb")
+            .width(180)
+            .height(28)
+            .text("check")
+            .checked(true)
+            .font_size(14)
+            .text_color(Color::from_rgb8(230, 230, 230))
+            .enabled(false)
+            .show();
+        assert!(response.checked);
+
+        ui.state().checkbox().set_enabled("cb", true);
+        ui.state().checkbox().set_checked("cb", false);
+        assert!(!ui.state().checkbox().checked("cb"));
     }
 }

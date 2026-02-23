@@ -87,3 +87,36 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         });
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use vello::Scene;
+    use vello::peniko::Color;
+
+    use crate::hooks::effect::EffectStore;
+    use crate::hooks::state::StateStore;
+    use crate::retained::RetainedState;
+    use crate::ui::Ui;
+
+    #[test]
+    fn label_builder_setters_and_show_work_without_font() {
+        let mut scene = Scene::new();
+        let mut effects = EffectStore::new();
+        let mut states = StateStore::new();
+        let mut retained = RetainedState::new();
+        let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+
+        ui.widgets()
+            .label()
+            .id("lbl")
+            .width(180)
+            .height(32)
+            .font_size(22)
+            .text("hello")
+            .text_color(Color::from_rgb8(210, 220, 230))
+            .enabled(false)
+            .show();
+
+        ui.state().label().set_enabled("lbl", true);
+    }
+}

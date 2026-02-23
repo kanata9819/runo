@@ -74,6 +74,7 @@ fn draw_text_run(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::font::load_default_font;
     use vello::kurbo::Rect;
     use vello::peniko::Color;
 
@@ -116,5 +117,32 @@ mod tests {
         button.pressed = true;
         button.hovered = true;
         assert_eq!(change_color(&button), Color::from_rgb8(83, 90, 100));
+    }
+
+    #[test]
+    fn render_runs_with_and_without_font() {
+        let mut scene = Scene::new();
+        let button = sample_button();
+        render(&mut scene, None, &button);
+
+        if let Some(font) = load_default_font() {
+            render(&mut scene, Some(&font), &button);
+        }
+    }
+
+    #[test]
+    fn draw_text_run_is_callable() {
+        let Some(font) = load_default_font() else {
+            return;
+        };
+        let mut scene = Scene::new();
+        let button = sample_button();
+        draw_text_run(
+            &mut scene,
+            &button,
+            &font,
+            vec![Glyph { id: 1, x: 0.0, y: 0.0 }],
+            10.0,
+        );
     }
 }

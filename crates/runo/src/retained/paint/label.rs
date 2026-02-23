@@ -29,3 +29,22 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNo
         },
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vello::kurbo::Rect;
+
+    #[test]
+    fn render_returns_early_when_font_is_missing() {
+        let mut scene = Scene::new();
+        let label = LabelNode {
+            rect: Rect::new(0.0, 0.0, 100.0, 30.0),
+            text: "hello".to_string(),
+            font_size: 18.0,
+            text_color: vello::peniko::Color::from_rgb8(255, 255, 255),
+            enabled: true,
+        };
+        render(&mut scene, None, &label);
+    }
+}

@@ -142,6 +142,7 @@ fn indicator_bg_color(checkbox: &CheckboxNode) -> AlphaColor<Srgb> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::font::load_default_font;
     use vello::kurbo::Rect;
     use vello::peniko::Color;
 
@@ -194,5 +195,18 @@ mod tests {
         checkbox.hovered = true;
         checkbox.checked = true;
         assert_eq!(indicator_bg_color(&checkbox), Color::from_rgb8(43, 47, 53));
+    }
+
+    #[test]
+    fn render_runs_for_checked_and_unchecked_states() {
+        let mut scene = Scene::new();
+        let mut checkbox = sample_checkbox();
+        render(&mut scene, None, &checkbox);
+
+        if let Some(font) = load_default_font() {
+            render(&mut scene, Some(&font), &checkbox);
+            checkbox.checked = true;
+            render(&mut scene, Some(&font), &checkbox);
+        }
     }
 }

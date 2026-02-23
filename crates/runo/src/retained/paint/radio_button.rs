@@ -114,6 +114,7 @@ fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::font::load_default_font;
     use vello::kurbo::Rect;
     use vello::peniko::Color;
 
@@ -165,5 +166,18 @@ mod tests {
         radio_button.pressed = true;
         radio_button.hovered = true;
         assert_eq!(outer_bg_color(&radio_button), Color::from_rgb8(43, 47, 53));
+    }
+
+    #[test]
+    fn render_runs_for_selected_and_unselected_states() {
+        let mut scene = Scene::new();
+        let mut radio = sample_radio_button();
+        render(&mut scene, None, &radio);
+
+        if let Some(font) = load_default_font() {
+            render(&mut scene, Some(&font), &radio);
+            radio.selected = true;
+            render(&mut scene, Some(&font), &radio);
+        }
     }
 }

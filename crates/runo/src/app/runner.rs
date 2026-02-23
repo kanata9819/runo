@@ -17,6 +17,10 @@ use crate::hooks::state::StateStore;
 use crate::input::InputState;
 use crate::retained::RetainedState;
 
+fn sanitize_window_size(width: u32, height: u32) -> (u32, u32) {
+    (width.max(1), height.max(1))
+}
+
 pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) user_app: A,
     pub(super) window: Option<Arc<Window>>,
@@ -35,8 +39,8 @@ pub(crate) struct AppRunner<A: RunoApplication + 'static> {
 
 impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn new(user_app: A, mut window_options: RunOptions) -> Self {
-        window_options.window_width = window_options.window_width.max(1);
-        window_options.window_height = window_options.window_height.max(1);
+        (window_options.window_width, window_options.window_height) =
+            sanitize_window_size(window_options.window_width, window_options.window_height);
         Self {
             user_app,
             window: None,
@@ -111,5 +115,48 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         if let Some(window) = &self.window {
             window.request_redraw();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::app::RunOptions;
+
+    struct DummyApp;
+    impl RunoApplication for DummyApp {}
+
+    #[test]
+    fn sanitize_window_size_never_returns_zero() {
+        assert_eq!(sanitize_window_size(0, 0), (1, 1));
+        assert_eq!(sanitize_window_size(640, 0), (640, 1));
+        assert_eq!(sanitize_window_size(0, 480), (1, 480));
+        assert_eq!(sanitize_window_size(800, 600), (800, 600));
+    }
+
+    #[test]
+    fn new_clamps_window_dimensions_to_minimum_one() {
+        let runner = AppRunner::new(
+            DummyApp,
+            RunOptions {
+                window_title: "t".to_string(),
+                window_width: 0,
+                window_height: 0,
+                window_resizable: true,
+            },
+        );
+        assert_eq!(runner.window_options.window_width, 1);
+        assert_eq!(runner.window_options.window_height, 1);
+    }
+
+    #[test]
+    fn resize_ignores_zero_sizes_without_surface() {
+        let mut runner = AppRunner::new(DummyApp, RunOptions::default());
+        runner.resize(0, 100);
+        runner.resize(100, 0);
+        runner.resize(0, 0);
+        runner.resize(100, 100);
+        // no panic and no surface mutation path is enough for this unit test
+        assert!(runner.surface.is_none());
     }
 }

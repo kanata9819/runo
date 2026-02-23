@@ -463,7 +463,8 @@ mod tests {
     use vello::peniko::Color;
 
     use super::*;
-    use crate::retained::node::{ComboBoxNode, SliderNode};
+    use crate::retained::node::{ComboBoxNode, SliderNode, WidgetNode};
+    use crate::retained::{RetainedState, UpsertCheckboxArgs, UpsertComboBoxArgs, UpsertRadioButtonArgs, UpsertSliderArgs};
 
     fn sample_combo_box(is_open: bool) -> ComboBoxNode {
         ComboBoxNode {
@@ -539,5 +540,122 @@ mod tests {
         let slider = sample_slider(Some(0.25));
         let value = slider_value_from_cursor(&slider, 40.0);
         assert!((value - 0.25).abs() < f64::EPSILON);
+    }
+
+    fn state_with_interactive_widgets() -> RetainedState {
+        let mut state = RetainedState::new();
+        let rect = Rect::new(0.0, 0.0, 140.0, 36.0);
+        let color = Color::from_rgb8(240, 240, 240);
+        state.upsert_button("btn".to_string(), rect, Some("b".to_string()), 14.0, color, true);
+        state.upsert_checkbox(UpsertCheckboxArgs {
+            id: "cb".to_string(),
+            rect,
+            text: Some("c".to_string()),
+            checked: Some(false),
+            font_size: 14.0,
+            text_color: color,
+            enabled: true,
+        });
+        state.upsert_radio_button(UpsertRadioButtonArgs {
+            id: "rb".to_string(),
+            group: "g".to_string(),
+            rect,
+            text: Some("r".to_string()),
+            selected: Some(false),
+            font_size: 14.0,
+            text_color: color,
+            enabled: true,
+        });
+        state.upsert_slider(UpsertSliderArgs {
+            id: "sl".to_string(),
+            rect,
+            min: 0.0,
+            max: 1.0,
+            value: Some(0.0),
+            step: Some(0.1),
+            text: None,
+            font_size: 14.0,
+            text_color: color,
+            enabled: true,
+        });
+        state.upsert_combo_box(UpsertComboBoxArgs {
+            id: "co".to_string(),
+            rect,
+            items: vec!["A".to_string(), "B".to_string()],
+            selected_index: Some(0),
+            font_size: 14.0,
+            text_color: color,
+            bg_color: Color::from_rgb8(20, 20, 20),
+            border_color: color,
+            enabled: true,
+        });
+        state
+    }
+
+    #[test]
+    fn update_hover_flags_marks_widgets_under_cursor() {
+        let mut state = state_with_interactive_widgets();
+        state.update_hover_flags((10.0, 10.0));
+
+        match state.widgets.get("btn") {
+            Some(WidgetNode::Button(button)) => assert!(button.hovered),
+            _ => panic!("button missing"),
+        }
+        match state.widgets.get("co") {
+            Some(WidgetNode::ComboBox(combo_box)) => assert!(combo_box.hovered),
+            _ => panic!("combo missing"),
+        }
+    }
+
+    #[test]
+    fn handle_mouse_press_sets_active_widget_ids() {
+        let mut state = state_with_interactive_widgets();
+        state.update_hover_flags((10.0, 10.0));
+        state.handle_mouse_press(true);
+
+        assert_eq!(state.active_button.as_deref(), Some("btn"));
+        assert_eq!(state.active_checkbox.as_deref(), Some("cb"));
+        assert_eq!(state.active_radio_button.as_deref(), Some("rb"));
+        assert_eq!(state.active_slider.as_deref(), Some("sl"));
+        assert_eq!(state.active_combo_box.as_deref(), Some("co"));
+    }
+
+    #[test]
+    fn update_button_states_pushes_click_event_and_clears_active_on_release() {
+        let mut state = state_with_interactive_widgets();
+        state.update_hover_flags((10.0, 10.0));
+        state.handle_mouse_press(true);
+        state.update_button_states(true, true, false);
+        state.update_button_states(false, false, true);
+
+        let events = state.drain_events();
+        assert!(events.iter().any(|e| matches!(e, UiEvent::ButtonClicked { id } if id == "btn")));
+        assert!(state.active_button.is_none());
+    }
+
+    #[test]
+    fn checkbox_radio_slider_and_combo_emit_events() {
+        let mut state = state_with_interactive_widgets();
+        state.update_hover_flags((10.0, 10.0));
+        state.handle_mouse_press(true);
+
+        state.update_checkbox_states(true, true);
+        state.active_radio_button = Some("rb".to_string());
+        state.update_radio_button_states(true, true);
+        state.active_slider = Some("sl".to_string());
+        state.update_slider_states((120.0, 10.0), true, true, true);
+
+        state.active_combo_box = Some("co".to_string());
+        state.update_combo_box_states(true, true); // open
+        // pick the second item so selected_index actually changes (0 -> 1)
+        state.update_hover_flags((10.0, 80.0));
+        state.active_combo_box = Some("co".to_string());
+        state.update_combo_box_states(true, true); // select
+
+        let events = state.drain_events();
+        assert!(events.iter().any(|e| matches!(e, UiEvent::CheckboxChanged { id, .. } if id == "cb")));
+        assert!(events.iter().any(|e| matches!(e, UiEvent::RadioButtonChanged { id, .. } if id == "rb")));
+        assert!(events.iter().any(|e| matches!(e, UiEvent::SliderChanged { id, .. } if id == "sl")));
+        assert!(events.iter().any(|e| matches!(e, UiEvent::ComboBoxChanged { id, .. } if id == "co")));
     }
 }

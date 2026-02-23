@@ -15,3 +15,10 @@ f:
 t:
     cargo fmt
     cargo test
+
+b:
+    cargo fmt
+    cargo build
+
+tlc:
+    cargo llvm-conv

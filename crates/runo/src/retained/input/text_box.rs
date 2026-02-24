@@ -126,7 +126,7 @@ impl RetainedState {
                 sync_text_box_text_advance(text_box, font);
                 Self::keep_text_box_end_visible(text_box);
                 pending_event = Some(UiEvent::TextBoxChanged {
-                    id,
+                    text_box: crate::widget::text_box::TextBoxHandle::new(id),
                     text: text_box.text.clone(),
                 });
             }
@@ -530,7 +530,7 @@ mod tests {
         let events = state.drain_events();
         assert!(events
             .iter()
-            .any(|e| matches!(e, UiEvent::TextBoxChanged { id, text } if id == "tb" && text.contains('Z'))));
+            .any(|e| matches!(e, UiEvent::TextBoxChanged { text_box, text } if text_box.id() == "tb" && text.contains('Z'))));
     }
 
     #[test]

@@ -223,20 +223,20 @@ mod tests {
     fn event_queue_pop_and_drain_preserve_order() {
         let mut state = RetainedState::new();
         state.push_event(UiEvent::ButtonClicked {
-            id: "a".to_string(),
+            button: crate::widget::button::ButtonHandle::new("a".to_string()),
         });
         state.push_event(UiEvent::ButtonClicked {
-            id: "b".to_string(),
+            button: crate::widget::button::ButtonHandle::new("b".to_string()),
         });
 
         match state.pop_event() {
-            Some(UiEvent::ButtonClicked { id }) => assert_eq!(id, "a"),
+            Some(UiEvent::ButtonClicked { button }) => assert_eq!(button.id(), "a"),
             _ => panic!("unexpected event"),
         }
         let remaining = state.drain_events();
         assert_eq!(remaining.len(), 1);
         match &remaining[0] {
-            UiEvent::ButtonClicked { id } => assert_eq!(id, "b"),
+            UiEvent::ButtonClicked { button } => assert_eq!(button.id(), "b"),
             _ => panic!("unexpected event"),
         }
     }

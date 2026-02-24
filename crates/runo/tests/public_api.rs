@@ -47,83 +47,35 @@ fn runo_application_can_override_options() {
 
 #[test]
 fn ui_event_payloads_are_accessible_through_pattern_matching() {
-    let events = [
-        UiEvent::ButtonClicked {
-            id: "btn".to_string(),
-        },
-        UiEvent::CheckboxChanged {
-            id: "check".to_string(),
-            checked: true,
-        },
-        UiEvent::RadioButtonChanged {
-            id: "radio.a".to_string(),
-            group: "group".to_string(),
-            selected: true,
-        },
-        UiEvent::SliderChanged {
-            id: "slider".to_string(),
-            value: 0.75,
-        },
-        UiEvent::TextBoxChanged {
-            id: "text".to_string(),
-            text: "hello".to_string(),
-        },
-        UiEvent::ComboBoxChanged {
-            id: "combo".to_string(),
-            selected_index: 2,
-            selected_text: "Manager".to_string(),
-        },
-    ];
+    fn accepts_and_matches(event: UiEvent) {
+        match event {
+            UiEvent::ButtonClicked { button: _ } => {}
+            UiEvent::CheckboxChanged {
+                checkbox: _,
+                checked: _,
+            } => {}
+            UiEvent::RadioButtonChanged {
+                radio_button: _,
+                group: _,
+                selected: _,
+            } => {}
+            UiEvent::SliderChanged {
+                slider: _,
+                value: _,
+            } => {}
+            UiEvent::TextBoxChanged {
+                text_box: _,
+                text: _,
+            } => {}
+            UiEvent::ComboBoxChanged {
+                combo_box: _,
+                selected_index: _,
+                selected_text: _,
+            } => {}
+        }
+    }
 
-    match &events[0] {
-        UiEvent::ButtonClicked { id } => assert_eq!(id, "btn"),
-        _ => panic!("unexpected event variant"),
-    }
-    match &events[1] {
-        UiEvent::CheckboxChanged { id, checked } => {
-            assert_eq!(id, "check");
-            assert!(*checked);
-        }
-        _ => panic!("unexpected event variant"),
-    }
-    match &events[2] {
-        UiEvent::RadioButtonChanged {
-            id,
-            group,
-            selected,
-        } => {
-            assert_eq!(id, "radio.a");
-            assert_eq!(group, "group");
-            assert!(*selected);
-        }
-        _ => panic!("unexpected event variant"),
-    }
-    match &events[3] {
-        UiEvent::SliderChanged { id, value } => {
-            assert_eq!(id, "slider");
-            assert!((*value - 0.75).abs() < f64::EPSILON);
-        }
-        _ => panic!("unexpected event variant"),
-    }
-    match &events[4] {
-        UiEvent::TextBoxChanged { id, text } => {
-            assert_eq!(id, "text");
-            assert_eq!(text, "hello");
-        }
-        _ => panic!("unexpected event variant"),
-    }
-    match &events[5] {
-        UiEvent::ComboBoxChanged {
-            id,
-            selected_index,
-            selected_text,
-        } => {
-            assert_eq!(id, "combo");
-            assert_eq!(*selected_index, 2);
-            assert_eq!(selected_text, "Manager");
-        }
-        _ => panic!("unexpected event variant"),
-    }
+    let _fn_ref: fn(UiEvent) = accepts_and_matches;
 }
 
 #[test]

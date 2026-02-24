@@ -192,7 +192,9 @@ impl RetainedState {
         }
 
         for id in clicked_ids {
-            self.push_event(UiEvent::ButtonClicked { id });
+            self.push_event(UiEvent::ButtonClicked {
+                button: crate::widget::button::ButtonHandle::new(id),
+            });
         }
 
         if mouse_released {
@@ -226,7 +228,10 @@ impl RetainedState {
         }
 
         for (id, checked) in changed {
-            self.push_event(UiEvent::CheckboxChanged { id, checked });
+            self.push_event(UiEvent::CheckboxChanged {
+                checkbox: crate::widget::checkbox::CheckboxHandle::new(id),
+                checked,
+            });
         }
 
         if mouse_released {
@@ -272,7 +277,7 @@ impl RetainedState {
             }
 
             self.push_event(UiEvent::RadioButtonChanged {
-                id: selected_id,
+                radio_button: crate::widget::radio_button::RadioButtonHandle::new(selected_id),
                 group: selected_group,
                 selected: true,
             });
@@ -318,7 +323,10 @@ impl RetainedState {
         }
 
         for (id, value) in changed {
-            self.push_event(UiEvent::SliderChanged { id, value });
+            self.push_event(UiEvent::SliderChanged {
+                slider: crate::widget::slider::SliderHandle::new(id),
+                value,
+            });
         }
 
         if mouse_released {
@@ -355,7 +363,7 @@ impl RetainedState {
 
         for (id, selected_index, selected_text) in changed {
             self.push_event(UiEvent::ComboBoxChanged {
-                id,
+                combo_box: crate::widget::combo_box::ComboBoxHandle::new(id),
                 selected_index,
                 selected_text,
             });
@@ -642,7 +650,7 @@ mod tests {
         assert!(
             events
                 .iter()
-                .any(|e| matches!(e, UiEvent::ButtonClicked { id } if id == "btn"))
+                .any(|e| matches!(e, UiEvent::ButtonClicked { button } if button.id() == "btn"))
         );
         assert!(state.active_button.is_none());
     }
@@ -667,25 +675,21 @@ mod tests {
         state.update_combo_box_states(true, true); // select
 
         let events = state.drain_events();
+        assert!(events.iter().any(
+            |e| matches!(e, UiEvent::CheckboxChanged { checkbox, .. } if checkbox.id() == "cb")
+        ));
         assert!(
             events
                 .iter()
-                .any(|e| matches!(e, UiEvent::CheckboxChanged { id, .. } if id == "cb"))
+                .any(|e| matches!(e, UiEvent::RadioButtonChanged { radio_button, .. } if radio_button.id() == "rb"))
         );
         assert!(
             events
                 .iter()
-                .any(|e| matches!(e, UiEvent::RadioButtonChanged { id, .. } if id == "rb"))
+                .any(|e| matches!(e, UiEvent::SliderChanged { slider, .. } if slider.id() == "sl"))
         );
-        assert!(
-            events
-                .iter()
-                .any(|e| matches!(e, UiEvent::SliderChanged { id, .. } if id == "sl"))
-        );
-        assert!(
-            events
-                .iter()
-                .any(|e| matches!(e, UiEvent::ComboBoxChanged { id, .. } if id == "co"))
-        );
+        assert!(events.iter().any(
+            |e| matches!(e, UiEvent::ComboBoxChanged { combo_box, .. } if combo_box.id() == "co")
+        ));
     }
 }

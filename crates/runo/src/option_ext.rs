@@ -9,6 +9,7 @@ use crate::widget::text_box::TextBoxHandle;
 pub trait OptionalButtonHandleExt {
     fn on_click(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce());
     fn on_click_with_ui(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(&mut crate::Ui<'_>));
+    fn take_click(&self, events: &mut UiEvents<'_, '_>) -> bool;
 }
 
 impl OptionalButtonHandleExt for Option<ButtonHandle> {
@@ -23,6 +24,11 @@ impl OptionalButtonHandleExt for Option<ButtonHandle> {
             handle.on_click_with_ui(events, f);
         }
     }
+
+    fn take_click(&self, events: &mut UiEvents<'_, '_>) -> bool {
+        self.as_ref()
+            .is_some_and(|handle| handle.take_click(events))
+    }
 }
 
 pub trait OptionalTextBoxHandleExt {
@@ -32,6 +38,7 @@ pub trait OptionalTextBoxHandleExt {
         events: &mut UiEvents<'_, '_>,
         f: impl FnOnce(&mut crate::Ui<'_>, String),
     );
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<String>;
 }
 
 impl OptionalTextBoxHandleExt for Option<TextBoxHandle> {
@@ -50,6 +57,10 @@ impl OptionalTextBoxHandleExt for Option<TextBoxHandle> {
             handle.on_change_with_ui(events, f);
         }
     }
+
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<String> {
+        self.as_ref().and_then(|handle| handle.take_change(events))
+    }
 }
 
 pub trait OptionalCheckboxHandleExt {
@@ -59,6 +70,7 @@ pub trait OptionalCheckboxHandleExt {
         events: &mut UiEvents<'_, '_>,
         f: impl FnOnce(&mut crate::Ui<'_>, bool),
     );
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<bool>;
 }
 
 impl OptionalCheckboxHandleExt for Option<CheckboxHandle> {
@@ -77,6 +89,10 @@ impl OptionalCheckboxHandleExt for Option<CheckboxHandle> {
             handle.on_change_with_ui(events, f);
         }
     }
+
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<bool> {
+        self.as_ref().and_then(|handle| handle.take_change(events))
+    }
 }
 
 pub trait OptionalSliderHandleExt {
@@ -86,6 +102,7 @@ pub trait OptionalSliderHandleExt {
         events: &mut UiEvents<'_, '_>,
         f: impl FnOnce(&mut crate::Ui<'_>, f64),
     );
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<f64>;
 }
 
 impl OptionalSliderHandleExt for Option<SliderHandle> {
@@ -104,6 +121,10 @@ impl OptionalSliderHandleExt for Option<SliderHandle> {
             handle.on_change_with_ui(events, f);
         }
     }
+
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<f64> {
+        self.as_ref().and_then(|handle| handle.take_change(events))
+    }
 }
 
 pub trait OptionalRadioButtonHandleExt {
@@ -113,6 +134,7 @@ pub trait OptionalRadioButtonHandleExt {
         events: &mut UiEvents<'_, '_>,
         f: impl FnOnce(&mut crate::Ui<'_>, bool),
     );
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<bool>;
 }
 
 impl OptionalRadioButtonHandleExt for Option<RadioButtonHandle> {
@@ -131,6 +153,10 @@ impl OptionalRadioButtonHandleExt for Option<RadioButtonHandle> {
             handle.on_change_with_ui(events, f);
         }
     }
+
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<bool> {
+        self.as_ref().and_then(|handle| handle.take_change(events))
+    }
 }
 
 pub trait OptionalComboBoxHandleExt {
@@ -140,6 +166,7 @@ pub trait OptionalComboBoxHandleExt {
         events: &mut UiEvents<'_, '_>,
         f: impl FnOnce(&mut crate::Ui<'_>, usize, String),
     );
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<(usize, String)>;
 }
 
 impl OptionalComboBoxHandleExt for Option<ComboBoxHandle> {
@@ -157,5 +184,9 @@ impl OptionalComboBoxHandleExt for Option<ComboBoxHandle> {
         if let Some(handle) = self {
             handle.on_change_with_ui(events, f);
         }
+    }
+
+    fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<(usize, String)> {
+        self.as_ref().and_then(|handle| handle.take_change(events))
     }
 }

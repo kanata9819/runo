@@ -1,7 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use runo::prelude::*;
-use runo::{ButtonHandle, CheckboxHandle, RunOptions, RunoApplication, TextBoxHandle, Ui, colors};
+use runo::{
+    ButtonHandle, CheckboxHandle, RunOptions, RunoApplication, TextBoxHandle, Ui, UiEvent, colors,
+};
 
 const SUMMARY_STATE_ID: &str = "state.task.summary";
 
@@ -28,6 +29,12 @@ struct TaskRowHandles {
     delete_button: ButtonHandle,
 }
 
+enum ButtonAction {
+    Add,
+    ClearDone,
+    DeleteTask(u64),
+}
+
 impl TaskApp {
     fn add_task(&mut self) {
         let title = self.draft.trim();
@@ -51,6 +58,19 @@ impl TaskApp {
     fn summary_text(&self) -> String {
         let done = self.tasks.iter().filter(|task| task.done).count();
         format!("{} tasks ({} done)", self.tasks.len(), done)
+    }
+
+    fn resolve_button_action(&self, button: &ButtonHandle) -> Option<ButtonAction> {
+        if self.add_button.as_ref() == Some(button) {
+            return Some(ButtonAction::Add);
+        }
+        if self.clear_done_button.as_ref() == Some(button) {
+            return Some(ButtonAction::ClearDone);
+        }
+        self.task_rows
+            .iter()
+            .find(|row| row.delete_button == *button)
+            .map(|row| ButtonAction::DeleteTask(row.task_id))
     }
 }
 
@@ -176,37 +196,46 @@ impl RunoApplication for TaskApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        // let input = self.input.clone();
-        let add_button = self.add_button.clone();
-        let clear_done_button = self.clear_done_button.clone();
-        let task_rows: Vec<(u64, CheckboxHandle, ButtonHandle)> = self
-            .task_rows
-            .iter()
-            .map(|row| (row.task_id, row.checkbox.clone(), row.delete_button.clone()))
-            .collect();
-
-        let mut events = ui.events();
-        self.input.on_change(&mut events, |text| self.draft = text);
-
-        let input_for_add = self.input.clone();
-        add_button.on_click_with_ui(&mut events, |ui| {
-            self.add_task();
-            if let Some(input) = &input_for_add {
-                input.set_text(ui, "");
-            }
-        });
-
-        clear_done_button.on_click(&mut events, || self.clear_done());
-
-        for (task_id, checkbox, delete_button) in task_rows {
-            delete_button.on_click(&mut events, || {
-                self.tasks.retain(|task| task.id != task_id);
-            });
-            checkbox.on_change(&mut events, |checked| {
-                if let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id) {
-                    task.done = checked;
+        let mut clear_input = false;
+        for event in ui.events().drain_events() {
+            match event {
+                UiEvent::ButtonClicked { button } => match self.resolve_button_action(&button) {
+                    Some(ButtonAction::Add) => {
+                        self.add_task();
+                        clear_input = true;
+                    }
+                    Some(ButtonAction::ClearDone) => {
+                        self.clear_done();
+                    }
+                    Some(ButtonAction::DeleteTask(task_id)) => {
+                        self.tasks.retain(|task| task.id != task_id);
+                    }
+                    None => {}
+                },
+                UiEvent::TextBoxChanged { text_box, text } => {
+                    if self.input.as_ref() == Some(&text_box) {
+                        self.draft = text;
+                    }
                 }
-            });
+                UiEvent::CheckboxChanged { checkbox, checked } => {
+                    if let Some(task_id) = self
+                        .task_rows
+                        .iter()
+                        .find(|row| row.checkbox == checkbox)
+                        .map(|row| row.task_id)
+                        && let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id)
+                    {
+                        task.done = checked;
+                    }
+                }
+                UiEvent::RadioButtonChanged { .. }
+                | UiEvent::SliderChanged { .. }
+                | UiEvent::ComboBoxChanged { .. } => {}
+            }
+        }
+
+        if clear_input && let Some(input) = &self.input {
+            input.set_text(ui, "");
         }
 
         let total = self.tasks.len();

@@ -56,6 +56,10 @@ impl ButtonHandle {
         events.on_button_clicked(self, f);
     }
 
+    pub fn take_click(&self, events: &mut UiEvents<'_, '_>) -> bool {
+        events.button_clicked(self)
+    }
+
     pub fn on_click_with_ui(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(&mut Ui<'_>)) {
         events.on_button_clicked_with_ui(self, f);
     }

@@ -59,6 +59,10 @@ impl RadioButtonHandle {
         events.on_radio_button_changed(self, f);
     }
 
+    pub fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<bool> {
+        events.radio_button_changed(self)
+    }
+
     pub fn on_change_with_ui(
         &self,
         events: &mut UiEvents<'_, '_>,

@@ -74,6 +74,10 @@ impl ComboBoxHandle {
         events.on_combo_box_changed(self, f);
     }
 
+    pub fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<(usize, String)> {
+        events.combo_box_changed(self)
+    }
+
     pub fn on_change_with_ui(
         &self,
         events: &mut UiEvents<'_, '_>,

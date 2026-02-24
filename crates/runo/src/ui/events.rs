@@ -99,6 +99,10 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         }
     }
 
+    pub fn button_clicked(&mut self, handle: &ButtonHandle) -> bool {
+        self.ui.retained.take_button_clicked(handle)
+    }
+
     pub fn on_button_clicked_with_ui(
         &mut self,
         handle: &ButtonHandle,
@@ -113,6 +117,10 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         if let Some(text) = self.ui.retained.take_text_box_changed(handle) {
             f(text);
         }
+    }
+
+    pub fn text_box_changed(&mut self, handle: &TextBoxHandle) -> Option<String> {
+        self.ui.retained.take_text_box_changed(handle)
     }
 
     pub fn on_text_box_changed_with_ui(
@@ -131,6 +139,10 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         }
     }
 
+    pub fn checkbox_changed(&mut self, handle: &CheckboxHandle) -> Option<bool> {
+        self.ui.retained.take_checkbox_changed(handle)
+    }
+
     pub fn on_checkbox_changed_with_ui(
         &mut self,
         handle: &CheckboxHandle,
@@ -145,6 +157,10 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         if let Some(value) = self.ui.retained.take_slider_changed(handle) {
             f(value);
         }
+    }
+
+    pub fn slider_changed(&mut self, handle: &SliderHandle) -> Option<f64> {
+        self.ui.retained.take_slider_changed(handle)
     }
 
     pub fn on_slider_changed_with_ui(
@@ -163,6 +179,10 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         }
     }
 
+    pub fn radio_button_changed(&mut self, handle: &RadioButtonHandle) -> Option<bool> {
+        self.ui.retained.take_radio_button_changed(handle)
+    }
+
     pub fn on_radio_button_changed_with_ui(
         &mut self,
         handle: &RadioButtonHandle,
@@ -179,6 +199,10 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         {
             f(selected_index, selected_text);
         }
+    }
+
+    pub fn combo_box_changed(&mut self, handle: &ComboBoxHandle) -> Option<(usize, String)> {
+        self.ui.retained.take_combo_box_changed(handle)
     }
 
     pub fn on_combo_box_changed_with_ui(

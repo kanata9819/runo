@@ -61,6 +61,10 @@ impl SliderHandle {
         events.on_slider_changed(self, f);
     }
 
+    pub fn take_change(&self, events: &mut UiEvents<'_, '_>) -> Option<f64> {
+        events.slider_changed(self)
+    }
+
     pub fn on_change_with_ui(
         &self,
         events: &mut UiEvents<'_, '_>,

@@ -71,7 +71,7 @@ mod tests {
             .size(140, 40)
             .text("ok")
             .show();
-        assert!(!button.clicked);
+        assert!(!button.clicked(&mut ui));
 
         let checkbox = ui
             .widgets()
@@ -80,7 +80,7 @@ mod tests {
             .checked(true)
             .text("check")
             .show();
-        assert!(checkbox.checked);
+        assert!(checkbox.checked(&mut ui));
 
         let text_box = ui
             .widgets()
@@ -89,7 +89,7 @@ mod tests {
             .text("hello")
             .placeholder("type")
             .show();
-        assert_eq!(text_box.text, "hello");
+        assert_eq!(text_box.text(&mut ui), "hello");
 
         let combo = ui
             .widgets()
@@ -98,7 +98,7 @@ mod tests {
             .items(["a", "b", "c"])
             .selected_index(1)
             .show();
-        assert_eq!(combo.selected_text, "b");
+        assert_eq!(combo.selected_text(&mut ui), "b");
 
         let radio = ui
             .widgets()
@@ -108,7 +108,7 @@ mod tests {
             .selected(true)
             .text("radio")
             .show();
-        assert!(radio.selected);
+        assert!(radio.selected(&mut ui));
 
         let slider = ui
             .widgets()
@@ -119,7 +119,7 @@ mod tests {
             .step(1.0)
             .text("slider")
             .show();
-        assert_eq!(slider.value, 2.0);
+        assert_eq!(slider.value(&mut ui), 2.0);
 
         ui.widgets()
             .label()

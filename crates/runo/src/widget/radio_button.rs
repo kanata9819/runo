@@ -24,6 +24,37 @@ pub struct RadioButtonBuilder<'ui, 'a> {
     enabled: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct RadioButtonHandle {
+    id: String,
+}
+
+impl RadioButtonHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn response(&self, ui: &mut Ui<'_>) -> RadioButtonResponse {
+        ui.state().radio_button().response(self.id())
+    }
+
+    pub fn selected(&self, ui: &mut Ui<'_>) -> bool {
+        self.response(ui).selected
+    }
+
+    pub fn set_selected(&self, ui: &mut Ui<'_>, selected: bool) {
+        ui.state().radio_button().set_selected(self.id(), selected);
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().radio_button().set_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -86,9 +117,10 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) -> RadioButtonResponse {
+    pub fn show(self) -> RadioButtonHandle {
+        let id = self.id;
         self.ui.show_radio_button(ShowRadioButtonArgs {
-            id: self.id,
+            id: id.clone(),
             group: self.group,
             width: self.width,
             height: self.height,
@@ -97,7 +129,8 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
             font_size: self.font_size,
             text_color: self.text_color,
             enabled: self.enabled,
-        })
+        });
+        RadioButtonHandle::new(id)
     }
 }
 
@@ -129,7 +162,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        let response = ui
+        let radio = ui
             .widgets()
             .radio_button()
             .id("r1")
@@ -142,10 +175,10 @@ mod tests {
             .text_color(Color::from_rgb8(240, 240, 240))
             .enabled(false)
             .show();
-        assert!(response.selected);
+        assert!(radio.selected(&mut ui));
 
-        ui.state().radio_button().set_enabled("r1", true);
-        ui.state().radio_button().set_selected("r1", false);
-        assert!(!ui.state().radio_button().selected("r1"));
+        radio.set_enabled(&mut ui, true);
+        radio.set_selected(&mut ui, false);
+        assert!(!radio.selected(&mut ui));
     }
 }

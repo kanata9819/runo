@@ -27,6 +27,49 @@ pub struct ComboBoxBuilder<'ui, 'a> {
     enabled: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct ComboBoxHandle {
+    id: String,
+}
+
+impl ComboBoxHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn response(&self, ui: &mut Ui<'_>) -> ComboBoxResponse {
+        ui.state().combo_box().response(self.id())
+    }
+
+    pub fn selected_text(&self, ui: &mut Ui<'_>) -> String {
+        self.response(ui).selected_text
+    }
+
+    pub fn selected_index(&self, ui: &mut Ui<'_>) -> usize {
+        self.response(ui).selected_index
+    }
+
+    pub fn set_selected_index(&self, ui: &mut Ui<'_>, index: usize) {
+        ui.state().combo_box().set_selected_index(self.id(), index);
+    }
+
+    pub fn set_items<I, T>(&self, ui: &mut Ui<'_>, items: I)
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        ui.state().combo_box().set_items(self.id(), items);
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().combo_box().set_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -98,9 +141,10 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) -> ComboBoxResponse {
+    pub fn show(self) -> ComboBoxHandle {
+        let id = self.id;
         self.ui.show_combo_box(ShowComboBoxArgs {
-            id: self.id,
+            id: id.clone(),
             width: self.width,
             height: self.height,
             items: self.items,
@@ -110,7 +154,8 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
             bg_color: self.bg_color,
             border_color: self.border_color,
             enabled: self.enabled,
-        })
+        });
+        ComboBoxHandle::new(id)
     }
 }
 
@@ -144,7 +189,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        let response = ui
+        let combo = ui
             .widgets()
             .combo_box()
             .id("combo")
@@ -158,12 +203,12 @@ mod tests {
             .border_color(Color::from_rgb8(90, 90, 90))
             .enabled(false)
             .show();
-        assert_eq!(response.selected_text, "b");
+        assert_eq!(combo.selected_text(&mut ui), "b");
 
-        ui.state().combo_box().set_enabled("combo", true);
-        ui.state().combo_box().set_selected_index("combo", 2);
-        assert_eq!(ui.state().combo_box().selected_text("combo"), "c");
-        ui.state().combo_box().set_items("combo", ["x", "y"]);
-        assert_eq!(ui.state().combo_box().selected_index("combo"), 1);
+        combo.set_enabled(&mut ui, true);
+        combo.set_selected_index(&mut ui, 2);
+        assert_eq!(combo.selected_text(&mut ui), "c");
+        combo.set_items(&mut ui, ["x", "y"]);
+        assert_eq!(combo.selected_index(&mut ui), 1);
     }
 }

@@ -187,6 +187,18 @@ impl<'a> Ui<'a> {
         crate::layout::div::DivBuilder::new(self, id)
     }
 
+    pub(crate) fn button_response(&self, id: impl AsRef<str>) -> crate::ButtonResponse {
+        self.retained.button_response(id)
+    }
+
+    pub(crate) fn set_button_text(&mut self, id: impl AsRef<str>, text: Option<String>) {
+        self.retained.set_button_text(id, text);
+    }
+
+    pub(crate) fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.retained.set_button_enabled(id, enabled);
+    }
+
     fn with_layout<R>(
         &mut self,
         direction: LayoutDirection,

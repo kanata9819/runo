@@ -45,6 +45,37 @@ pub struct TextBoxBuilder<'ui, 'a> {
     overflow_y: Overflow,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct TextBoxHandle {
+    id: String,
+}
+
+impl TextBoxHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn response(&self, ui: &mut Ui<'_>) -> TextBoxResponse {
+        ui.state().text_box().response(self.id())
+    }
+
+    pub fn text(&self, ui: &mut Ui<'_>) -> String {
+        self.response(ui).text
+    }
+
+    pub fn set_text(&self, ui: &mut Ui<'_>, text: impl Into<String>) {
+        ui.state().text_box().set_text(self.id(), text);
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().text_box().set_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -124,9 +155,10 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) -> TextBoxResponse {
+    pub fn show(self) -> TextBoxHandle {
+        let id = self.id;
         self.ui.show_text_box(ShowTextBoxArgs {
-            id: self.id,
+            id: id.clone(),
             width: self.width,
             height: self.height,
             text: self.text,
@@ -138,7 +170,8 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             enabled: self.enabled,
             overflow_x: self.overflow_x,
             overflow_y: self.overflow_y,
-        })
+        });
+        TextBoxHandle::new(id)
     }
 }
 
@@ -177,7 +210,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        let response = ui
+        let text_box = ui
             .widgets()
             .text_box()
             .id("tb")
@@ -193,10 +226,10 @@ mod tests {
             .overflow_x(Overflow::Scroll)
             .overflow_y(Overflow::Auto)
             .show();
-        assert_eq!(response.text, "hello");
+        assert_eq!(text_box.text(&mut ui), "hello");
 
-        ui.state().text_box().set_enabled("tb", true);
-        ui.state().text_box().set_text("tb", "updated");
-        assert_eq!(ui.state().text_box().text("tb"), "updated");
+        text_box.set_enabled(&mut ui, true);
+        text_box.set_text(&mut ui, "updated");
+        assert_eq!(text_box.text(&mut ui), "updated");
     }
 }

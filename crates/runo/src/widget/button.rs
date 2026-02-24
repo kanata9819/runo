@@ -21,6 +21,37 @@ pub struct ButtonBuilder<'ui, 'a> {
     enabled: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct ButtonHandle {
+    id: String,
+}
+
+impl ButtonHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn response(&self, ui: &mut Ui<'_>) -> ButtonResponse {
+        ui.button_response(self.id())
+    }
+
+    pub fn clicked(&self, ui: &mut Ui<'_>) -> bool {
+        self.response(ui).clicked
+    }
+
+    pub fn set_text(&self, ui: &mut Ui<'_>, text: impl Into<String>) {
+        ui.set_button_text(self.id(), Some(text.into()));
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.set_button_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -76,16 +107,18 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) -> ButtonResponse {
+    pub fn show(self) -> ButtonHandle {
+        let id = self.id;
         self.ui.show_button(ShowButtonArgs {
-            id: self.id,
+            id: id.clone(),
             width: self.width,
             height: self.height,
             text: self.text,
             font_size: self.font_size,
             text_color: self.text_color,
             enabled: self.enabled,
-        })
+        });
+        ButtonHandle::new(id)
     }
 }
 
@@ -116,7 +149,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        let response = ui
+        let button = ui
             .widgets()
             .button()
             .id("btn")
@@ -128,10 +161,10 @@ mod tests {
             .text_color(Color::from_rgb8(220, 220, 220))
             .enabled(false)
             .show();
-        assert!(!response.clicked);
+        assert!(!button.clicked(&mut ui));
 
-        ui.state().button().set_enabled("btn", true);
-        ui.state().button().set_text("btn", "ok");
-        assert!(!ui.state().button().clicked("btn"));
+        button.set_enabled(&mut ui, true);
+        button.set_text(&mut ui, "ok");
+        assert!(!button.clicked(&mut ui));
     }
 }

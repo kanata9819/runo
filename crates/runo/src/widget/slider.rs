@@ -26,6 +26,37 @@ pub struct SliderBuilder<'ui, 'a> {
     enabled: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct SliderHandle {
+    id: String,
+}
+
+impl SliderHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn response(&self, ui: &mut Ui<'_>) -> SliderResponse {
+        ui.state().slider().response(self.id())
+    }
+
+    pub fn value(&self, ui: &mut Ui<'_>) -> f64 {
+        self.response(ui).value
+    }
+
+    pub fn set_value(&self, ui: &mut Ui<'_>, value: f64) {
+        ui.state().slider().set_value(self.id(), value);
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().slider().set_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> SliderBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -96,9 +127,10 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) -> SliderResponse {
+    pub fn show(self) -> SliderHandle {
+        let id = self.id;
         self.ui.show_slider(ShowSliderArgs {
-            id: self.id,
+            id: id.clone(),
             width: self.width,
             height: self.height,
             min: self.min,
@@ -109,7 +141,8 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
             font_size: self.font_size,
             text_color: self.text_color,
             enabled: self.enabled,
-        })
+        });
+        SliderHandle::new(id)
     }
 }
 
@@ -141,7 +174,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        let response = ui
+        let slider = ui
             .widgets()
             .slider()
             .id("sl")
@@ -155,10 +188,10 @@ mod tests {
             .text_color(Color::from_rgb8(220, 220, 220))
             .enabled(false)
             .show();
-        assert!((response.value - 0.5).abs() < f64::EPSILON);
+        assert!((slider.value(&mut ui) - 0.5).abs() < f64::EPSILON);
 
-        ui.state().slider().set_enabled("sl", true);
-        ui.state().slider().set_value("sl", -0.5);
-        assert!((ui.state().slider().value("sl") + 0.5).abs() < f64::EPSILON);
+        slider.set_enabled(&mut ui, true);
+        slider.set_value(&mut ui, -0.5);
+        assert!((slider.value(&mut ui) + 0.5).abs() < f64::EPSILON);
     }
 }

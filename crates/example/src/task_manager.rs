@@ -1,17 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use runo::{RunOptions, RunoApplication, Ui, UiEvent, colors};
+use runo::{ButtonHandle, CheckboxHandle, RunOptions, RunoApplication, TextBoxHandle, Ui, colors};
 
-const TITLE_ID: &str = "task.title";
-const SUMMARY_ID: &str = "task.summary";
-const PANEL_ID: &str = "task.panel";
-const INPUT_ID: &str = "task.input";
-const ADD_BUTTON_ID: &str = "task.add";
-const CLEAR_DONE_BUTTON_ID: &str = "task.clear_done";
-
-const TASK_CHECK_PREFIX: &str = "task.item.check.";
-const TASK_DELETE_PREFIX: &str = "task.item.delete.";
-const TASK_ROW_PREFIX: &str = "task.item.row.";
 const SUMMARY_STATE_ID: &str = "state.task.summary";
 
 #[derive(Clone)]
@@ -25,6 +15,16 @@ struct TaskApp {
     tasks: Vec<Task>,
     draft: String,
     next_id: u64,
+    input: Option<TextBoxHandle>,
+    add_button: Option<ButtonHandle>,
+    clear_done_button: Option<ButtonHandle>,
+    task_rows: Vec<TaskRowHandles>,
+}
+
+struct TaskRowHandles {
+    task_id: u64,
+    checkbox: CheckboxHandle,
+    delete_button: ButtonHandle,
 }
 
 impl TaskApp {
@@ -45,10 +45,6 @@ impl TaskApp {
 
     fn clear_done(&mut self) {
         self.tasks.retain(|task| !task.done);
-    }
-
-    fn parse_task_id(id: &str, prefix: &str) -> Option<u64> {
-        id.strip_prefix(prefix)?.parse::<u64>().ok()
     }
 
     fn summary_text(&self) -> String {
@@ -73,14 +69,12 @@ impl RunoApplication for TaskApp {
         ui.vertical(|ui| {
             ui.widgets()
                 .label()
-                .id(TITLE_ID)
                 .text("Task Manager")
                 .font_size(26)
                 .show();
 
             ui.widgets()
                 .label()
-                .id(SUMMARY_ID)
                 .text(summary)
                 .font_size(16)
                 .text_color(colors::rgb(colors::TEXT_SECONDARY))
@@ -88,7 +82,6 @@ impl RunoApplication for TaskApp {
 
             ui.widgets()
                 .div()
-                .id(PANEL_ID)
                 .width(860)
                 .padding(16)
                 .gap(12)
@@ -97,42 +90,41 @@ impl RunoApplication for TaskApp {
                 .radius(12)
                 .show(|ui| {
                     ui.horizontal(|ui| {
-                        ui.widgets()
-                            .text_box()
-                            .id(INPUT_ID)
-                            .width(520)
-                            .height(44)
-                            .font_size(18)
-                            .placeholder("Add a new task...")
-                            .show();
+                        self.input = Some(
+                            ui.widgets()
+                                .text_box()
+                                .width(520)
+                                .height(44)
+                                .font_size(18)
+                                .placeholder("Add a new task...")
+                                .show(),
+                        );
 
-                        ui.widgets()
-                            .button()
-                            .id(ADD_BUTTON_ID)
-                            .width(100)
-                            .height(44)
-                            .font_size(16)
-                            .text("Add")
-                            .show();
+                        self.add_button = Some(
+                            ui.widgets()
+                                .button()
+                                .width(100)
+                                .height(44)
+                                .font_size(16)
+                                .text("Add")
+                                .show(),
+                        );
 
-                        ui.widgets()
-                            .button()
-                            .id(CLEAR_DONE_BUTTON_ID)
-                            .width(120)
-                            .height(44)
-                            .font_size(16)
-                            .text("Clear done")
-                            .show();
+                        self.clear_done_button = Some(
+                            ui.widgets()
+                                .button()
+                                .width(120)
+                                .height(44)
+                                .font_size(16)
+                                .text("Clear done")
+                                .show(),
+                        );
                     });
 
+                    let mut task_rows = Vec::new();
                     for task in &self.tasks {
-                        let row_id = format!("{}{}", TASK_ROW_PREFIX, task.id);
-                        let check_id = format!("{}{}", TASK_CHECK_PREFIX, task.id);
-                        let delete_id = format!("{}{}", TASK_DELETE_PREFIX, task.id);
-
                         ui.widgets()
                             .div()
-                            .id(row_id)
                             .horizontal()
                             .width(728)
                             .padding(10)
@@ -151,9 +143,9 @@ impl RunoApplication for TaskApp {
                                     task.title.clone()
                                 };
 
-                                ui.widgets()
+                                let checkbox = ui
+                                    .widgets()
                                     .checkbox()
-                                    .id(check_id)
                                     .width(620)
                                     .height(36)
                                     .font_size(18)
@@ -161,47 +153,65 @@ impl RunoApplication for TaskApp {
                                     .checked(task.done)
                                     .show();
 
-                                ui.widgets()
+                                let delete_button = ui
+                                    .widgets()
                                     .button()
-                                    .id(delete_id)
                                     .width(84)
                                     .height(36)
                                     .font_size(15)
                                     .text("Delete")
                                     .show();
+
+                                task_rows.push(TaskRowHandles {
+                                    task_id: task.id,
+                                    checkbox,
+                                    delete_button,
+                                });
                             });
                     }
+                    self.task_rows = task_rows;
                 });
         });
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        for event in ui.events().drain_events() {
-            match event {
-                UiEvent::TextBoxChanged { id, text } if id == INPUT_ID => {
-                    self.draft = text;
-                }
-                UiEvent::ButtonClicked { id } if id == ADD_BUTTON_ID => {
-                    self.add_task();
-                    ui.state().text_box().set_text(INPUT_ID, "");
-                }
-                UiEvent::ButtonClicked { id } if id == CLEAR_DONE_BUTTON_ID => {
-                    self.clear_done();
-                }
-                UiEvent::ButtonClicked { id } => {
-                    if let Some(task_id) = Self::parse_task_id(&id, TASK_DELETE_PREFIX) {
-                        self.tasks.retain(|task| task.id != task_id);
-                    }
-                }
-                UiEvent::CheckboxChanged { id, checked } => {
-                    if let Some(task_id) = Self::parse_task_id(&id, TASK_CHECK_PREFIX)
-                        && let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id)
-                    {
-                        task.done = checked;
-                    }
-                }
-                _ => {}
+        if let Some(input) = &self.input {
+            let response = input.response(ui);
+            if response.changed {
+                self.draft = response.text;
             }
+        }
+
+        if let Some(add_button) = &self.add_button
+            && add_button.clicked(ui)
+        {
+            self.add_task();
+            if let Some(input) = &self.input {
+                input.set_text(ui, "");
+            }
+        }
+
+        if let Some(clear_done_button) = &self.clear_done_button
+            && clear_done_button.clicked(ui)
+        {
+            self.clear_done();
+        }
+
+        let mut delete_ids = Vec::new();
+        for row in &self.task_rows {
+            if row.delete_button.clicked(ui) {
+                delete_ids.push(row.task_id);
+                continue;
+            }
+            let checkbox_response = row.checkbox.response(ui);
+            if checkbox_response.changed
+                && let Some(task) = self.tasks.iter_mut().find(|task| task.id == row.task_id)
+            {
+                task.done = checkbox_response.checked;
+            }
+        }
+        if !delete_ids.is_empty() {
+            self.tasks.retain(|task| !delete_ids.contains(&task.id));
         }
 
         let total = self.tasks.len();
@@ -245,5 +255,9 @@ fn main() {
         ],
         draft: String::new(),
         next_id: 2,
+        input: None,
+        add_button: None,
+        clear_done_button: None,
+        task_rows: Vec::new(),
     });
 }

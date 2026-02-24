@@ -1,18 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use runo::{RunOptions, RunoApplication, Ui, UiEvent, colors, run};
-
-const TITLE_ID: &str = "title";
-const INPUT_NAME_ID: &str = "input.name";
-const COMBO_ROLE_ID: &str = "combo.role";
-const CHECKBOX_NEWSLETTER_ID: &str = "check.newsletter";
-const RADIO_CHANNEL_EMAIL_ID: &str = "radio.channel.email";
-const RADIO_CHANNEL_SMS_ID: &str = "radio.channel.sms";
-const RADIO_CHANNEL_PUSH_ID: &str = "radio.channel.push";
-const RADIO_CHANNEL_GROUP: &str = "channel";
-const SLIDER_VOLUME_ID: &str = "slider.volume";
-const TOGGLE_BUTTON_ID: &str = "btnToggle";
-const MAIN_PANEL_ID: &str = "main.panel";
+use runo::{
+    ButtonHandle, CheckboxHandle, ComboBoxHandle, DivHandle, RadioButtonHandle, RunOptions,
+    RunoApplication, SliderHandle, TextBoxHandle, Ui, colors, run,
+};
 
 struct MyApp {
     toggled: bool,
@@ -21,98 +12,104 @@ struct MyApp {
     newsletter_opt_in: bool,
     selected_channel: String,
     volume: f64,
+    input_name: Option<TextBoxHandle>,
+    role_combo: Option<ComboBoxHandle>,
+    newsletter_checkbox: Option<CheckboxHandle>,
+    channel_email: Option<RadioButtonHandle>,
+    channel_sms: Option<RadioButtonHandle>,
+    channel_push: Option<RadioButtonHandle>,
+    volume_slider: Option<SliderHandle>,
+    toggle_button: Option<ButtonHandle>,
+    main_panel: Option<DivHandle>,
 }
 
 impl MyApp {
     fn build_title(ui: &mut Ui<'_>) {
         ui.widgets()
             .label()
-            .id(TITLE_ID)
             .text("runo example")
             .font_size(22)
             .show();
     }
 
-    fn build_name_input(ui: &mut Ui<'_>) {
+    fn build_name_input(ui: &mut Ui<'_>) -> TextBoxHandle {
         ui.widgets()
             .text_box()
-            .id(INPUT_NAME_ID)
             .width(320)
             .height(44)
             .font_size(20)
             .placeholder("Type here...")
             .overflow_x(runo::Overflow::Auto)
-            .show();
+            .show()
     }
 
-    fn build_role_combo(ui: &mut Ui<'_>) {
+    fn build_role_combo(ui: &mut Ui<'_>) -> ComboBoxHandle {
         ui.widgets()
             .combo_box()
-            .id(COMBO_ROLE_ID)
             .width(320)
             .height(44)
             .font_size(18)
             .items(["Designer", "Engineer", "Manager"])
-            .show();
+            .show()
     }
 
-    fn build_toggle_button(ui: &mut Ui<'_>) {
+    fn build_toggle_button(ui: &mut Ui<'_>) -> ButtonHandle {
         ui.widgets()
             .button()
-            .id(TOGGLE_BUTTON_ID)
             .width(220)
             .height(64)
             .font_size(18)
             .text("Toggle: OFF")
-            .show();
+            .show()
     }
 
-    fn build_newsletter_checkbox(ui: &mut Ui<'_>) {
+    fn build_newsletter_checkbox(ui: &mut Ui<'_>) -> CheckboxHandle {
         ui.widgets()
             .checkbox()
-            .id(CHECKBOX_NEWSLETTER_ID)
             .height(40)
             .text("Receive newsletter")
             .checked(true)
-            .show();
+            .show()
     }
 
-    fn build_channel_radio_buttons(ui: &mut Ui<'_>) {
-        ui.widgets()
+    fn build_channel_radio_buttons(
+        ui: &mut Ui<'_>,
+    ) -> (RadioButtonHandle, RadioButtonHandle, RadioButtonHandle) {
+        let email = ui
+            .widgets()
             .radio_button()
-            .id(RADIO_CHANNEL_EMAIL_ID)
-            .group(RADIO_CHANNEL_GROUP)
+            .group("channel")
             .height(36)
             .text("Channel: Email")
             .selected(true)
             .show();
-        ui.widgets()
+        let sms = ui
+            .widgets()
             .radio_button()
-            .id(RADIO_CHANNEL_SMS_ID)
-            .group(RADIO_CHANNEL_GROUP)
+            .group("channel")
             .height(36)
             .text("Channel: SMS")
             .show();
-        ui.widgets()
+        let push = ui
+            .widgets()
             .radio_button()
-            .id(RADIO_CHANNEL_PUSH_ID)
-            .group(RADIO_CHANNEL_GROUP)
+            .group("channel")
             .height(36)
             .text("Channel: Push")
             .show();
+        (email, sms, push)
     }
 
-    fn build_volume_slider(ui: &mut Ui<'_>) {
+    fn build_volume_slider(ui: &mut Ui<'_>) -> SliderHandle {
         ui.widgets()
             .slider()
-            .id(SLIDER_VOLUME_ID)
             .width(320)
             .height(48)
             .text("Volume")
             .range(0.0, 1.0)
             .step(0.01)
             .value(0.35)
-            .show();
+            .show()
     }
 }
 
@@ -129,133 +126,109 @@ impl RunoApplication for MyApp {
     fn build(&mut self, ui: &mut Ui<'_>) {
         ui.vertical(|ui| {
             Self::build_title(ui);
-            ui.widgets()
+            let (main_panel, _) = ui
+                .widgets()
                 .div()
-                .id(MAIN_PANEL_ID)
                 .width(380)
                 .padding(16)
                 .gap(10)
                 .background(colors::rgb(colors::PANEL_BG))
                 .border(colors::rgb(colors::PANEL_BORDER), 1)
                 .radius(12)
-                .show(|ui| {
-                    Self::build_name_input(ui);
-                    Self::build_role_combo(ui);
-                    Self::build_newsletter_checkbox(ui);
-                    Self::build_channel_radio_buttons(ui);
-                    Self::build_volume_slider(ui);
-                    Self::build_toggle_button(ui);
+                .show_with_handle(|ui| {
+                    self.input_name = Some(Self::build_name_input(ui));
+                    self.role_combo = Some(Self::build_role_combo(ui));
+                    self.newsletter_checkbox = Some(Self::build_newsletter_checkbox(ui));
+                    let (email, sms, push) = Self::build_channel_radio_buttons(ui);
+                    self.channel_email = Some(email);
+                    self.channel_sms = Some(sms);
+                    self.channel_push = Some(push);
+                    self.volume_slider = Some(Self::build_volume_slider(ui));
+                    self.toggle_button = Some(Self::build_toggle_button(ui));
                 });
+            self.main_panel = Some(main_panel);
         });
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        for event in ui.events().drain_events() {
-            match event {
-                UiEvent::ButtonClicked { id } if id == TOGGLE_BUTTON_ID => {
-                    self.toggled = !self.toggled;
-                    let panel_color = if self.toggled {
-                        colors::rgb(colors::PANEL_BG_ACTIVE)
-                    } else {
-                        colors::rgb(colors::PANEL_BG)
-                    };
+        if let Some(input_name) = &self.input_name {
+            let response = input_name.response(ui);
+            if response.changed {
+                self.input_text = response.text;
+            }
+        }
 
-                    ui.state().div().set_background(MAIN_PANEL_ID, panel_color);
+        if let Some(role_combo) = &self.role_combo {
+            let response = role_combo.response(ui);
+            if response.changed {
+                self.selected_role = response.selected_text;
+                println!("{}", response.selected_index);
+            }
+        }
 
-                    let label = if self.toggled {
-                        "Toggle: ON"
-                    } else {
-                        "Toggle: OFF"
-                    };
+        if let Some(newsletter_checkbox) = &self.newsletter_checkbox {
+            let response = newsletter_checkbox.response(ui);
+            if response.changed {
+                self.newsletter_opt_in = response.checked;
+            }
+        }
 
-                    if self.input_text.is_empty() {
-                        ui.state().button().set_text(TOGGLE_BUTTON_ID, label);
-                    } else {
-                        ui.state()
-                            .button()
-                            .set_text(TOGGLE_BUTTON_ID, format!("{} ({})", label, self.input_text));
-                    }
-                }
-                UiEvent::TextBoxChanged { id, text } if id == INPUT_NAME_ID => {
-                    self.input_text = text;
-                    let label = if self.toggled {
-                        "Toggle: ON"
-                    } else {
-                        "Toggle: OFF"
-                    };
-                    if self.input_text.is_empty() {
-                        ui.state().button().set_text(TOGGLE_BUTTON_ID, label);
-                    } else {
-                        ui.state()
-                            .button()
-                            .set_text(TOGGLE_BUTTON_ID, format!("{} ({})", label, self.input_text));
-                    }
-                }
-                UiEvent::ComboBoxChanged {
-                    id, selected_text, ..
-                } if id == COMBO_ROLE_ID => {
-                    self.selected_role = selected_text;
-                    let label = if self.toggled {
-                        "Toggle: ON"
-                    } else {
-                        "Toggle: OFF"
-                    };
-                    if self.input_text.is_empty() {
-                        ui.state().button().set_text(
-                            TOGGLE_BUTTON_ID,
-                            format!("{} [{}]", label, self.selected_role),
-                        );
-                        println!("{}", ui.state().combo_box().selected_index(COMBO_ROLE_ID));
-                    } else {
-                        ui.state().button().set_text(
-                            TOGGLE_BUTTON_ID,
-                            format!("{} ({}) [{}]", label, self.input_text, self.selected_role),
-                        );
-                    }
-                }
-                UiEvent::CheckboxChanged { id, checked } if id == CHECKBOX_NEWSLETTER_ID => {
-                    self.newsletter_opt_in = checked;
-                    let label = if self.toggled {
-                        "Toggle: ON"
-                    } else {
-                        "Toggle: OFF"
-                    };
-                    ui.state().button().set_text(
-                        TOGGLE_BUTTON_ID,
-                        format!(
-                            "{} ({}) [{}] {}",
-                            label,
-                            if self.input_text.is_empty() {
-                                "anonymous"
-                            } else {
-                                &self.input_text
-                            },
-                            self.selected_role,
-                            if self.newsletter_opt_in {
-                                "newsletter:on"
-                            } else {
-                                "newsletter:off"
-                            }
-                        ),
-                    );
-                }
-                UiEvent::RadioButtonChanged { id, group, .. } if group == RADIO_CHANNEL_GROUP => {
-                    self.selected_channel = if id == RADIO_CHANNEL_EMAIL_ID {
-                        "Email".to_string()
-                    } else if id == RADIO_CHANNEL_SMS_ID {
-                        "SMS".to_string()
-                    } else if id == RADIO_CHANNEL_PUSH_ID {
-                        "Push".to_string()
-                    } else {
-                        self.selected_channel.clone()
-                    };
-                    println!("selected channel: {}", self.selected_channel);
-                }
-                UiEvent::SliderChanged { id, value } if id == SLIDER_VOLUME_ID => {
-                    self.volume = value;
-                    println!("volume: {:.2}", self.volume);
-                }
-                _ => {}
+        if let (Some(email), Some(sms), Some(push)) =
+            (&self.channel_email, &self.channel_sms, &self.channel_push)
+        {
+            if email.selected(ui) {
+                self.selected_channel = "Email".to_string();
+            } else if sms.selected(ui) {
+                self.selected_channel = "SMS".to_string();
+            } else if push.selected(ui) {
+                self.selected_channel = "Push".to_string();
+            }
+        }
+
+        if let Some(volume_slider) = &self.volume_slider {
+            let response = volume_slider.response(ui);
+            if response.changed {
+                self.volume = response.value;
+                println!("volume: {:.2}", self.volume);
+            }
+        }
+
+        if let Some(toggle_button) = &self.toggle_button
+            && toggle_button.clicked(ui)
+        {
+            self.toggled = !self.toggled;
+            if let Some(main_panel) = &self.main_panel {
+                let panel_color = if self.toggled {
+                    colors::rgb(colors::PANEL_BG_ACTIVE)
+                } else {
+                    colors::rgb(colors::PANEL_BG)
+                };
+                main_panel.set_background(ui, panel_color);
+            }
+        }
+
+        if let Some(toggle_button) = &self.toggle_button {
+            let label = if self.toggled {
+                "Toggle: ON"
+            } else {
+                "Toggle: OFF"
+            };
+            if self.newsletter_opt_in {
+                toggle_button.set_text(
+                    ui,
+                    format!(
+                        "{} ({}) [{}]",
+                        label,
+                        if self.input_text.is_empty() {
+                            "anonymous"
+                        } else {
+                            &self.input_text
+                        },
+                        self.selected_role,
+                    ),
+                );
+            } else {
+                toggle_button.set_text(ui, label);
             }
         }
 
@@ -275,5 +248,14 @@ fn main() {
         newsletter_opt_in: true,
         selected_channel: "Email".to_string(),
         volume: 0.35,
+        input_name: None,
+        role_combo: None,
+        newsletter_checkbox: None,
+        channel_email: None,
+        channel_sms: None,
+        channel_push: None,
+        volume_slider: None,
+        toggle_button: None,
+        main_panel: None,
     });
 }

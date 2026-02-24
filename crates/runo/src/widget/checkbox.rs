@@ -23,6 +23,37 @@ pub struct CheckboxBuilder<'ui, 'a> {
     enabled: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct CheckboxHandle {
+    id: String,
+}
+
+impl CheckboxHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn response(&self, ui: &mut Ui<'_>) -> CheckboxResponse {
+        ui.state().checkbox().response(self.id())
+    }
+
+    pub fn checked(&self, ui: &mut Ui<'_>) -> bool {
+        self.response(ui).checked
+    }
+
+    pub fn set_checked(&self, ui: &mut Ui<'_>, checked: bool) {
+        ui.state().checkbox().set_checked(self.id(), checked);
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().checkbox().set_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -79,9 +110,10 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) -> CheckboxResponse {
+    pub fn show(self) -> CheckboxHandle {
+        let id = self.id;
         self.ui.show_checkbox(ShowCheckboxArgs {
-            id: self.id,
+            id: id.clone(),
             width: self.width,
             height: self.height,
             text: self.text,
@@ -89,7 +121,8 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
             font_size: self.font_size,
             text_color: self.text_color,
             enabled: self.enabled,
-        })
+        });
+        CheckboxHandle::new(id)
     }
 }
 
@@ -121,7 +154,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        let response = ui
+        let checkbox = ui
             .widgets()
             .checkbox()
             .id("cb")
@@ -133,10 +166,10 @@ mod tests {
             .text_color(Color::from_rgb8(230, 230, 230))
             .enabled(false)
             .show();
-        assert!(response.checked);
+        assert!(checkbox.checked(&mut ui));
 
-        ui.state().checkbox().set_enabled("cb", true);
-        ui.state().checkbox().set_checked("cb", false);
-        assert!(!ui.state().checkbox().checked("cb"));
+        checkbox.set_enabled(&mut ui, true);
+        checkbox.set_checked(&mut ui, false);
+        assert!(!checkbox.checked(&mut ui));
     }
 }

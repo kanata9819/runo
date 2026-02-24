@@ -15,6 +15,25 @@ pub struct LabelBuilder<'ui, 'a> {
     enabled: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct LabelHandle {
+    id: String,
+}
+
+impl LabelHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().label().set_enabled(self.id(), enabled);
+    }
+}
+
 impl<'ui, 'a> LabelBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -64,7 +83,7 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         self
     }
 
-    pub fn show(self) {
+    pub fn show(self) -> LabelHandle {
         let intrinsic_height = self.font_size as f64 * 1.35;
         let intrinsic_width = if let Some(font) = self.ui.font.as_ref() {
             layout_text(font, &self.text, self.font_size)
@@ -75,9 +94,10 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         };
         let width = self.width.unwrap_or(intrinsic_width as f64);
         let height = self.height.unwrap_or(intrinsic_height);
+        let id = self.id;
 
         self.ui.show_label(ShowLabelArgs {
-            id: self.id,
+            id: id.clone(),
             width,
             height,
             text: self.text,
@@ -85,6 +105,7 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
             text_color: self.text_color,
             enabled: self.enabled,
         });
+        LabelHandle::new(id)
     }
 }
 
@@ -106,7 +127,8 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        ui.widgets()
+        let label = ui
+            .widgets()
             .label()
             .id("lbl")
             .width(180)
@@ -117,6 +139,6 @@ mod tests {
             .enabled(false)
             .show();
 
-        ui.state().label().set_enabled("lbl", true);
+        label.set_enabled(&mut ui, true);
     }
 }

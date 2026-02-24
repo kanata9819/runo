@@ -1,7 +1,15 @@
 use super::Ui;
+use crate::layout::div::DivHandle;
+use crate::widget::button::ButtonHandle;
+use crate::widget::checkbox::CheckboxHandle;
 use crate::widget::checkbox::CheckboxResponse;
+use crate::widget::combo_box::ComboBoxHandle;
+use crate::widget::label::LabelHandle;
+use crate::widget::radio_button::RadioButtonHandle;
 use crate::widget::radio_button::RadioButtonResponse;
+use crate::widget::slider::SliderHandle;
 use crate::widget::slider::SliderResponse;
+use crate::widget::text_box::TextBoxHandle;
 use crate::widget::text_box::TextBoxResponse;
 use crate::{ButtonResponse, ComboBoxResponse};
 
@@ -84,12 +92,28 @@ impl<'ui, 'a> UiButtonState<'ui, 'a> {
         self.response(id).clicked
     }
 
+    pub fn response_handle(&self, handle: &ButtonHandle) -> ButtonResponse {
+        self.response(handle.id())
+    }
+
+    pub fn clicked_handle(&self, handle: &ButtonHandle) -> bool {
+        self.clicked(handle.id())
+    }
+
     pub fn set_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
         self.ui.retained.set_button_text(id, Some(text.into()));
     }
 
+    pub fn set_text_handle(&mut self, handle: &ButtonHandle, text: impl Into<String>) {
+        self.set_text(handle.id(), text);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_button_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &ButtonHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
@@ -102,12 +126,28 @@ impl<'ui, 'a> UiTextBoxState<'ui, 'a> {
         self.response(id).text
     }
 
+    pub fn response_handle(&self, handle: &TextBoxHandle) -> TextBoxResponse {
+        self.response(handle.id())
+    }
+
+    pub fn text_handle(&self, handle: &TextBoxHandle) -> String {
+        self.text(handle.id())
+    }
+
     pub fn set_text(&mut self, id: impl AsRef<str>, text: impl Into<String>) {
         self.ui.retained.set_text_box_text(id, text);
     }
 
+    pub fn set_text_handle(&mut self, handle: &TextBoxHandle, text: impl Into<String>) {
+        self.set_text(handle.id(), text);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_text_box_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &TextBoxHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
@@ -120,12 +160,28 @@ impl<'ui, 'a> UiCheckboxState<'ui, 'a> {
         self.response(id).checked
     }
 
+    pub fn response_handle(&self, handle: &CheckboxHandle) -> CheckboxResponse {
+        self.response(handle.id())
+    }
+
+    pub fn checked_handle(&self, handle: &CheckboxHandle) -> bool {
+        self.checked(handle.id())
+    }
+
     pub fn set_checked(&mut self, id: impl AsRef<str>, checked: bool) {
         self.ui.retained.set_checkbox_checked(id, checked);
     }
 
+    pub fn set_checked_handle(&mut self, handle: &CheckboxHandle, checked: bool) {
+        self.set_checked(handle.id(), checked);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_checkbox_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &CheckboxHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
@@ -138,12 +194,28 @@ impl<'ui, 'a> UiRadioButtonState<'ui, 'a> {
         self.response(id).selected
     }
 
+    pub fn response_handle(&self, handle: &RadioButtonHandle) -> RadioButtonResponse {
+        self.response(handle.id())
+    }
+
+    pub fn selected_handle(&self, handle: &RadioButtonHandle) -> bool {
+        self.selected(handle.id())
+    }
+
     pub fn set_selected(&mut self, id: impl AsRef<str>, selected: bool) {
         self.ui.retained.set_radio_button_selected(id, selected);
     }
 
+    pub fn set_selected_handle(&mut self, handle: &RadioButtonHandle, selected: bool) {
+        self.set_selected(handle.id(), selected);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_radio_button_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &RadioButtonHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
@@ -156,12 +228,28 @@ impl<'ui, 'a> UiSliderState<'ui, 'a> {
         self.response(id).value
     }
 
+    pub fn response_handle(&self, handle: &SliderHandle) -> SliderResponse {
+        self.response(handle.id())
+    }
+
+    pub fn value_handle(&self, handle: &SliderHandle) -> f64 {
+        self.value(handle.id())
+    }
+
     pub fn set_value(&mut self, id: impl AsRef<str>, value: f64) {
         self.ui.retained.set_slider_value(id, value);
     }
 
+    pub fn set_value_handle(&mut self, handle: &SliderHandle, value: f64) {
+        self.set_value(handle.id(), value);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_slider_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &SliderHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
@@ -178,8 +266,24 @@ impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
         self.response(id).selected_index
     }
 
+    pub fn response_handle(&self, handle: &ComboBoxHandle) -> ComboBoxResponse {
+        self.response(handle.id())
+    }
+
+    pub fn selected_text_handle(&self, handle: &ComboBoxHandle) -> String {
+        self.selected_text(handle.id())
+    }
+
+    pub fn selected_index_handle(&self, handle: &ComboBoxHandle) -> usize {
+        self.selected_index(handle.id())
+    }
+
     pub fn set_selected_index(&mut self, id: impl AsRef<str>, index: usize) {
         self.ui.retained.set_combo_box_selected_index(id, index);
+    }
+
+    pub fn set_selected_index_handle(&mut self, handle: &ComboBoxHandle, index: usize) {
+        self.set_selected_index(handle.id(), index);
     }
 
     pub fn set_items<I, T>(&mut self, id: impl AsRef<str>, items: I)
@@ -190,14 +294,30 @@ impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
         self.ui.retained.set_combo_box_items(id, items);
     }
 
+    pub fn set_items_handle<I, T>(&mut self, handle: &ComboBoxHandle, items: I)
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        self.set_items(handle.id(), items);
+    }
+
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_combo_box_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &ComboBoxHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
 impl<'ui, 'a> UiLabelState<'ui, 'a> {
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_label_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &LabelHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 }
 
@@ -206,16 +326,32 @@ impl<'ui, 'a> UiDivState<'ui, 'a> {
         self.ui.retained.set_div_visible(id, visible);
     }
 
+    pub fn set_visible_handle(&mut self, handle: &DivHandle, visible: bool) {
+        self.set_visible(handle.id(), visible);
+    }
+
     pub fn set_enabled(&mut self, id: impl Into<String>, enabled: bool) {
         self.ui.retained.set_div_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &DivHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
     }
 
     pub fn set_background(&mut self, id: impl Into<String>, color: crate::Color) {
         self.ui.retained.set_div_background(id, color);
     }
 
+    pub fn set_background_handle(&mut self, handle: &DivHandle, color: crate::Color) {
+        self.set_background(handle.id(), color);
+    }
+
     pub fn clear_background(&mut self, id: impl AsRef<str>) {
         self.ui.retained.clear_div_background(id);
+    }
+
+    pub fn clear_background_handle(&mut self, handle: &DivHandle) {
+        self.clear_background(handle.id());
     }
 }
 
@@ -237,7 +373,7 @@ mod tests {
         let mut retained = RetainedState::new();
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
 
-        ui.widgets().button().id("btn").text("b").show();
+        let button = ui.widgets().button().id("btn").text("b").show();
         ui.widgets().text_box().id("tb").text("x").show();
         ui.widgets().checkbox().id("cb").checked(false).show();
         ui.widgets()
@@ -265,10 +401,12 @@ mod tests {
             .background(Color::from_rgb8(20, 20, 20))
             .show(|_| ());
 
-        let _ = ui.state().button().response("btn");
-        assert!(!ui.state().button().clicked("btn"));
+        let _ = ui.state().button().response_handle(&button);
+        assert!(!ui.state().button().clicked_handle(&button));
         ui.state().button().set_text("btn", "next");
         ui.state().button().set_enabled("btn", true);
+        ui.state().button().set_text_handle(&button, "next2");
+        ui.state().button().set_enabled_handle(&button, true);
 
         let _ = ui.state().text_box().response("tb");
         assert_eq!(ui.state().text_box().text("tb"), "x");

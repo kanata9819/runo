@@ -84,6 +84,37 @@ pub struct DivBuilder<'ui, 'a> {
     config: DivConfig,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct DivHandle {
+    id: String,
+}
+
+impl DivHandle {
+    pub(crate) fn new(id: String) -> Self {
+        Self { id }
+    }
+
+    pub(crate) fn id(&self) -> &str {
+        &self.id
+    }
+
+    pub fn set_visible(&self, ui: &mut Ui<'_>, visible: bool) {
+        ui.state().div().set_visible(self.id(), visible);
+    }
+
+    pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
+        ui.state().div().set_enabled(self.id(), enabled);
+    }
+
+    pub fn set_background(&self, ui: &mut Ui<'_>, color: Color) {
+        ui.state().div().set_background(self.id(), color);
+    }
+
+    pub fn clear_background(&self, ui: &mut Ui<'_>) {
+        ui.state().div().clear_background(self.id());
+    }
+}
+
 impl<'ui, 'a> DivBuilder<'ui, 'a> {
     pub fn new(ui: &'ui mut Ui<'a>, id: String) -> Self {
         Self {
@@ -161,6 +192,12 @@ impl<'ui, 'a> DivBuilder<'ui, 'a> {
 
     pub fn show<R>(self, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
         self.ui.show_div(self.config.into_show_args(), f)
+    }
+
+    pub fn show_with_handle<R>(self, f: impl FnOnce(&mut Ui<'a>) -> R) -> (DivHandle, R) {
+        let handle = DivHandle::new(self.config.id.clone());
+        let result = self.ui.show_div(self.config.into_show_args(), f);
+        (handle, result)
     }
 }
 

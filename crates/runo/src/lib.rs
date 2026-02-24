@@ -38,7 +38,8 @@ pub use widget::text_box::{Overflow, TextBoxResponse};
 
 pub mod prelude {
     pub use crate::option_ext::{
-        OptionalButtonHandleExt, OptionalCheckboxHandleExt, OptionalTextBoxHandleExt,
+        OptionalButtonHandleExt, OptionalCheckboxHandleExt, OptionalComboBoxHandleExt,
+        OptionalRadioButtonHandleExt, OptionalSliderHandleExt, OptionalTextBoxHandleExt,
     };
 }
 

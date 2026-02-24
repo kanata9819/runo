@@ -140,6 +140,58 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
             f(self.ui, checked);
         }
     }
+
+    pub fn on_slider_changed(&mut self, handle: &SliderHandle, f: impl FnOnce(f64)) {
+        if let Some(value) = self.ui.retained.take_slider_changed(handle) {
+            f(value);
+        }
+    }
+
+    pub fn on_slider_changed_with_ui(
+        &mut self,
+        handle: &SliderHandle,
+        f: impl FnOnce(&mut Ui<'a>, f64),
+    ) {
+        if let Some(value) = self.ui.retained.take_slider_changed(handle) {
+            f(self.ui, value);
+        }
+    }
+
+    pub fn on_radio_button_changed(&mut self, handle: &RadioButtonHandle, f: impl FnOnce(bool)) {
+        if let Some(selected) = self.ui.retained.take_radio_button_changed(handle) {
+            f(selected);
+        }
+    }
+
+    pub fn on_radio_button_changed_with_ui(
+        &mut self,
+        handle: &RadioButtonHandle,
+        f: impl FnOnce(&mut Ui<'a>, bool),
+    ) {
+        if let Some(selected) = self.ui.retained.take_radio_button_changed(handle) {
+            f(self.ui, selected);
+        }
+    }
+
+    pub fn on_combo_box_changed(&mut self, handle: &ComboBoxHandle, f: impl FnOnce(usize, String)) {
+        if let Some((selected_index, selected_text)) =
+            self.ui.retained.take_combo_box_changed(handle)
+        {
+            f(selected_index, selected_text);
+        }
+    }
+
+    pub fn on_combo_box_changed_with_ui(
+        &mut self,
+        handle: &ComboBoxHandle,
+        f: impl FnOnce(&mut Ui<'a>, usize, String),
+    ) {
+        if let Some((selected_index, selected_text)) =
+            self.ui.retained.take_combo_box_changed(handle)
+        {
+            f(self.ui, selected_index, selected_text);
+        }
+    }
 }
 
 #[cfg(test)]
@@ -154,6 +206,9 @@ mod tests {
     use crate::ui::Ui;
     use crate::widget::button::ButtonHandle;
     use crate::widget::checkbox::CheckboxHandle;
+    use crate::widget::combo_box::ComboBoxHandle;
+    use crate::widget::radio_button::RadioButtonHandle;
+    use crate::widget::slider::SliderHandle;
     use crate::widget::text_box::TextBoxHandle;
 
     #[test]
@@ -224,6 +279,48 @@ mod tests {
         assert!(clicked);
         assert_eq!(text, "hello");
         assert!(checked);
+        assert!(ui.events().drain_events().is_empty());
+    }
+
+    #[test]
+    fn ui_events_callback_helpers_consume_slider_radio_and_combo_events() {
+        let mut scene = Scene::new();
+        let mut effects = EffectStore::new();
+        let mut states = StateStore::new();
+        let mut retained = RetainedState::new();
+        let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+
+        let slider = SliderHandle::new("sl".to_string());
+        let radio_button = RadioButtonHandle::new("rb".to_string());
+        let combo_box = ComboBoxHandle::new("cb".to_string());
+        ui.retained.push_event(UiEvent::SliderChanged {
+            slider: slider.clone(),
+            value: 0.75,
+        });
+        ui.retained.push_event(UiEvent::RadioButtonChanged {
+            radio_button: radio_button.clone(),
+            group: "g".to_string(),
+            selected: true,
+        });
+        ui.retained.push_event(UiEvent::ComboBoxChanged {
+            combo_box: combo_box.clone(),
+            selected_index: 1,
+            selected_text: "b".to_string(),
+        });
+
+        let mut slider_value = 0.0;
+        let mut selected = false;
+        let mut combo = (0usize, String::new());
+        {
+            let mut events = ui.events();
+            events.on_slider_changed(&slider, |value| slider_value = value);
+            events.on_radio_button_changed(&radio_button, |value| selected = value);
+            events.on_combo_box_changed(&combo_box, |index, text| combo = (index, text));
+        }
+
+        assert!((slider_value - 0.75).abs() < f64::EPSILON);
+        assert!(selected);
+        assert_eq!(combo, (1, "b".to_string()));
         assert!(ui.events().drain_events().is_empty());
     }
 }

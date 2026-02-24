@@ -8,6 +8,9 @@ use crate::retained::node::{LabelNode, WidgetNode};
 use crate::retained::state::RetainedState;
 use crate::widget::button::ButtonHandle;
 use crate::widget::checkbox::CheckboxHandle;
+use crate::widget::combo_box::ComboBoxHandle;
+use crate::widget::radio_button::RadioButtonHandle;
+use crate::widget::slider::SliderHandle;
 use crate::widget::text_box::TextBoxHandle;
 
 impl RetainedState {
@@ -141,6 +144,46 @@ impl RetainedState {
         let event = self.events.remove(index)?;
         match event {
             UiEvent::CheckboxChanged { checked, .. } => Some(checked),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn take_slider_changed(&mut self, handle: &SliderHandle) -> Option<f64> {
+        let index = self.events.iter().position(
+            |event| matches!(event, UiEvent::SliderChanged { slider, .. } if slider == handle),
+        )?;
+        let event = self.events.remove(index)?;
+        match event {
+            UiEvent::SliderChanged { value, .. } => Some(value),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn take_radio_button_changed(&mut self, handle: &RadioButtonHandle) -> Option<bool> {
+        let index = self.events.iter().position(|event| {
+            matches!(event, UiEvent::RadioButtonChanged { radio_button, .. } if radio_button == handle)
+        })?;
+        let event = self.events.remove(index)?;
+        match event {
+            UiEvent::RadioButtonChanged { selected, .. } => Some(selected),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn take_combo_box_changed(
+        &mut self,
+        handle: &ComboBoxHandle,
+    ) -> Option<(usize, String)> {
+        let index = self.events.iter().position(
+            |event| matches!(event, UiEvent::ComboBoxChanged { combo_box, .. } if combo_box == handle),
+        )?;
+        let event = self.events.remove(index)?;
+        match event {
+            UiEvent::ComboBoxChanged {
+                selected_index,
+                selected_text,
+                ..
+            } => Some((selected_index, selected_text)),
             _ => None,
         }
     }

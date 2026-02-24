@@ -2,6 +2,7 @@ use vello::peniko::Color;
 
 use crate::Ui;
 use crate::ui::ShowComboBoxArgs;
+use crate::ui::UiEvents;
 
 #[derive(Clone, Debug, Default)]
 pub struct ComboBoxResponse {
@@ -67,6 +68,18 @@ impl ComboBoxHandle {
 
     pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
         ui.state().combo_box().set_enabled(self.id(), enabled);
+    }
+
+    pub fn on_change(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(usize, String)) {
+        events.on_combo_box_changed(self, f);
+    }
+
+    pub fn on_change_with_ui(
+        &self,
+        events: &mut UiEvents<'_, '_>,
+        f: impl FnOnce(&mut Ui<'_>, usize, String),
+    ) {
+        events.on_combo_box_changed_with_ui(self, f);
     }
 }
 

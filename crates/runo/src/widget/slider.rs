@@ -2,6 +2,7 @@ use vello::peniko::Color;
 
 use crate::Ui;
 use crate::ui::ShowSliderArgs;
+use crate::ui::UiEvents;
 
 #[derive(Clone, Debug, Default)]
 pub struct SliderResponse {
@@ -54,6 +55,18 @@ impl SliderHandle {
 
     pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
         ui.state().slider().set_enabled(self.id(), enabled);
+    }
+
+    pub fn on_change(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(f64)) {
+        events.on_slider_changed(self, f);
+    }
+
+    pub fn on_change_with_ui(
+        &self,
+        events: &mut UiEvents<'_, '_>,
+        f: impl FnOnce(&mut Ui<'_>, f64),
+    ) {
+        events.on_slider_changed_with_ui(self, f);
     }
 }
 

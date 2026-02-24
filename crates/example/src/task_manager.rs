@@ -176,7 +176,7 @@ impl RunoApplication for TaskApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        let input = self.input.clone();
+        // let input = self.input.clone();
         let add_button = self.add_button.clone();
         let clear_done_button = self.clear_done_button.clone();
         let task_rows: Vec<(u64, CheckboxHandle, ButtonHandle)> = self
@@ -186,9 +186,9 @@ impl RunoApplication for TaskApp {
             .collect();
 
         let mut events = ui.events();
-        input.on_change(&mut events, |text| self.draft = text);
+        self.input.on_change(&mut events, |text| self.draft = text);
 
-        let input_for_add = input.clone();
+        let input_for_add = self.input.clone();
         add_button.on_click_with_ui(&mut events, |ui| {
             self.add_task();
             if let Some(input) = &input_for_add {

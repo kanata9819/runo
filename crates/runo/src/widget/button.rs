@@ -2,6 +2,7 @@ use vello::peniko::Color;
 
 use crate::Ui;
 use crate::ui::ShowButtonArgs;
+use crate::ui::UiEvents;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ButtonResponse {
@@ -49,6 +50,14 @@ impl ButtonHandle {
 
     pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
         ui.set_button_enabled(self.id(), enabled);
+    }
+
+    pub fn on_click(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce()) {
+        events.on_button_clicked(self, f);
+    }
+
+    pub fn on_click_with_ui(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(&mut Ui<'_>)) {
+        events.on_button_clicked_with_ui(self, f);
     }
 }
 

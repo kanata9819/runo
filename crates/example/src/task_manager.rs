@@ -1,8 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use runo::{
-    ButtonHandle, CheckboxHandle, RunOptions, RunoApplication, TextBoxHandle, Ui, UiEvent, colors,
-};
+use runo::prelude::*;
+use runo::{ButtonHandle, CheckboxHandle, RunOptions, RunoApplication, TextBoxHandle, Ui, colors};
 
 const SUMMARY_STATE_ID: &str = "state.task.summary";
 
@@ -177,52 +176,37 @@ impl RunoApplication for TaskApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
-        let events = ui.events().drain_events();
-        for event in events {
-            match event {
-                UiEvent::TextBoxChanged { text_box, text } => {
-                    if self.input.as_ref().is_some_and(|input| input == &text_box) {
-                        self.draft = text;
-                    }
-                }
-                UiEvent::ButtonClicked { button } => {
-                    if self
-                        .add_button
-                        .as_ref()
-                        .is_some_and(|add_button| add_button == &button)
-                    {
-                        self.add_task();
-                        if let Some(input) = &self.input {
-                            input.set_text(ui, "");
-                        }
-                        continue;
-                    }
-                    if self
-                        .clear_done_button
-                        .as_ref()
-                        .is_some_and(|clear_done_button| clear_done_button == &button)
-                    {
-                        self.clear_done();
-                        continue;
-                    }
-                    if let Some(row) = self
-                        .task_rows
-                        .iter()
-                        .find(|row| row.delete_button == button)
-                    {
-                        self.tasks.retain(|task| task.id != row.task_id);
-                    }
-                }
-                UiEvent::CheckboxChanged { checkbox, checked } => {
-                    if let Some(row) = self.task_rows.iter().find(|row| row.checkbox == checkbox)
-                        && let Some(task) =
-                            self.tasks.iter_mut().find(|task| task.id == row.task_id)
-                    {
-                        task.done = checked;
-                    }
-                }
-                _ => {}
+        let input = self.input.clone();
+        let add_button = self.add_button.clone();
+        let clear_done_button = self.clear_done_button.clone();
+        let task_rows: Vec<(u64, CheckboxHandle, ButtonHandle)> = self
+            .task_rows
+            .iter()
+            .map(|row| (row.task_id, row.checkbox.clone(), row.delete_button.clone()))
+            .collect();
+
+        let mut events = ui.events();
+        input.on_change(&mut events, |text| self.draft = text);
+
+        let input_for_add = input.clone();
+        add_button.on_click_with_ui(&mut events, |ui| {
+            self.add_task();
+            if let Some(input) = &input_for_add {
+                input.set_text(ui, "");
             }
+        });
+
+        clear_done_button.on_click(&mut events, || self.clear_done());
+
+        for (task_id, checkbox, delete_button) in task_rows {
+            delete_button.on_click(&mut events, || {
+                self.tasks.retain(|task| task.id != task_id);
+            });
+            checkbox.on_change(&mut events, |checked| {
+                if let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id) {
+                    task.done = checked;
+                }
+            });
         }
 
         let total = self.tasks.len();

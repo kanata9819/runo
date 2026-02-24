@@ -6,6 +6,9 @@ use vello::peniko::Color;
 use crate::event::UiEvent;
 use crate::retained::node::{LabelNode, WidgetNode};
 use crate::retained::state::RetainedState;
+use crate::widget::button::ButtonHandle;
+use crate::widget::checkbox::CheckboxHandle;
+use crate::widget::text_box::TextBoxHandle;
 
 impl RetainedState {
     pub(crate) fn new() -> Self {
@@ -106,7 +109,39 @@ impl RetainedState {
         self.events.drain(..).collect()
     }
 
-    pub(in crate::retained) fn push_event(&mut self, event: UiEvent) {
+    pub(crate) fn push_event(&mut self, event: UiEvent) {
         self.events.push_back(event);
+    }
+
+    pub(crate) fn take_button_clicked(&mut self, handle: &ButtonHandle) -> bool {
+        let Some(index) = self.events.iter().position(
+            |event| matches!(event, UiEvent::ButtonClicked { button } if button == handle),
+        ) else {
+            return false;
+        };
+        let _ = self.events.remove(index);
+        true
+    }
+
+    pub(crate) fn take_text_box_changed(&mut self, handle: &TextBoxHandle) -> Option<String> {
+        let index = self.events.iter().position(
+            |event| matches!(event, UiEvent::TextBoxChanged { text_box, .. } if text_box == handle),
+        )?;
+        let event = self.events.remove(index)?;
+        match event {
+            UiEvent::TextBoxChanged { text, .. } => Some(text),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn take_checkbox_changed(&mut self, handle: &CheckboxHandle) -> Option<bool> {
+        let index = self.events.iter().position(
+            |event| matches!(event, UiEvent::CheckboxChanged { checkbox, .. } if checkbox == handle),
+        )?;
+        let event = self.events.remove(index)?;
+        match event {
+            UiEvent::CheckboxChanged { checked, .. } => Some(checked),
+            _ => None,
+        }
     }
 }

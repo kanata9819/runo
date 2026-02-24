@@ -2,6 +2,7 @@ use vello::peniko::Color;
 
 use crate::Ui;
 use crate::ui::ShowCheckboxArgs;
+use crate::ui::UiEvents;
 
 #[derive(Clone, Debug, Default)]
 pub struct CheckboxResponse {
@@ -51,6 +52,18 @@ impl CheckboxHandle {
 
     pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
         ui.state().checkbox().set_enabled(self.id(), enabled);
+    }
+
+    pub fn on_change(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(bool)) {
+        events.on_checkbox_changed(self, f);
+    }
+
+    pub fn on_change_with_ui(
+        &self,
+        events: &mut UiEvents<'_, '_>,
+        f: impl FnOnce(&mut Ui<'_>, bool),
+    ) {
+        events.on_checkbox_changed_with_ui(self, f);
     }
 }
 

@@ -2,6 +2,7 @@ use vello::peniko::Color;
 
 use crate::Ui;
 use crate::ui::ShowTextBoxArgs;
+use crate::ui::UiEvents;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Overflow {
@@ -73,6 +74,18 @@ impl TextBoxHandle {
 
     pub fn set_enabled(&self, ui: &mut Ui<'_>, enabled: bool) {
         ui.state().text_box().set_enabled(self.id(), enabled);
+    }
+
+    pub fn on_change(&self, events: &mut UiEvents<'_, '_>, f: impl FnOnce(String)) {
+        events.on_text_box_changed(self, f);
+    }
+
+    pub fn on_change_with_ui(
+        &self,
+        events: &mut UiEvents<'_, '_>,
+        f: impl FnOnce(&mut Ui<'_>, String),
+    ) {
+        events.on_text_box_changed_with_ui(self, f);
     }
 }
 

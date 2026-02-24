@@ -5,7 +5,7 @@ mod widgets;
 
 use std::marker::PhantomData;
 
-pub use events::UiEvents;
+pub use events::{ActionBindings, UiEvents};
 pub use state::{
     UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiRadioButtonState,
     UiSliderState, UiState, UiTextBoxState,

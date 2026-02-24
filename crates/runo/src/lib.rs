@@ -5,6 +5,7 @@ mod font;
 mod hooks;
 mod input;
 mod layout;
+mod option_ext;
 mod retained;
 mod theme;
 mod ui;
@@ -16,8 +17,9 @@ pub use hooks::effect::EffectCleanup;
 pub use layout::div::DivHandle;
 pub use theme::color as colors;
 pub use ui::{
-    Ui, UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiEvents, UiLabelState,
-    UiRadioButtonState, UiSliderState, UiState, UiStateSetter, UiTextBoxState, UiWidgets,
+    ActionBindings, Ui, UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiEvents,
+    UiLabelState, UiRadioButtonState, UiSliderState, UiState, UiStateSetter, UiTextBoxState,
+    UiWidgets,
 };
 pub use vello::peniko::Color;
 pub use widget::button::ButtonHandle;
@@ -33,6 +35,12 @@ pub use widget::slider::SliderHandle;
 pub use widget::slider::SliderResponse;
 pub use widget::text_box::TextBoxHandle;
 pub use widget::text_box::{Overflow, TextBoxResponse};
+
+pub mod prelude {
+    pub use crate::option_ext::{
+        OptionalButtonHandleExt, OptionalCheckboxHandleExt, OptionalTextBoxHandleExt,
+    };
+}
 
 #[cfg(test)]
 mod tests {

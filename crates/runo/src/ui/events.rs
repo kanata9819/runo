@@ -17,6 +17,15 @@ pub struct ActionBindings<A> {
     combo_box: HashMap<ComboBoxHandle, A>,
 }
 
+pub struct EventBindings<E> {
+    button: HashMap<ButtonHandle, Box<dyn Fn() -> E>>,
+    checkbox: HashMap<CheckboxHandle, Box<dyn Fn(bool) -> E>>,
+    radio_button: HashMap<RadioButtonHandle, Box<dyn Fn(bool) -> E>>,
+    slider: HashMap<SliderHandle, Box<dyn Fn(f64) -> E>>,
+    text_box: HashMap<TextBoxHandle, Box<dyn Fn(String) -> E>>,
+    combo_box: HashMap<ComboBoxHandle, Box<dyn Fn(usize, String) -> E>>,
+}
+
 impl<A> ActionBindings<A> {
     pub fn new() -> Self {
         Self {
@@ -54,7 +63,65 @@ impl<A> ActionBindings<A> {
     }
 }
 
+impl<E> EventBindings<E> {
+    pub fn new() -> Self {
+        Self {
+            button: HashMap::new(),
+            checkbox: HashMap::new(),
+            radio_button: HashMap::new(),
+            slider: HashMap::new(),
+            text_box: HashMap::new(),
+            combo_box: HashMap::new(),
+        }
+    }
+
+    pub fn bind_button(&mut self, handle: ButtonHandle, event: E)
+    where
+        E: Clone + 'static,
+    {
+        self.bind_button_with(handle, move || event.clone());
+    }
+
+    pub fn bind_button_with(&mut self, handle: ButtonHandle, f: impl Fn() -> E + 'static) {
+        self.button.insert(handle, Box::new(f));
+    }
+
+    pub fn bind_checkbox(&mut self, handle: CheckboxHandle, f: impl Fn(bool) -> E + 'static) {
+        self.checkbox.insert(handle, Box::new(f));
+    }
+
+    pub fn bind_radio_button(
+        &mut self,
+        handle: RadioButtonHandle,
+        f: impl Fn(bool) -> E + 'static,
+    ) {
+        self.radio_button.insert(handle, Box::new(f));
+    }
+
+    pub fn bind_slider(&mut self, handle: SliderHandle, f: impl Fn(f64) -> E + 'static) {
+        self.slider.insert(handle, Box::new(f));
+    }
+
+    pub fn bind_text_box(&mut self, handle: TextBoxHandle, f: impl Fn(String) -> E + 'static) {
+        self.text_box.insert(handle, Box::new(f));
+    }
+
+    pub fn bind_combo_box(
+        &mut self,
+        handle: ComboBoxHandle,
+        f: impl Fn(usize, String) -> E + 'static,
+    ) {
+        self.combo_box.insert(handle, Box::new(f));
+    }
+}
+
 impl<A> Default for ActionBindings<A> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<E> Default for EventBindings<E> {
     fn default() -> Self {
         Self::new()
     }
@@ -90,6 +157,40 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
                 UiEvent::ComboBoxChanged { combo_box, .. } => bindings.combo_box.get(&combo_box),
             })
             .cloned()
+            .collect()
+    }
+
+    pub fn drain_bound_events<E>(&mut self, bindings: &EventBindings<E>) -> Vec<E> {
+        self.drain_events()
+            .into_iter()
+            .filter_map(|event| match event {
+                UiEvent::ButtonClicked { button } => bindings.button.get(&button).map(|f| f()),
+                UiEvent::CheckboxChanged { checkbox, checked } => {
+                    bindings.checkbox.get(&checkbox).map(|f| f(checked))
+                }
+                UiEvent::RadioButtonChanged {
+                    radio_button,
+                    selected,
+                    ..
+                } => bindings
+                    .radio_button
+                    .get(&radio_button)
+                    .map(|f| f(selected)),
+                UiEvent::SliderChanged { slider, value } => {
+                    bindings.slider.get(&slider).map(|f| f(value))
+                }
+                UiEvent::TextBoxChanged { text_box, text } => {
+                    bindings.text_box.get(&text_box).map(|f| f(text))
+                }
+                UiEvent::ComboBoxChanged {
+                    combo_box,
+                    selected_index,
+                    selected_text,
+                } => bindings
+                    .combo_box
+                    .get(&combo_box)
+                    .map(|f| f(selected_index, selected_text)),
+            })
             .collect()
     }
 
@@ -222,7 +323,7 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
 mod tests {
     use vello::Scene;
 
-    use super::ActionBindings;
+    use super::{ActionBindings, EventBindings};
     use crate::event::UiEvent;
     use crate::hooks::effect::EffectStore;
     use crate::hooks::state::StateStore;
@@ -265,6 +366,45 @@ mod tests {
 
         let actions = ui.events().drain_actions(&bindings);
         assert_eq!(actions, vec!["do".to_string()]);
+    }
+
+    #[test]
+    fn ui_events_can_drain_bound_events_with_payloads() {
+        let mut scene = Scene::new();
+        let mut effects = EffectStore::new();
+        let mut states = StateStore::new();
+        let mut retained = RetainedState::new();
+        let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+
+        let button = ButtonHandle::new("btn".to_string());
+        let text_box = TextBoxHandle::new("tb".to_string());
+        let checkbox = CheckboxHandle::new("cb".to_string());
+        ui.retained.push_event(UiEvent::ButtonClicked {
+            button: button.clone(),
+        });
+        ui.retained.push_event(UiEvent::TextBoxChanged {
+            text_box: text_box.clone(),
+            text: "hello".to_string(),
+        });
+        ui.retained.push_event(UiEvent::CheckboxChanged {
+            checkbox: checkbox.clone(),
+            checked: true,
+        });
+
+        let mut bindings = EventBindings::new();
+        bindings.bind_button(button, "clicked".to_string());
+        bindings.bind_text_box(text_box, |text| format!("text={text}"));
+        bindings.bind_checkbox(checkbox, |checked| format!("checked={checked}"));
+
+        let events = ui.events().drain_bound_events(&bindings);
+        assert_eq!(
+            events,
+            vec![
+                "clicked".to_string(),
+                "text=hello".to_string(),
+                "checked=true".to_string(),
+            ]
+        );
     }
 
     #[test]

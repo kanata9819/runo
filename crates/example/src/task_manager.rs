@@ -1,7 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use runo::{
-    ButtonHandle, CheckboxHandle, RunOptions, RunoApplication, TextBoxHandle, Ui, UiEvent, colors,
+    ButtonHandle, CheckboxHandle, EventBindings, RunOptions, RunoApplication, TextBoxHandle, Ui,
+    colors,
 };
 
 const SUMMARY_STATE_ID: &str = "state.task.summary";
@@ -29,10 +30,13 @@ struct TaskRowHandles {
     delete_button: ButtonHandle,
 }
 
-enum ButtonAction {
-    Add,
-    ClearDone,
+#[derive(Clone)]
+enum Event {
+    AddClicked,
+    ClearDoneClicked,
     DeleteTask(u64),
+    DraftChanged(String),
+    TaskToggled { task_id: u64, checked: bool },
 }
 
 impl TaskApp {
@@ -60,17 +64,28 @@ impl TaskApp {
         format!("{} tasks ({} done)", self.tasks.len(), done)
     }
 
-    fn resolve_button_action(&self, button: &ButtonHandle) -> Option<ButtonAction> {
-        if self.add_button.as_ref() == Some(button) {
-            return Some(ButtonAction::Add);
+    fn build_event_bindings(&self) -> EventBindings<Event> {
+        let mut bindings = EventBindings::new();
+        if let Some(button) = &self.add_button {
+            bindings.bind_button(button.clone(), Event::AddClicked);
         }
-        if self.clear_done_button.as_ref() == Some(button) {
-            return Some(ButtonAction::ClearDone);
+        if let Some(button) = &self.clear_done_button {
+            bindings.bind_button(button.clone(), Event::ClearDoneClicked);
         }
-        self.task_rows
-            .iter()
-            .find(|row| row.delete_button == *button)
-            .map(|row| ButtonAction::DeleteTask(row.task_id))
+        if let Some(text_box) = &self.input {
+            bindings.bind_text_box(text_box.clone(), Event::DraftChanged);
+        }
+        for row in &self.task_rows {
+            let task_id = row.task_id;
+            bindings.bind_button_with(row.delete_button.clone(), move || {
+                Event::DeleteTask(task_id)
+            });
+            bindings.bind_checkbox(row.checkbox.clone(), move |checked| Event::TaskToggled {
+                task_id,
+                checked,
+            });
+        }
+        bindings
     }
 }
 
@@ -196,41 +211,28 @@ impl RunoApplication for TaskApp {
     }
 
     fn update(&mut self, ui: &mut Ui<'_>) {
+        let bindings = self.build_event_bindings();
         let mut clear_input = false;
-        for event in ui.events().drain_events() {
+        for event in ui.events().drain_bound_events(&bindings) {
             match event {
-                UiEvent::ButtonClicked { button } => match self.resolve_button_action(&button) {
-                    Some(ButtonAction::Add) => {
-                        self.add_task();
-                        clear_input = true;
-                    }
-                    Some(ButtonAction::ClearDone) => {
-                        self.clear_done();
-                    }
-                    Some(ButtonAction::DeleteTask(task_id)) => {
-                        self.tasks.retain(|task| task.id != task_id);
-                    }
-                    None => {}
-                },
-                UiEvent::TextBoxChanged { text_box, text } => {
-                    if self.input.as_ref() == Some(&text_box) {
-                        self.draft = text;
-                    }
+                Event::AddClicked => {
+                    self.add_task();
+                    clear_input = true;
                 }
-                UiEvent::CheckboxChanged { checkbox, checked } => {
-                    if let Some(task_id) = self
-                        .task_rows
-                        .iter()
-                        .find(|row| row.checkbox == checkbox)
-                        .map(|row| row.task_id)
-                        && let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id)
-                    {
+                Event::ClearDoneClicked => {
+                    self.clear_done();
+                }
+                Event::DeleteTask(task_id) => {
+                    self.tasks.retain(|task| task.id != task_id);
+                }
+                Event::DraftChanged(text) => {
+                    self.draft = text;
+                }
+                Event::TaskToggled { task_id, checked } => {
+                    if let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id) {
                         task.done = checked;
                     }
                 }
-                UiEvent::RadioButtonChanged { .. }
-                | UiEvent::SliderChanged { .. }
-                | UiEvent::ComboBoxChanged { .. } => {}
             }
         }
 

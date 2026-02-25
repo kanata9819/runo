@@ -27,6 +27,7 @@ Current built-in widgets:
 5. `Checkbox`
 6. `RadioButton`
 7. `Slider`
+8. `Div`
 
 ## 3. RunoApplication lifecycle
 
@@ -76,7 +77,7 @@ pub trait RunoApplication {
    `ui/mod.rs`: `Ui` root object and layout/effect helpers
    `ui/widgets.rs`: `ui.widgets()` builder entrypoints
    `ui/state.rs`: `ui.state()` mutation API (`set_text`, `set_value`, `combo_box().set_items`, etc.)
-   `ui/events.rs`: `drain_events` / `next_event`
+   `ui/events.rs`: `drain_events` / `next_event` / `drain_actions` / `drain_bound_events`, plus handle-oriented `on_*` and `*_changed` helpers
    `ui/show/*.rs`: adapter layer from builders to retained state upserts
 4. `ui/colors`: constants + grouped APIs (`Gray::gray_50()`, `Blue::blue_500()`, `Semantic::success()`)
 5. `widget/`: builders and response types (`button`, `label`, `checkbox`, `radio_button`, `slider`, `text_box`, `combo_box`)

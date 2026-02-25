@@ -7,12 +7,16 @@ This section contains implementation-agnostic knowledge for building GUI librari
 1. Built-in widgets
    `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
 2. Event model
-   `UiEvent` (`ButtonClicked`, `CheckboxChanged`, `RadioButtonChanged`, `SliderChanged`, `TextBoxChanged`, `ComboBoxChanged`)
+   `UiEvent` (handle-based events) + `ActionBindings` / `EventBindings` / `EventBindingsBuilder`
 3. Enable/disable API
    `ui.state().*().set_enabled(...)` and per-widget `enabled(...)`
 4. Dynamic combo box items API
    `ui.state().combo_box().set_items(...)`
-5. Color presets
+5. Handle API
+   `ButtonHandle` and others provide `on_click` / `take_click` / `set_enabled` style operations
+6. Optional handle extensions
+   `prelude::*` exposes `Optional*HandleExt` helpers (`on_click` / `on_change` / `take_change`)
+7. Color presets
    constants + grouped APIs like `Gray::gray_50()` and `Semantic::success()`
 
 ## Documents

@@ -22,7 +22,7 @@ GUI フレームワークは主に次を行います。
 
 `Runo` は保持型（Retained Mode）寄りの設計です。
 
-1. ウィジェット（Button/Label/TextBox/ComboBox/Checkbox/RadioButton/Slider）を内部状態に保持する
+1. ウィジェット（Button/Label/TextBox/ComboBox/Checkbox/RadioButton/Slider/Div）を内部状態に保持する
 2. 入力でその状態を更新する
 3. 保持された状態を描画する
 
@@ -90,6 +90,7 @@ pub trait RunoApplication {
 2. `ui/widgets.rs`: `ui.widgets()` の各ビルダー入口
 3. `ui/state.rs`: `ui.state()` の状態更新API（例: `combo_box().set_items(...)`）
 4. `ui/events.rs`: `ui.events()` で `drain_events` / `next_event`
+   `drain_actions` / `drain_bound_events` と、handle ベースの `on_*` / `*_changed` 系も提供
 5. `ui/show/*.rs`: 各ウィジェットを保持状態へ反映する中継層
 6. `ui/colors.rs`: 色定数 + grouped API（`Gray::gray_50()`, `Blue::blue_500()`, `Semantic::success()`）
 7. `ui/mod.rs` の補助: `vertical`, `horizontal`, `use_effect`

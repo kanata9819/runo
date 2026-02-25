@@ -7,12 +7,16 @@ GUI ライブラリを作るときに必要になる、実装非依存の基礎�
 1. 組み込みウィジェット
    `button`, `label`, `text_box`, `combo_box`, `checkbox`, `radio_button`, `slider`, `div`
 2. イベントモデル
-   `UiEvent`（`ButtonClicked`, `CheckboxChanged`, `RadioButtonChanged`, `SliderChanged`, `TextBoxChanged`, `ComboBoxChanged`）
+   `UiEvent`（ハンドル付きイベント）+ `ActionBindings` / `EventBindings` / `EventBindingsBuilder`
 3. 活性/非活性 API
    `ui.state().*().set_enabled(...)` / `enabled(...)`
 4. ComboBox の動的 items 更新 API
    `ui.state().combo_box().set_items(...)`
-5. 色プリセット API
+5. ハンドル API
+   `ButtonHandle` などで `on_click` / `take_click` / `set_enabled` などを利用可能
+6. `Option<Handle>` 拡張 API
+   `prelude::*` で `Optional*HandleExt`（`on_click` / `on_change` / `take_change`）を利用可能
+7. 色プリセット API
    定数 + grouped API（`Gray::gray_50()`, `Semantic::success()` など）
 
 ## ドキュメント

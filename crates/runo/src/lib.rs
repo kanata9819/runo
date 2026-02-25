@@ -17,9 +17,9 @@ pub use hooks::effect::EffectCleanup;
 pub use layout::div::DivHandle;
 pub use theme::color as colors;
 pub use ui::{
-    ActionBindings, EventBindings, Ui, UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState,
-    UiEvents, UiLabelState, UiRadioButtonState, UiSliderState, UiState, UiStateSetter,
-    UiTextBoxState, UiWidgets,
+    ActionBindings, EventBindings, EventBindingsBuilder, Ui, UiButtonState, UiCheckboxState,
+    UiComboBoxState, UiDivState, UiEvents, UiLabelState, UiRadioButtonState, UiSliderState,
+    UiState, UiStateSetter, UiTextBoxState, UiWidgets,
 };
 pub use vello::peniko::Color;
 pub use widget::button::ButtonHandle;

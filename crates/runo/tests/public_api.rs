@@ -1,14 +1,27 @@
 use runo::{
-    ButtonResponse, Color, Overflow, RunOptions, RunoApplication, TextBoxResponse, UiEvent, colors,
+    ButtonResponse, Color, EventBindings, Overflow, RunOptions, RunoApplication, TextBoxResponse,
+    UiEvent, colors,
 };
 
 struct DefaultOptionsApp;
 
-impl RunoApplication for DefaultOptionsApp {}
+impl RunoApplication for DefaultOptionsApp {
+    type Event = ();
+
+    fn event_bindings(&self) -> EventBindings<Self::Event> {
+        EventBindings::new()
+    }
+}
 
 struct CustomOptionsApp;
 
 impl RunoApplication for CustomOptionsApp {
+    type Event = ();
+
+    fn event_bindings(&self) -> EventBindings<Self::Event> {
+        EventBindings::new()
+    }
+
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "custom".to_string(),

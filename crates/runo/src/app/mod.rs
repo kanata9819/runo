@@ -5,7 +5,7 @@ pub(crate) mod gpu_runtime;
 pub(crate) mod runner;
 pub(crate) mod runtime;
 
-use crate::ui::Ui;
+use crate::ui::{EventBindings, Ui};
 pub(crate) use runner::AppRunner;
 pub use runtime::run;
 
@@ -29,8 +29,11 @@ impl Default for RunOptions {
 }
 
 pub trait RunoApplication {
+    type Event: 'static;
+
     fn build(&mut self, _ui: &mut Ui<'_>) {}
-    fn update(&mut self, _ui: &mut Ui<'_>) {}
+    fn event_bindings(&self) -> EventBindings<Self::Event>;
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) {}
     fn options(&self) -> RunOptions {
         RunOptions::default()
     }
@@ -46,7 +49,13 @@ mod tests {
     use super::*;
 
     struct App;
-    impl RunoApplication for App {}
+    impl RunoApplication for App {
+        type Event = ();
+
+        fn event_bindings(&self) -> EventBindings<Self::Event> {
+            EventBindings::new()
+        }
+    }
 
     #[test]
     fn run_options_default_values() {
@@ -67,6 +76,12 @@ mod tests {
 
     struct CustomApp;
     impl RunoApplication for CustomApp {
+        type Event = ();
+
+        fn event_bindings(&self) -> EventBindings<Self::Event> {
+            EventBindings::new()
+        }
+
         fn options(&self) -> RunOptions {
             RunOptions {
                 window_title: "custom".to_string(),

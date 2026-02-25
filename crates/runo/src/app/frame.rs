@@ -99,7 +99,10 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 &mut self.states,
                 &mut self.retained,
             );
-            self.user_app.update(&mut ui);
+            let bindings = self.user_app.event_bindings();
+            for event in ui.drain_bound_events(&bindings) {
+                self.user_app.on_event(&mut ui, event);
+            }
         }
 
         self.effects.end_frame();
@@ -119,16 +122,22 @@ mod tests {
     #[derive(Default)]
     struct DummyApp {
         build_calls: usize,
-        update_calls: usize,
+        event_calls: usize,
     }
 
     impl RunoApplication for DummyApp {
+        type Event = ();
+
+        fn event_bindings(&self) -> crate::EventBindings<Self::Event> {
+            crate::EventBindings::new()
+        }
+
         fn build(&mut self, _ui: &mut Ui<'_>) {
             self.build_calls += 1;
         }
 
-        fn update(&mut self, _ui: &mut Ui<'_>) {
-            self.update_calls += 1;
+        fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) {
+            self.event_calls += 1;
         }
     }
 
@@ -144,6 +153,6 @@ mod tests {
         runner.build_scene(320, 180);
         runner.run_ui_frame();
         assert_eq!(runner.user_app.build_calls, 1);
-        assert_eq!(runner.user_app.update_calls, 1);
+        assert_eq!(runner.user_app.event_calls, 0);
     }
 }

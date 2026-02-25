@@ -5,6 +5,18 @@ use runo::{
     RunoApplication, SliderHandle, TextBoxHandle, Ui, colors, run,
 };
 
+#[derive(Clone)]
+enum Event {
+    NameChanged(String),
+    RoleChanged { index: usize, text: String },
+    NewsletterChanged(bool),
+    ChannelEmailChanged(bool),
+    ChannelSmsChanged(bool),
+    ChannelPushChanged(bool),
+    VolumeChanged(f64),
+    ToggleClicked,
+}
+
 struct MyApp {
     toggled: bool,
     input_text: String,
@@ -111,9 +123,49 @@ impl MyApp {
             .value(0.35)
             .show()
     }
+
+    fn refresh_toggle_button(&self, ui: &mut Ui<'_>) {
+        if let Some(toggle_button) = &self.toggle_button {
+            let label = if self.toggled {
+                "Toggle: ON"
+            } else {
+                "Toggle: OFF"
+            };
+            if self.newsletter_opt_in {
+                toggle_button.set_text(
+                    ui,
+                    format!(
+                        "{} ({}) [{}]",
+                        label,
+                        if self.input_text.is_empty() {
+                            "anonymous"
+                        } else {
+                            &self.input_text
+                        },
+                        self.selected_role,
+                    ),
+                );
+            } else {
+                toggle_button.set_text(ui, label);
+            }
+        }
+    }
+
+    fn update_panel_color(&self, ui: &mut Ui<'_>) {
+        if let Some(main_panel) = &self.main_panel {
+            let panel_color = if self.toggled {
+                colors::rgb(colors::PANEL_BG_ACTIVE)
+            } else {
+                colors::rgb(colors::PANEL_BG)
+            };
+            main_panel.set_background(ui, panel_color);
+        }
+    }
 }
 
 impl RunoApplication for MyApp {
+    type Event = Event;
+
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "runo example".to_string(),
@@ -150,87 +202,76 @@ impl RunoApplication for MyApp {
         });
     }
 
-    fn update(&mut self, ui: &mut Ui<'_>) {
+    fn event_bindings(&self) -> runo::EventBindings<Self::Event> {
+        let mut builder = runo::EventBindings::builder();
         if let Some(input_name) = &self.input_name {
-            let response = input_name.response(ui);
-            if response.changed {
-                self.input_text = response.text;
-            }
+            builder = builder.text_box(input_name.clone(), Event::NameChanged);
         }
-
         if let Some(role_combo) = &self.role_combo {
-            let response = role_combo.response(ui);
-            if response.changed {
-                self.selected_role = response.selected_text;
-                println!("{}", response.selected_index);
-            }
+            builder = builder.combo_box(role_combo.clone(), |index, text| Event::RoleChanged {
+                index,
+                text,
+            });
         }
-
         if let Some(newsletter_checkbox) = &self.newsletter_checkbox {
-            let response = newsletter_checkbox.response(ui);
-            if response.changed {
-                self.newsletter_opt_in = response.checked;
-            }
+            builder = builder.checkbox(newsletter_checkbox.clone(), Event::NewsletterChanged);
         }
-
-        if let (Some(email), Some(sms), Some(push)) =
-            (&self.channel_email, &self.channel_sms, &self.channel_push)
-        {
-            if email.selected(ui) {
-                self.selected_channel = "Email".to_string();
-            } else if sms.selected(ui) {
-                self.selected_channel = "SMS".to_string();
-            } else if push.selected(ui) {
-                self.selected_channel = "Push".to_string();
-            }
+        if let Some(channel_email) = &self.channel_email {
+            builder = builder.radio_button(channel_email.clone(), Event::ChannelEmailChanged);
         }
-
+        if let Some(channel_sms) = &self.channel_sms {
+            builder = builder.radio_button(channel_sms.clone(), Event::ChannelSmsChanged);
+        }
+        if let Some(channel_push) = &self.channel_push {
+            builder = builder.radio_button(channel_push.clone(), Event::ChannelPushChanged);
+        }
         if let Some(volume_slider) = &self.volume_slider {
-            let response = volume_slider.response(ui);
-            if response.changed {
-                self.volume = response.value;
+            builder = builder.slider(volume_slider.clone(), Event::VolumeChanged);
+        }
+        if let Some(toggle_button) = &self.toggle_button {
+            builder = builder.button(toggle_button.clone(), Event::ToggleClicked);
+        }
+        builder.build()
+    }
+
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) {
+        match event {
+            Event::NameChanged(text) => {
+                self.input_text = text;
+            }
+            Event::RoleChanged { index, text } => {
+                self.selected_role = text;
+                println!("{index}");
+            }
+            Event::NewsletterChanged(checked) => {
+                self.newsletter_opt_in = checked;
+            }
+            Event::ChannelEmailChanged(selected) => {
+                if selected {
+                    self.selected_channel = "Email".to_string();
+                }
+            }
+            Event::ChannelSmsChanged(selected) => {
+                if selected {
+                    self.selected_channel = "SMS".to_string();
+                }
+            }
+            Event::ChannelPushChanged(selected) => {
+                if selected {
+                    self.selected_channel = "Push".to_string();
+                }
+            }
+            Event::VolumeChanged(value) => {
+                self.volume = value;
                 println!("volume: {:.2}", self.volume);
             }
-        }
-
-        if let Some(toggle_button) = &self.toggle_button
-            && toggle_button.clicked(ui)
-        {
-            self.toggled = !self.toggled;
-            if let Some(main_panel) = &self.main_panel {
-                let panel_color = if self.toggled {
-                    colors::rgb(colors::PANEL_BG_ACTIVE)
-                } else {
-                    colors::rgb(colors::PANEL_BG)
-                };
-                main_panel.set_background(ui, panel_color);
+            Event::ToggleClicked => {
+                self.toggled = !self.toggled;
+                self.update_panel_color(ui);
             }
         }
 
-        if let Some(toggle_button) = &self.toggle_button {
-            let label = if self.toggled {
-                "Toggle: ON"
-            } else {
-                "Toggle: OFF"
-            };
-            if self.newsletter_opt_in {
-                toggle_button.set_text(
-                    ui,
-                    format!(
-                        "{} ({}) [{}]",
-                        label,
-                        if self.input_text.is_empty() {
-                            "anonymous"
-                        } else {
-                            &self.input_text
-                        },
-                        self.selected_role,
-                    ),
-                );
-            } else {
-                toggle_button.set_text(ui, label);
-            }
-        }
+        self.refresh_toggle_button(ui);
 
         let toggled = self.toggled;
         ui.use_effect("toggle_effect", toggled, move || {

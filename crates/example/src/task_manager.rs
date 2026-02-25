@@ -65,31 +65,34 @@ impl TaskApp {
     }
 
     fn build_event_bindings(&self) -> EventBindings<Event> {
-        let mut bindings = EventBindings::new();
+        let mut builder = EventBindings::builder();
         if let Some(button) = &self.add_button {
-            bindings.bind_button(button.clone(), Event::AddClicked);
+            builder = builder.button(button.clone(), Event::AddClicked);
         }
         if let Some(button) = &self.clear_done_button {
-            bindings.bind_button(button.clone(), Event::ClearDoneClicked);
+            builder = builder.button(button.clone(), Event::ClearDoneClicked);
         }
         if let Some(text_box) = &self.input {
-            bindings.bind_text_box(text_box.clone(), Event::DraftChanged);
+            builder = builder.text_box(text_box.clone(), Event::DraftChanged);
         }
         for row in &self.task_rows {
             let task_id = row.task_id;
-            bindings.bind_button_with(row.delete_button.clone(), move || {
-                Event::DeleteTask(task_id)
-            });
-            bindings.bind_checkbox(row.checkbox.clone(), move |checked| Event::TaskToggled {
-                task_id,
-                checked,
-            });
+            builder = builder
+                .button_with(row.delete_button.clone(), move || {
+                    Event::DeleteTask(task_id)
+                })
+                .checkbox(row.checkbox.clone(), move |checked| Event::TaskToggled {
+                    task_id,
+                    checked,
+                });
         }
-        bindings
+        builder.build()
     }
 }
 
 impl RunoApplication for TaskApp {
+    type Event = Event;
+
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "runo task manager example".to_string(),
@@ -97,6 +100,10 @@ impl RunoApplication for TaskApp {
             window_height: 760,
             window_resizable: false,
         }
+    }
+
+    fn event_bindings(&self) -> EventBindings<Self::Event> {
+        self.build_event_bindings()
     }
 
     fn build(&mut self, ui: &mut Ui<'_>) {
@@ -210,28 +217,25 @@ impl RunoApplication for TaskApp {
         });
     }
 
-    fn update(&mut self, ui: &mut Ui<'_>) {
-        let bindings = self.build_event_bindings();
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) {
         let mut clear_input = false;
-        for event in ui.events().drain_bound_events(&bindings) {
-            match event {
-                Event::AddClicked => {
-                    self.add_task();
-                    clear_input = true;
-                }
-                Event::ClearDoneClicked => {
-                    self.clear_done();
-                }
-                Event::DeleteTask(task_id) => {
-                    self.tasks.retain(|task| task.id != task_id);
-                }
-                Event::DraftChanged(text) => {
-                    self.draft = text;
-                }
-                Event::TaskToggled { task_id, checked } => {
-                    if let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id) {
-                        task.done = checked;
-                    }
+        match event {
+            Event::AddClicked => {
+                self.add_task();
+                clear_input = true;
+            }
+            Event::ClearDoneClicked => {
+                self.clear_done();
+            }
+            Event::DeleteTask(task_id) => {
+                self.tasks.retain(|task| task.id != task_id);
+            }
+            Event::DraftChanged(text) => {
+                self.draft = text;
+            }
+            Event::TaskToggled { task_id, checked } => {
+                if let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id) {
+                    task.done = checked;
                 }
             }
         }

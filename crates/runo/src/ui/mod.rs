@@ -5,7 +5,7 @@ mod widgets;
 
 use std::marker::PhantomData;
 
-pub use events::{ActionBindings, EventBindings, UiEvents};
+pub use events::{ActionBindings, EventBindings, EventBindingsBuilder, UiEvents};
 pub use state::{
     UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiRadioButtonState,
     UiSliderState, UiState, UiTextBoxState,
@@ -96,6 +96,10 @@ impl<'a> Ui<'a> {
 
     pub fn events(&mut self) -> UiEvents<'_, 'a> {
         UiEvents { ui: self }
+    }
+
+    pub fn drain_bound_events<E>(&mut self, bindings: &EventBindings<E>) -> Vec<E> {
+        self.events().drain_bound_events(bindings)
     }
 
     pub fn vertical<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> R {

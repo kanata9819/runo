@@ -21,6 +21,7 @@ pub(crate) fn layout_text(
 
         let mut total_advance = 0.0_f32;
         let mut glyphs = Vec::new();
+
         for ch in text.chars() {
             let Some(glyph_id) = charmap.map(ch) else {
                 continue;

@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/runo", "crates/example"]
+exclude = ["vendor/winit"]
 resolver = "3"
 
 [profile.dev]

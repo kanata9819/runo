@@ -107,8 +107,6 @@ impl RunoApplication for TaskApp {
     }
 
     fn build(&mut self, ui: &mut Ui<'_>) {
-        let (summary, _) = ui.use_state(SUMMARY_STATE_ID, || self.summary_text());
-
         ui.vertical(|ui| {
             ui.widgets()
                 .label()
@@ -118,7 +116,6 @@ impl RunoApplication for TaskApp {
 
             ui.widgets()
                 .label()
-                .text(summary)
                 .font_size(16)
                 .text_color(colors::rgb(colors::TEXT_SECONDARY))
                 .show();

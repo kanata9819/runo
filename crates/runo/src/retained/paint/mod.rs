@@ -20,6 +20,7 @@ impl RetainedState {
             let Some(node) = self.widgets.get_mut(id) else {
                 continue;
             };
+
             match node {
                 WidgetNode::Button(button) => button::render(scene, font, button),
                 WidgetNode::Checkbox(checkbox) => checkbox::render(scene, font, checkbox),

@@ -69,12 +69,15 @@ impl TaskApp {
         if let Some(button) = &self.add_button {
             builder = builder.button(button.clone(), Event::AddClicked);
         }
+
         if let Some(button) = &self.clear_done_button {
             builder = builder.button(button.clone(), Event::ClearDoneClicked);
         }
+
         if let Some(text_box) = &self.input {
             builder = builder.text_box(text_box.clone(), Event::DraftChanged);
         }
+
         for row in &self.task_rows {
             let task_id = row.task_id;
             builder = builder
@@ -86,6 +89,7 @@ impl TaskApp {
                     checked,
                 });
         }
+
         builder.build()
     }
 }

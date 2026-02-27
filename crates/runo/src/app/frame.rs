@@ -91,6 +91,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
         self.retained
             .begin_frame_input(self.input.snapshot(), self.font.as_ref());
+
         {
             let mut ui = Ui::new(
                 &mut self.scene,
@@ -99,6 +100,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 &mut self.states,
                 &mut self.retained,
             );
+
             let bindings = self.user_app.event_bindings();
             for event in ui.drain_bound_events(&bindings) {
                 self.user_app.on_event(&mut ui, event);
@@ -107,9 +109,11 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
         self.effects.end_frame();
         self.states.end_frame();
+
         if self.states.take_changed() {
             self.request_redraw();
         }
+
         self.input.end_frame();
     }
 }

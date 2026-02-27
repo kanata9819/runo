@@ -1,8 +1,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use runo::{
-    colors, run, ButtonHandle, CheckboxHandle, ComboBoxHandle, DivHandle, RadioButtonHandle,
-    RunOptions, RunoApplication, SliderHandle, TextBoxHandle, Ui,
+    ButtonHandle, CheckboxHandle, ComboBoxHandle, DivHandle, RadioButtonHandle, RunOptions,
+    RunoApplication, SliderHandle, TextBoxHandle, Ui, colors, run,
 };
 
 #[derive(Clone)]

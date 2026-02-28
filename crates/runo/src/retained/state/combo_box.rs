@@ -32,37 +32,54 @@ impl RetainedState {
         } = args;
 
         let selected_index_override = selected_index;
-        let initial_selected_index = initial_selected_index(&items, selected_index_override);
-        let replacement_node = build_combo_box_node(
-            rect,
-            items,
-            initial_selected_index,
-            font_size,
-            text_color,
-            bg_color,
-            border_color,
-            enabled,
-        );
+        let items_for_update = items.clone();
 
-        if !self.widgets.contains_key(&id) {
-            self.order.push(id.clone());
-            self.widgets
-                .insert(id.clone(), WidgetNode::ComboBox(replacement_node));
+        self.upsert_widget_node(
+            id,
+            || {
+                let items = items.clone();
+                let initial_selected_index =
+                    initial_selected_index(&items.clone(), selected_index_override);
 
-            return combo_box_response_for_new(&self.widgets, &id);
-        }
+                let args: BuildNodeParams = BuildNodeParams {
+                    rect,
+                    items,
+                    selected_index: initial_selected_index,
+                    font_size,
+                    text_color,
+                    bg_color,
+                    border_color,
+                    enabled,
+                };
 
-        let entry = self.widgets.get_mut(&id).expect("combo box entry missing");
-        match entry {
-            WidgetNode::ComboBox(combo_box) => {
-                update_existing_combo_box(combo_box, replacement_node, selected_index_override);
-                combo_box_response(combo_box)
-            }
-            _ => {
-                *entry = WidgetNode::ComboBox(replacement_node);
-                combo_box_response_for_new(&self.widgets, &id)
-            }
-        }
+                WidgetNode::ComboBox(build_combo_box_node(args))
+            },
+            |entry| match entry {
+                WidgetNode::ComboBox(combo_box) => {
+                    let initial_selected_index =
+                        initial_selected_index(&items_for_update, selected_index_override);
+                    let args: BuildNodeParams = BuildNodeParams {
+                        rect,
+                        items: items_for_update,
+                        selected_index: initial_selected_index,
+                        font_size,
+                        text_color,
+                        bg_color,
+                        border_color,
+                        enabled,
+                    };
+
+                    let replacement = build_combo_box_node(args);
+                    update_existing_combo_box(combo_box, replacement, selected_index_override);
+                    Some(combo_box_response(combo_box))
+                }
+                _ => None,
+            },
+            |node| match node {
+                WidgetNode::ComboBox(combo_box) => combo_box_response(combo_box),
+                _ => ComboBoxResponse::default(),
+            },
+        )
     }
 
     pub(crate) fn combo_box_response(&self, id: impl AsRef<str>) -> ComboBoxResponse {
@@ -163,7 +180,7 @@ fn initial_selected_index(items: &[String], selected_index: Option<usize>) -> us
     }
 }
 
-fn build_combo_box_node(
+struct BuildNodeParams {
     rect: Rect,
     items: Vec<String>,
     selected_index: usize,
@@ -172,7 +189,20 @@ fn build_combo_box_node(
     bg_color: Color,
     border_color: Color,
     enabled: bool,
-) -> ComboBoxNode {
+}
+
+fn build_combo_box_node(params: BuildNodeParams) -> ComboBoxNode {
+    let BuildNodeParams {
+        rect,
+        items,
+        selected_index,
+        font_size,
+        text_color,
+        bg_color,
+        border_color,
+        enabled,
+    } = params;
+
     ComboBoxNode {
         rect,
         items,
@@ -225,16 +255,6 @@ fn combo_box_response(combo_box: &ComboBoxNode) -> ComboBoxResponse {
         pressed: combo_box.pressed,
         changed: combo_box.changed,
         is_open: combo_box.is_open,
-    }
-}
-
-fn combo_box_response_for_new(
-    widgets: &std::collections::HashMap<String, WidgetNode>,
-    id: &str,
-) -> ComboBoxResponse {
-    match widgets.get(id) {
-        Some(WidgetNode::ComboBox(combo_box)) => combo_box_response(combo_box),
-        _ => ComboBoxResponse::default(),
     }
 }
 

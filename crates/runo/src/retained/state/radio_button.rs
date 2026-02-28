@@ -35,19 +35,19 @@ impl RetainedState {
         } = args;
 
         let default_selected = selected.unwrap_or(false);
+        if default_selected && !matches!(self.widgets.get(&id), Some(WidgetNode::RadioButton(_))) {
+            Self::clear_radio_group_selection(&mut self.widgets, &group);
+        }
+        let group_for_update = group.clone();
+        let text_for_update = text.clone();
 
-        if !self.widgets.contains_key(&id) {
-            if default_selected {
-                Self::clear_radio_group_selection(&mut self.widgets, &group);
-            }
-
-            self.order.push(id.clone());
-            self.widgets.insert(
-                id.clone(),
+        self.upsert_widget_node(
+            id,
+            || {
                 WidgetNode::RadioButton(RadioButtonNode {
                     rect,
-                    group,
-                    text,
+                    group: group.clone(),
+                    text: text.clone(),
                     selected: default_selected,
                     font_size,
                     text_color,
@@ -55,60 +55,34 @@ impl RetainedState {
                     hovered: false,
                     pressed: false,
                     changed: false,
-                }),
-            );
+                })
+            },
+            |entry| match entry {
+                WidgetNode::RadioButton(radio_button) => {
+                    radio_button.rect = rect;
+                    radio_button.group = group_for_update;
+                    radio_button.text = text_for_update;
+                    let _ = selected;
+                    radio_button.font_size = font_size;
+                    radio_button.text_color = text_color;
+                    radio_button.enabled = enabled;
 
-            return RadioButtonResponse {
+                    Some(RadioButtonResponse {
+                        selected: radio_button.selected,
+                        hovered: radio_button.hovered,
+                        pressed: radio_button.pressed,
+                        changed: radio_button.changed,
+                    })
+                }
+                _ => None,
+            },
+            |_node| RadioButtonResponse {
                 selected: default_selected,
                 hovered: false,
                 pressed: false,
                 changed: false,
-            };
-        }
-
-        if let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(&id) {
-            radio_button.rect = rect;
-            radio_button.group = group;
-            radio_button.text = text;
-            let _ = selected;
-            radio_button.font_size = font_size;
-            radio_button.text_color = text_color;
-            radio_button.enabled = enabled;
-
-            return RadioButtonResponse {
-                selected: radio_button.selected,
-                hovered: radio_button.hovered,
-                pressed: radio_button.pressed,
-                changed: radio_button.changed,
-            };
-        }
-
-        if default_selected {
-            Self::clear_radio_group_selection(&mut self.widgets, &group);
-        }
-
-        self.widgets.insert(
-            id,
-            WidgetNode::RadioButton(RadioButtonNode {
-                rect,
-                group,
-                text,
-                selected: default_selected,
-                font_size,
-                text_color,
-                enabled,
-                hovered: false,
-                pressed: false,
-                changed: false,
-            }),
-        );
-
-        RadioButtonResponse {
-            selected: default_selected,
-            hovered: false,
-            pressed: false,
-            changed: false,
-        }
+            },
+        )
     }
 
     pub(crate) fn radio_button_response(&self, id: impl AsRef<str>) -> RadioButtonResponse {

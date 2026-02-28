@@ -42,31 +42,19 @@ impl RetainedState {
         text_color: Color,
         enabled: bool,
     ) {
-        if !self.widgets.contains_key(&id) {
-            self.order.push(id.clone());
-            self.widgets.insert(
-                id.clone(),
+        self.upsert_widget_node(
+            id,
+            || {
                 WidgetNode::Label(LabelNode {
                     rect,
-                    text,
+                    text: text.clone(),
                     font_size,
                     text_color,
                     enabled,
-                }),
-            );
-
-            return;
-        }
-
-        self.widgets.insert(
-            id,
-            WidgetNode::Label(LabelNode {
-                rect,
-                text,
-                font_size,
-                text_color,
-                enabled,
-            }),
+                })
+            },
+            |_entry| None,
+            |_node| (),
         );
     }
 

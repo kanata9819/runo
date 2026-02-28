@@ -15,14 +15,13 @@ impl RetainedState {
         text_color: Color,
         enabled: bool,
     ) -> ButtonResponse {
-        if !self.widgets.contains_key(&id) {
-            self.order.push(id.clone());
-
-            self.widgets.insert(
-                id.clone(),
+        let text_for_update = text.clone();
+        self.upsert_widget_node(
+            id,
+            || {
                 WidgetNode::Button(ButtonNode {
                     rect,
-                    text,
+                    text: text.clone(),
                     text_overridden: false,
                     font_size,
                     text_color,
@@ -30,47 +29,30 @@ impl RetainedState {
                     hovered: false,
                     pressed: false,
                     clicked: false,
-                }),
-            );
+                })
+            },
+            |entry| match entry {
+                WidgetNode::Button(button) => {
+                    button.rect = rect;
 
-            return ButtonResponse::default();
-        }
+                    if !button.text_overridden {
+                        button.text = text_for_update;
+                    }
 
-        let entry = self.widgets.get_mut(&id).expect("button entry missing");
-        match entry {
-            WidgetNode::Button(button) => {
-                button.rect = rect;
+                    button.font_size = font_size;
+                    button.text_color = text_color;
+                    button.enabled = enabled;
 
-                if !button.text_overridden {
-                    button.text = text;
+                    Some(ButtonResponse {
+                        hovered: button.hovered,
+                        pressed: button.pressed,
+                        clicked: button.clicked,
+                    })
                 }
-
-                button.font_size = font_size;
-                button.text_color = text_color;
-                button.enabled = enabled;
-
-                ButtonResponse {
-                    hovered: button.hovered,
-                    pressed: button.pressed,
-                    clicked: button.clicked,
-                }
-            }
-            _ => {
-                *entry = WidgetNode::Button(ButtonNode {
-                    rect,
-                    text,
-                    text_overridden: false,
-                    font_size,
-                    text_color,
-                    enabled,
-                    hovered: false,
-                    pressed: false,
-                    clicked: false,
-                });
-
-                ButtonResponse::default()
-            }
-        }
+                _ => None,
+            },
+            |_node| ButtonResponse::default(),
+        )
     }
 
     pub(crate) fn button_response(&self, id: impl AsRef<str>) -> ButtonResponse {

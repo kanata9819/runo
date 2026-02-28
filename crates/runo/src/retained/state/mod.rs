@@ -53,6 +53,41 @@ fn snap_and_clamp(value: f64, min: f64, max: f64, step: Option<f64>) -> f64 {
     clamped
 }
 
+impl RetainedState {
+    pub(super) fn upsert_widget_node<R, FNode, FUpdate, FNewResponse>(
+        &mut self,
+        id: String,
+        mut make_new_node: FNode,
+        update_existing: FUpdate,
+        new_or_replaced_response: FNewResponse,
+    ) -> R
+    where
+        FNode: FnMut() -> WidgetNode,
+        FUpdate: FnOnce(&mut WidgetNode) -> Option<R>,
+        FNewResponse: FnOnce(&WidgetNode) -> R,
+    {
+        if !self.widgets.contains_key(&id) {
+            self.order.push(id.clone());
+            self.widgets.insert(id.clone(), make_new_node());
+            let node = self
+                .widgets
+                .get(&id)
+                .expect("newly inserted widget entry missing");
+
+            return new_or_replaced_response(node);
+        }
+
+        let entry = self.widgets.get_mut(&id).expect("widget entry missing");
+
+        if let Some(response) = update_existing(entry) {
+            return response;
+        }
+
+        *entry = make_new_node();
+        new_or_replaced_response(entry)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use vello::kurbo::Rect;
@@ -241,5 +276,35 @@ mod tests {
             UiEvent::ButtonClicked { button } => assert_eq!(button.id(), "b"),
             _ => panic!("unexpected event"),
         }
+    }
+
+    #[test]
+    fn upsert_helper_keeps_order_unique_and_supports_type_replacement() {
+        let mut state = RetainedState::new();
+        let color = Color::from_rgb8(240, 240, 240);
+
+        state.upsert_label(
+            "same".to_string(),
+            rect(),
+            "label".to_string(),
+            14.0,
+            color,
+            true,
+        );
+        assert_eq!(state.order, vec!["same".to_string()]);
+
+        let _ = state.upsert_button(
+            "same".to_string(),
+            rect(),
+            Some("b".to_string()),
+            14.0,
+            color,
+            true,
+        );
+        assert_eq!(state.order, vec!["same".to_string()]);
+        assert!(matches!(
+            state.widgets.get("same"),
+            Some(crate::retained::node::WidgetNode::Button(_))
+        ));
     }
 }

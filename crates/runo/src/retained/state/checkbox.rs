@@ -28,15 +28,14 @@ impl RetainedState {
         } = args;
 
         let default_checked = checked.unwrap_or(false);
+        let text_for_update = text.clone();
 
-        if !self.widgets.contains_key(&id) {
-            self.order.push(id.clone());
-
-            self.widgets.insert(
-                id.clone(),
+        self.upsert_widget_node(
+            id,
+            || {
                 WidgetNode::Checkbox(CheckboxNode {
                     rect,
-                    text,
+                    text: text.clone(),
                     checked: default_checked,
                     font_size,
                     text_color,
@@ -44,55 +43,33 @@ impl RetainedState {
                     hovered: false,
                     pressed: false,
                     changed: false,
-                }),
-            );
+                })
+            },
+            |entry| match entry {
+                WidgetNode::Checkbox(checkbox) => {
+                    checkbox.rect = rect;
+                    checkbox.text = text_for_update;
+                    let _ = checked;
+                    checkbox.font_size = font_size;
+                    checkbox.text_color = text_color;
+                    checkbox.enabled = enabled;
 
-            return CheckboxResponse {
+                    Some(CheckboxResponse {
+                        checked: checkbox.checked,
+                        hovered: checkbox.hovered,
+                        pressed: checkbox.pressed,
+                        changed: checkbox.changed,
+                    })
+                }
+                _ => None,
+            },
+            |_node| CheckboxResponse {
                 checked: default_checked,
                 hovered: false,
                 pressed: false,
                 changed: false,
-            };
-        }
-
-        let entry = self.widgets.get_mut(&id).expect("checkbox entry missing");
-        match entry {
-            WidgetNode::Checkbox(checkbox) => {
-                checkbox.rect = rect;
-                checkbox.text = text;
-                let _ = checked;
-                checkbox.font_size = font_size;
-                checkbox.text_color = text_color;
-                checkbox.enabled = enabled;
-
-                CheckboxResponse {
-                    checked: checkbox.checked,
-                    hovered: checkbox.hovered,
-                    pressed: checkbox.pressed,
-                    changed: checkbox.changed,
-                }
-            }
-            _ => {
-                *entry = WidgetNode::Checkbox(CheckboxNode {
-                    rect,
-                    text,
-                    checked: default_checked,
-                    font_size,
-                    text_color,
-                    enabled,
-                    hovered: false,
-                    pressed: false,
-                    changed: false,
-                });
-
-                CheckboxResponse {
-                    checked: default_checked,
-                    hovered: false,
-                    pressed: false,
-                    changed: false,
-                }
-            }
-        }
+            },
+        )
     }
 
     pub(crate) fn checkbox_response(&self, id: impl AsRef<str>) -> CheckboxResponse {

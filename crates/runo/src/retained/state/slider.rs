@@ -35,79 +35,56 @@ impl RetainedState {
 
         let (min, max) = normalize_range(min, max);
         let default_value = snap_and_clamp(value.unwrap_or(min), min, max, step);
+        let text_for_update = text.clone();
 
-        if !self.widgets.contains_key(&id) {
-            self.order.push(id.clone());
-            self.widgets.insert(
-                id.clone(),
+        self.upsert_widget_node(
+            id,
+            || {
                 WidgetNode::Slider(SliderNode {
                     rect,
                     min,
                     max,
                     value: default_value,
                     step,
-                    text,
+                    text: text.clone(),
                     font_size,
                     text_color,
                     enabled,
                     hovered: false,
                     pressed: false,
                     changed: false,
-                }),
-            );
+                })
+            },
+            |entry| match entry {
+                WidgetNode::Slider(slider) => {
+                    slider.rect = rect;
+                    slider.min = min;
+                    slider.max = max;
+                    slider.step = step;
+                    slider.text = text_for_update;
+                    slider.font_size = font_size;
+                    slider.text_color = text_color;
+                    slider.enabled = enabled;
+                    slider.value =
+                        snap_and_clamp(slider.value, slider.min, slider.max, slider.step);
+                    let _ = value;
 
-            return SliderResponse {
+                    Some(SliderResponse {
+                        value: slider.value,
+                        hovered: slider.hovered,
+                        pressed: slider.pressed,
+                        changed: slider.changed,
+                    })
+                }
+                _ => None,
+            },
+            |_node| SliderResponse {
                 value: default_value,
                 hovered: false,
                 pressed: false,
                 changed: false,
-            };
-        }
-
-        if let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(&id) {
-            slider.rect = rect;
-            slider.min = min;
-            slider.max = max;
-            slider.step = step;
-            slider.text = text;
-            slider.font_size = font_size;
-            slider.text_color = text_color;
-            slider.enabled = enabled;
-            slider.value = snap_and_clamp(slider.value, slider.min, slider.max, slider.step);
-            let _ = value;
-
-            return SliderResponse {
-                value: slider.value,
-                hovered: slider.hovered,
-                pressed: slider.pressed,
-                changed: slider.changed,
-            };
-        }
-
-        self.widgets.insert(
-            id,
-            WidgetNode::Slider(SliderNode {
-                rect,
-                min,
-                max,
-                value: default_value,
-                step,
-                text,
-                font_size,
-                text_color,
-                enabled,
-                hovered: false,
-                pressed: false,
-                changed: false,
-            }),
-        );
-
-        SliderResponse {
-            value: default_value,
-            hovered: false,
-            pressed: false,
-            changed: false,
-        }
+            },
+        )
     }
 
     pub(crate) fn slider_response(&self, id: impl AsRef<str>) -> SliderResponse {

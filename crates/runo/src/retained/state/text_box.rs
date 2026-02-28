@@ -35,19 +35,19 @@ impl RetainedState {
             overflow_x,
             overflow_y,
         } = args;
+        let initial_text = text.clone().unwrap_or_default();
+        let initial_text_advance = estimate_text_width(&initial_text, font_size) as f64;
+        let initial_caret_index = initial_text.chars().count();
+        let text_for_update = text;
+        let placeholder_for_update = placeholder.clone();
 
-        if !self.widgets.contains_key(&id) {
-            let text = text.unwrap_or_default();
-            let text_advance = estimate_text_width(&text, font_size) as f64;
-            let caret_index = text.chars().count();
-            let response_text = text.clone();
-            self.order.push(id.clone());
-            self.widgets.insert(
-                id.clone(),
+        self.upsert_widget_node(
+            id,
+            || {
                 WidgetNode::TextBox(TextBoxNode {
                     rect,
-                    text,
-                    placeholder,
+                    text: initial_text.clone(),
+                    placeholder: placeholder.clone(),
                     font_size,
                     text_color,
                     bg_color,
@@ -55,93 +55,60 @@ impl RetainedState {
                     enabled,
                     overflow_x,
                     overflow_y,
-                    text_advance,
-                    caret_index,
+                    text_advance: initial_text_advance,
+                    caret_index: initial_caret_index,
                     scroll_x: 0.0,
                     scroll_y: 0.0,
                     hovered: false,
                     focused: false,
                     changed: false,
-                }),
-            );
+                })
+            },
+            |entry| match entry {
+                WidgetNode::TextBox(text_box) => {
+                    text_box.rect = rect;
 
-            return TextBoxResponse {
-                text: response_text,
-                hovered: false,
-                focused: false,
-                changed: false,
-            };
-        }
+                    if let Some(next_text) = text_for_update {
+                        text_box.text = next_text;
+                        text_box.text_advance =
+                            estimate_text_width(&text_box.text, text_box.font_size) as f64;
+                        text_box.caret_index = text_box.text.chars().count();
+                    }
 
-        let entry = self.widgets.get_mut(&id).expect("text box entry missing");
+                    text_box.placeholder = placeholder_for_update;
 
-        match entry {
-            WidgetNode::TextBox(text_box) => {
-                text_box.rect = rect;
+                    if (text_box.font_size - font_size).abs() > f32::EPSILON {
+                        text_box.font_size = font_size;
+                        text_box.text_advance =
+                            estimate_text_width(&text_box.text, text_box.font_size) as f64;
+                    }
 
-                if let Some(next_text) = text {
-                    text_box.text = next_text;
-                    text_box.text_advance =
-                        estimate_text_width(&text_box.text, text_box.font_size) as f64;
-                    text_box.caret_index = text_box.text.chars().count();
+                    text_box.text_color = text_color;
+                    text_box.bg_color = bg_color;
+                    text_box.border_color = border_color;
+                    text_box.enabled = enabled;
+                    text_box.overflow_x = overflow_x;
+                    text_box.overflow_y = overflow_y;
+
+                    Some(TextBoxResponse {
+                        text: text_box.text.clone(),
+                        hovered: text_box.hovered,
+                        focused: text_box.focused,
+                        changed: text_box.changed,
+                    })
                 }
-
-                text_box.placeholder = placeholder;
-
-                if (text_box.font_size - font_size).abs() > f32::EPSILON {
-                    text_box.font_size = font_size;
-                    text_box.text_advance =
-                        estimate_text_width(&text_box.text, text_box.font_size) as f64;
-                }
-
-                text_box.text_color = text_color;
-                text_box.bg_color = bg_color;
-                text_box.border_color = border_color;
-                text_box.enabled = enabled;
-                text_box.overflow_x = overflow_x;
-                text_box.overflow_y = overflow_y;
-
-                TextBoxResponse {
+                _ => None,
+            },
+            |node| match node {
+                WidgetNode::TextBox(text_box) => TextBoxResponse {
                     text: text_box.text.clone(),
-                    hovered: text_box.hovered,
-                    focused: text_box.focused,
-                    changed: text_box.changed,
-                }
-            }
-            _ => {
-                let text = text.unwrap_or_default();
-                let text_advance = estimate_text_width(&text, font_size) as f64;
-                let caret_index = text.chars().count();
-                let response_text = text.clone();
-
-                *entry = WidgetNode::TextBox(TextBoxNode {
-                    rect,
-                    text,
-                    placeholder,
-                    font_size,
-                    text_color,
-                    bg_color,
-                    border_color,
-                    enabled,
-                    overflow_x,
-                    overflow_y,
-                    text_advance,
-                    caret_index,
-                    scroll_x: 0.0,
-                    scroll_y: 0.0,
                     hovered: false,
                     focused: false,
                     changed: false,
-                });
-
-                TextBoxResponse {
-                    text: response_text,
-                    hovered: false,
-                    focused: false,
-                    changed: false,
-                }
-            }
-        }
+                },
+                _ => TextBoxResponse::default(),
+            },
+        )
     }
 
     pub(crate) fn text_box_response(&self, id: impl AsRef<str>) -> TextBoxResponse {

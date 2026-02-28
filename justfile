@@ -7,7 +7,8 @@ ci:
     $env:CARGO_TARGET_DIR = "target/ci-local"; cargo test --workspace
 
 r:
-    just ci
+    cargo fmt
+    cargo test
     cargo run -p example --bin task_manager
 
 f:

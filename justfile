@@ -1,9 +1,10 @@
 set shell := ["powershell", "-Command"]
 
 ci:
-    cargo fmt --all -- --check
-    cargo clippy --workspace --all-targets --all-features -- -D warnings
-    cargo test --workspace
+    if (Test-Path target/ci-local) { Remove-Item -Recurse -Force target/ci-local }
+    $env:CARGO_TARGET_DIR = "target/ci-local"; cargo fmt --all -- --check
+    $env:CARGO_TARGET_DIR = "target/ci-local"; cargo clippy --workspace --all-targets --all-features -- -D warnings
+    $env:CARGO_TARGET_DIR = "target/ci-local"; cargo test --workspace
 
 r:
     just ci

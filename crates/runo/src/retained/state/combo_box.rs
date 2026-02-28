@@ -30,105 +30,36 @@ impl RetainedState {
             border_color,
             enabled,
         } = args;
+
         let selected_index_override = selected_index;
-        let initial_selected_index = if items.is_empty() {
-            0
-        } else {
-            selected_index_override.unwrap_or(0).min(items.len() - 1)
-        };
+        let initial_selected_index = initial_selected_index(&items, selected_index_override);
+        let replacement_node = build_combo_box_node(
+            rect,
+            items,
+            initial_selected_index,
+            font_size,
+            text_color,
+            bg_color,
+            border_color,
+            enabled,
+        );
 
         if !self.widgets.contains_key(&id) {
-            let selected_text = items
-                .get(initial_selected_index)
-                .cloned()
-                .unwrap_or_default();
             self.order.push(id.clone());
-            self.widgets.insert(
-                id.clone(),
-                WidgetNode::ComboBox(ComboBoxNode {
-                    rect,
-                    items,
-                    selected_index: initial_selected_index,
-                    font_size,
-                    text_color,
-                    bg_color,
-                    border_color,
-                    enabled,
-                    hovered: false,
-                    hovered_item: None,
-                    pressed: false,
-                    changed: false,
-                    is_open: false,
-                }),
-            );
-            return ComboBoxResponse {
-                selected_index: initial_selected_index,
-                selected_text,
-                hovered: false,
-                pressed: false,
-                changed: false,
-                is_open: false,
-            };
+            self.widgets
+                .insert(id.clone(), WidgetNode::ComboBox(replacement_node));
+            return combo_box_response_for_new(&self.widgets, &id);
         }
 
         let entry = self.widgets.get_mut(&id).expect("combo box entry missing");
         match entry {
             WidgetNode::ComboBox(combo_box) => {
-                combo_box.rect = rect;
-                combo_box.items = items;
-                if combo_box.items.is_empty() {
-                    combo_box.selected_index = 0;
-                } else if let Some(next_index) = selected_index_override {
-                    combo_box.selected_index = next_index.min(combo_box.items.len() - 1);
-                } else if combo_box.selected_index >= combo_box.items.len() {
-                    combo_box.selected_index = combo_box.items.len() - 1;
-                }
-                combo_box.font_size = font_size;
-                combo_box.text_color = text_color;
-                combo_box.bg_color = bg_color;
-                combo_box.border_color = border_color;
-                combo_box.enabled = enabled;
-                ComboBoxResponse {
-                    selected_index: combo_box.selected_index,
-                    selected_text: combo_box
-                        .items
-                        .get(combo_box.selected_index)
-                        .cloned()
-                        .unwrap_or_default(),
-                    hovered: combo_box.hovered,
-                    pressed: combo_box.pressed,
-                    changed: combo_box.changed,
-                    is_open: combo_box.is_open,
-                }
+                update_existing_combo_box(combo_box, replacement_node, selected_index_override);
+                combo_box_response(combo_box)
             }
             _ => {
-                let selected_text = items
-                    .get(initial_selected_index)
-                    .cloned()
-                    .unwrap_or_default();
-                *entry = WidgetNode::ComboBox(ComboBoxNode {
-                    rect,
-                    items,
-                    selected_index: initial_selected_index,
-                    font_size,
-                    text_color,
-                    bg_color,
-                    border_color,
-                    enabled,
-                    hovered: false,
-                    hovered_item: None,
-                    pressed: false,
-                    changed: false,
-                    is_open: false,
-                });
-                ComboBoxResponse {
-                    selected_index: initial_selected_index,
-                    selected_text,
-                    hovered: false,
-                    pressed: false,
-                    changed: false,
-                    is_open: false,
-                }
+                *entry = WidgetNode::ComboBox(replacement_node);
+                combo_box_response_for_new(&self.widgets, &id)
             }
         }
     }
@@ -209,6 +140,87 @@ impl RetainedState {
                 self.active_combo_box = None;
             }
         }
+    }
+}
+
+fn initial_selected_index(items: &[String], selected_index: Option<usize>) -> usize {
+    if items.is_empty() {
+        0
+    } else {
+        selected_index.unwrap_or(0).min(items.len() - 1)
+    }
+}
+
+fn build_combo_box_node(
+    rect: Rect,
+    items: Vec<String>,
+    selected_index: usize,
+    font_size: f32,
+    text_color: Color,
+    bg_color: Color,
+    border_color: Color,
+    enabled: bool,
+) -> ComboBoxNode {
+    ComboBoxNode {
+        rect,
+        items,
+        selected_index,
+        font_size,
+        text_color,
+        bg_color,
+        border_color,
+        enabled,
+        hovered: false,
+        hovered_item: None,
+        pressed: false,
+        changed: false,
+        is_open: false,
+    }
+}
+
+fn update_existing_combo_box(
+    combo_box: &mut ComboBoxNode,
+    replacement: ComboBoxNode,
+    selected_index_override: Option<usize>,
+) {
+    combo_box.rect = replacement.rect;
+    combo_box.items = replacement.items;
+    if combo_box.items.is_empty() {
+        combo_box.selected_index = 0;
+    } else if let Some(next_index) = selected_index_override {
+        combo_box.selected_index = next_index.min(combo_box.items.len() - 1);
+    } else if combo_box.selected_index >= combo_box.items.len() {
+        combo_box.selected_index = combo_box.items.len() - 1;
+    }
+    combo_box.font_size = replacement.font_size;
+    combo_box.text_color = replacement.text_color;
+    combo_box.bg_color = replacement.bg_color;
+    combo_box.border_color = replacement.border_color;
+    combo_box.enabled = replacement.enabled;
+}
+
+fn combo_box_response(combo_box: &ComboBoxNode) -> ComboBoxResponse {
+    ComboBoxResponse {
+        selected_index: combo_box.selected_index,
+        selected_text: combo_box
+            .items
+            .get(combo_box.selected_index)
+            .cloned()
+            .unwrap_or_default(),
+        hovered: combo_box.hovered,
+        pressed: combo_box.pressed,
+        changed: combo_box.changed,
+        is_open: combo_box.is_open,
+    }
+}
+
+fn combo_box_response_for_new(
+    widgets: &std::collections::HashMap<String, WidgetNode>,
+    id: &str,
+) -> ComboBoxResponse {
+    match widgets.get(id) {
+        Some(WidgetNode::ComboBox(combo_box)) => combo_box_response(combo_box),
+        _ => ComboBoxResponse::default(),
     }
 }
 

@@ -33,11 +33,14 @@ impl RetainedState {
             text_color,
             enabled,
         } = args;
+
         let default_selected = selected.unwrap_or(false);
+
         if !self.widgets.contains_key(&id) {
             if default_selected {
                 Self::clear_radio_group_selection(&mut self.widgets, &group);
             }
+
             self.order.push(id.clone());
             self.widgets.insert(
                 id.clone(),
@@ -54,6 +57,7 @@ impl RetainedState {
                     changed: false,
                 }),
             );
+
             return RadioButtonResponse {
                 selected: default_selected,
                 hovered: false,
@@ -70,6 +74,7 @@ impl RetainedState {
             radio_button.font_size = font_size;
             radio_button.text_color = text_color;
             radio_button.enabled = enabled;
+
             return RadioButtonResponse {
                 selected: radio_button.selected,
                 hovered: radio_button.hovered,
@@ -81,6 +86,7 @@ impl RetainedState {
         if default_selected {
             Self::clear_radio_group_selection(&mut self.widgets, &group);
         }
+
         self.widgets.insert(
             id,
             WidgetNode::RadioButton(RadioButtonNode {
@@ -96,6 +102,7 @@ impl RetainedState {
                 changed: false,
             }),
         );
+
         RadioButtonResponse {
             selected: default_selected,
             hovered: false,
@@ -108,6 +115,7 @@ impl RetainedState {
         let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get(id.as_ref()) else {
             return RadioButtonResponse::default();
         };
+
         RadioButtonResponse {
             selected: radio_button.selected,
             hovered: radio_button.hovered,
@@ -122,6 +130,7 @@ impl RetainedState {
             WidgetNode::RadioButton(radio_button) => Some(radio_button.group.clone()),
             _ => None,
         });
+
         let Some(group) = group else {
             return;
         };
@@ -129,9 +138,11 @@ impl RetainedState {
         if selected {
             Self::clear_radio_group_selection(&mut self.widgets, &group);
         }
+
         let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
             return;
         };
+
         radio_button.changed = radio_button.selected != selected;
         radio_button.selected = selected;
     }
@@ -141,11 +152,14 @@ impl RetainedState {
         let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
             return;
         };
+
         radio_button.enabled = enabled;
+
         if !enabled {
             radio_button.hovered = false;
             radio_button.pressed = false;
             radio_button.changed = false;
+
             if self.active_radio_button.as_deref() == Some(id_ref) {
                 self.active_radio_button = None;
             }

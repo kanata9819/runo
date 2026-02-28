@@ -25,6 +25,7 @@ impl<'a> Ui<'a> {
             text_color,
             enabled,
         } = args;
+
         let (x, y) = self.allocate_rect(width, height);
         let rect = Rect::new(x, y, x + width, y + height);
         self.retained.upsert_button(

@@ -76,6 +76,7 @@ fn draw_active_fill(
         track_y + track_h * HALF_RATIO,
         TRACK_CORNER_RADIUS,
     );
+
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
@@ -96,6 +97,7 @@ fn draw_active_fill(
 /// Draws the slider thumb circle.
 fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64) {
     let thumb = Circle::new((thumb_x, track_y), THUMB_RADIUS);
+
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
@@ -107,6 +109,7 @@ fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64
         None,
         &thumb,
     );
+
     scene.stroke(
         &Stroke::new(THUMB_BORDER_WIDTH),
         Affine::IDENTITY,
@@ -122,6 +125,7 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
         && let Some((glyphs, _)) = text::layout_text(font, text, slider.font_size)
     {
         let baseline_y = slider.rect.y0 + slider.font_size as f64;
+
         text::draw_text_run(
             scene,
             font,
@@ -141,8 +145,10 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
 /// Draws the right-aligned numeric value text.
 fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_x: f64) {
     let value_text = format!("{:.*}", VALUE_DECIMALS, slider.value);
+
     if let Some((glyphs, w)) = text::layout_text(font, &value_text, slider.font_size) {
         let baseline_y = slider.rect.y0 + slider.font_size as f64;
+
         text::draw_text_run(
             scene,
             font,
@@ -162,9 +168,11 @@ fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_
 /// Converts slider value in `[min, max]` into a clamped ratio in `[0.0, 1.0]`.
 fn value_ratio(value: f64, min: f64, max: f64) -> f64 {
     let span = (max - min).abs();
+
     if span <= f64::EPSILON {
         return 0.0;
     }
+
     ((value - min) / (max - min)).clamp(0.0, 1.0)
 }
 

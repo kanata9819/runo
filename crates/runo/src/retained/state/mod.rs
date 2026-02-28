@@ -42,12 +42,14 @@ fn normalize_range(min: f64, max: f64) -> (f64, f64) {
 
 fn snap_and_clamp(value: f64, min: f64, max: f64, step: Option<f64>) -> f64 {
     let mut clamped = value.clamp(min, max);
+
     if let Some(step) = step
         && step > 0.0
     {
         let snapped = ((clamped - min) / step).round() * step + min;
         clamped = snapped.clamp(min, max);
     }
+
     clamped
 }
 

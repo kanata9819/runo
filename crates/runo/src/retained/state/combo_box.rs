@@ -48,6 +48,7 @@ impl RetainedState {
             self.order.push(id.clone());
             self.widgets
                 .insert(id.clone(), WidgetNode::ComboBox(replacement_node));
+
             return combo_box_response_for_new(&self.widgets, &id);
         }
 
@@ -68,6 +69,7 @@ impl RetainedState {
         let Some(WidgetNode::ComboBox(combo_box)) = self.widgets.get(id.as_ref()) else {
             return ComboBoxResponse::default();
         };
+
         ComboBoxResponse {
             selected_index: combo_box.selected_index,
             selected_text: combo_box
@@ -86,11 +88,13 @@ impl RetainedState {
         let Some(WidgetNode::ComboBox(combo_box)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         if combo_box.items.is_empty() {
             combo_box.selected_index = 0;
             combo_box.changed = false;
             return;
         }
+
         let next_index = index.min(combo_box.items.len() - 1);
         combo_box.changed = combo_box.selected_index != next_index;
         combo_box.selected_index = next_index;
@@ -104,9 +108,11 @@ impl RetainedState {
         let Some(WidgetNode::ComboBox(combo_box)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         let next_items: Vec<String> = items.into_iter().map(Into::into).collect();
         let prev_index = combo_box.selected_index;
         combo_box.items = next_items;
+
         if combo_box.items.is_empty() {
             combo_box.selected_index = 0;
             combo_box.hovered_item = None;
@@ -114,13 +120,16 @@ impl RetainedState {
             combo_box.changed = false;
             return;
         }
+
         combo_box.selected_index = prev_index.min(combo_box.items.len() - 1);
+
         if combo_box
             .hovered_item
             .is_some_and(|idx| idx >= combo_box.items.len())
         {
             combo_box.hovered_item = None;
         }
+
         combo_box.changed = combo_box.selected_index != prev_index;
     }
 
@@ -129,13 +138,16 @@ impl RetainedState {
         let Some(WidgetNode::ComboBox(combo_box)) = self.widgets.get_mut(id_ref) else {
             return;
         };
+
         combo_box.enabled = enabled;
+
         if !enabled {
             combo_box.hovered = false;
             combo_box.hovered_item = None;
             combo_box.pressed = false;
             combo_box.changed = false;
             combo_box.is_open = false;
+
             if self.active_combo_box.as_deref() == Some(id_ref) {
                 self.active_combo_box = None;
             }
@@ -185,6 +197,7 @@ fn update_existing_combo_box(
 ) {
     combo_box.rect = replacement.rect;
     combo_box.items = replacement.items;
+
     if combo_box.items.is_empty() {
         combo_box.selected_index = 0;
     } else if let Some(next_index) = selected_index_override {
@@ -192,6 +205,7 @@ fn update_existing_combo_box(
     } else if combo_box.selected_index >= combo_box.items.len() {
         combo_box.selected_index = combo_box.items.len() - 1;
     }
+
     combo_box.font_size = replacement.font_size;
     combo_box.text_color = replacement.text_color;
     combo_box.bg_color = replacement.bg_color;

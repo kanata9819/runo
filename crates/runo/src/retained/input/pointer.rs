@@ -10,6 +10,7 @@ impl RetainedState {
             let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
                 return None;
             };
+
             if combo_box.enabled
                 && combo_box.is_open
                 && combo_expanded_contains(combo_box, cursor_pos.0, cursor_pos.1)
@@ -93,6 +94,7 @@ impl RetainedState {
                 let WidgetNode::Button(button) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if button.enabled && button.hovered {
                     Some(id.clone())
                 } else {
@@ -104,6 +106,7 @@ impl RetainedState {
                 let WidgetNode::Checkbox(checkbox) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if checkbox.enabled && checkbox.hovered {
                     Some(id.clone())
                 } else {
@@ -115,6 +118,7 @@ impl RetainedState {
                 let WidgetNode::RadioButton(radio_button) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if radio_button.enabled && radio_button.hovered {
                     Some(id.clone())
                 } else {
@@ -126,6 +130,7 @@ impl RetainedState {
                 let WidgetNode::Slider(slider) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if slider.enabled && slider.hovered {
                     Some(id.clone())
                 } else {
@@ -137,6 +142,7 @@ impl RetainedState {
                 let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if text_box.enabled && text_box.hovered {
                     Some(id.clone())
                 } else {
@@ -148,6 +154,7 @@ impl RetainedState {
                 let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if combo_box.enabled && (combo_box.hovered || combo_box.hovered_item.is_some()) {
                     Some(id.clone())
                 } else {
@@ -171,12 +178,14 @@ impl RetainedState {
                     button.clicked = false;
                     continue;
                 }
+
                 button.pressed = mouse_down
                     && self
                         .active_button
                         .as_ref()
                         .map(|active| active == id)
                         .unwrap_or(false);
+
                 if mouse_pressed
                     && button.hovered
                     && self
@@ -213,10 +222,12 @@ impl RetainedState {
                     checkbox.changed = false;
                     continue;
                 }
+
                 let is_active = active_checkbox
                     .as_ref()
                     .map(|active| active == id)
                     .unwrap_or(false);
+
                 checkbox.pressed = mouse_down && is_active;
 
                 if mouse_released && is_active && checkbox.hovered {
@@ -252,10 +263,12 @@ impl RetainedState {
                     radio_button.changed = false;
                     continue;
                 }
+
                 let is_active = active_radio_button
                     .as_ref()
                     .map(|active| active == id)
                     .unwrap_or(false);
+
                 radio_button.pressed = mouse_down && is_active;
 
                 if mouse_released && is_active && radio_button.hovered && !radio_button.selected {
@@ -305,16 +318,19 @@ impl RetainedState {
                     slider.changed = false;
                     continue;
                 }
+
                 let is_active = active_slider
                     .as_ref()
                     .map(|active| active == id)
                     .unwrap_or(false);
+
                 slider.pressed = mouse_down && is_active;
 
                 if (mouse_pressed || mouse_down) && is_active {
                     let next_value = slider_value_from_cursor(slider, cursor_pos.0);
                     slider.changed = (slider.value - next_value).abs() > f64::EPSILON;
                     slider.value = next_value;
+
                     if slider.changed {
                         changed.push((id.clone(), slider.value));
                     }
@@ -343,10 +359,12 @@ impl RetainedState {
                     Self::reset_disabled_combo_box(combo_box);
                     continue;
                 }
+
                 let is_active = active_combo_box
                     .as_ref()
                     .map(|active| active == id)
                     .unwrap_or(false);
+
                 combo_box.pressed = mouse_down && is_active;
 
                 if !mouse_released {
@@ -398,14 +416,17 @@ impl RetainedState {
                 combo_box.changed = combo_box.selected_index != index;
                 combo_box.selected_index = index;
                 combo_box.is_open = false;
+
                 if combo_box.changed {
                     return Some((
                         combo_box.selected_index,
                         combo_box.items[combo_box.selected_index].clone(),
                     ));
                 }
+
                 return None;
             }
+
             combo_box.is_open = false;
             return None;
         }
@@ -429,14 +450,17 @@ fn combo_item_index_at(
     if !combo_box.is_open || combo_box.items.is_empty() {
         return None;
     }
+
     let item_height = combo_box.rect.height();
     for index in 0..combo_box.items.len() {
         let top = combo_box.rect.y1 + item_height * index as f64;
         let rect = Rect::new(combo_box.rect.x0, top, combo_box.rect.x1, top + item_height);
+
         if contains(rect, x, y) {
             return Some(index);
         }
     }
+
     None
 }
 
@@ -457,11 +481,13 @@ fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x
     let width = (x1 - x0).max(1.0);
     let ratio = ((cursor_x - x0) / width).clamp(0.0, 1.0);
     let mut value = slider.min + (slider.max - slider.min) * ratio;
+
     if let Some(step) = slider.step
         && step > 0.0
     {
         value = ((value - slider.min) / step).round() * step + slider.min;
     }
+
     value.clamp(slider.min, slider.max)
 }
 

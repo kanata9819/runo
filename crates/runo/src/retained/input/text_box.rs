@@ -21,6 +21,7 @@ impl RetainedState {
                 let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
                     return None;
                 };
+
                 if text_box.enabled
                     && text_box.overflow_x.allows_scroll()
                     && text_box_max_scroll_x(text_box) > 0.0
@@ -31,6 +32,7 @@ impl RetainedState {
                     None
                 }
             });
+
             self.active_text_box_scrollbar = scrollbar_id;
         }
 
@@ -116,6 +118,7 @@ impl RetainedState {
                     .chars()
                     .filter(|ch| !ch.is_control())
                     .collect();
+
                 if !sanitized.is_empty() {
                     insert_text_at_caret(&mut text_box.text, &mut text_box.caret_index, &sanitized);
                     text_box.changed = true;
@@ -125,6 +128,7 @@ impl RetainedState {
             if text_box.changed {
                 sync_text_box_text_advance(text_box, font);
                 Self::keep_text_box_end_visible(text_box);
+
                 pending_event = Some(UiEvent::TextBoxChanged {
                     text_box: crate::widget::text_box::TextBoxHandle::new(id),
                     text: text_box.text.clone(),
@@ -146,6 +150,7 @@ impl RetainedState {
             let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
                 return None;
             };
+
             if text_box.enabled && (text_box.hovered || text_box.focused) {
                 Some(id.clone())
             } else {
@@ -167,6 +172,7 @@ impl RetainedState {
                 } else {
                     input.scroll_y
                 };
+
                 text_box.scroll_x =
                     (text_box.scroll_x + wheel_x).clamp(0.0, Self::max_scroll_x(text_box));
             } else {
@@ -189,6 +195,7 @@ impl RetainedState {
             text_box.scroll_x = text_box.scroll_x.clamp(0.0, Self::max_scroll_x(text_box));
             return;
         }
+
         text_box.scroll_x = Self::max_scroll_x(text_box);
     }
 
@@ -221,6 +228,7 @@ fn text_box_scrollbar_track_contains(
     let hit_bottom = text_box.rect.y1 - 2.0;
     let hit_top = (hit_bottom - hit_height).max(text_box.rect.y0);
     let hit = Rect::new(inner_left, hit_top, inner_right, hit_bottom);
+
     contains(hit, x, y)
 }
 
@@ -233,6 +241,7 @@ fn set_scroll_from_scrollbar_cursor(
     let inner_width = (inner_right - inner_left).max(1.0);
     let content_width = text_box_content_width(text_box);
     let max_scroll = text_box_max_scroll_x(text_box);
+
     if max_scroll <= 0.0 {
         text_box.scroll_x = 0.0;
         return;
@@ -241,6 +250,7 @@ fn set_scroll_from_scrollbar_cursor(
     let thumb_w = ((inner_width / content_width) * inner_width)
         .clamp(18.0, inner_width)
         .min(inner_width);
+
     let den = (inner_width - thumb_w).max(1.0);
     let ratio = ((cursor_x - inner_left - thumb_w * 0.5) / den).clamp(0.0, 1.0);
     text_box.scroll_x = ratio * max_scroll;
@@ -264,6 +274,7 @@ fn sync_text_box_text_advance(
         text_box.text_advance = advance as f64;
         return;
     }
+
     text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
 }
 
@@ -300,6 +311,7 @@ fn remove_char_before_caret(text: &mut String, caret_index: &mut usize) -> bool 
     let end = char_to_byte_index(text, *caret_index);
     text.replace_range(start..end, "");
     *caret_index -= 1;
+
     true
 }
 
@@ -308,9 +320,11 @@ fn remove_char_at_caret(text: &mut String, caret_index: usize) -> bool {
     if caret_index >= total {
         return false;
     }
+
     let start = char_to_byte_index(text, caret_index);
     let end = char_to_byte_index(text, caret_index + 1);
     text.replace_range(start..end, "");
+
     true
 }
 
@@ -322,6 +336,7 @@ fn move_caret_vertical(text: &str, caret_index: usize, delta_line: i32) -> usize
     }
     let target_line = (line as i32 + delta_line).clamp(0, lines.len() as i32 - 1) as usize;
     let target_col = col.min(lines[target_line].chars().count());
+
     char_index_from_line_col(&lines, target_line, target_col)
 }
 
@@ -339,6 +354,7 @@ fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
             col += 1;
         }
     }
+
     (line, col)
 }
 
@@ -353,6 +369,7 @@ fn char_index_from_line_col(lines: &[&str], line: usize, col: usize) -> usize {
             index += 1;
         }
     }
+
     index
 }
 

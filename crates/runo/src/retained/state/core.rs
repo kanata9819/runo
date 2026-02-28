@@ -54,6 +54,7 @@ impl RetainedState {
                     enabled,
                 }),
             );
+
             return;
         }
 
@@ -73,6 +74,7 @@ impl RetainedState {
         let Some(WidgetNode::Label(label)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         label.enabled = enabled;
     }
 
@@ -122,7 +124,9 @@ impl RetainedState {
         ) else {
             return false;
         };
+
         let _ = self.events.remove(index);
+
         true
     }
 
@@ -130,7 +134,9 @@ impl RetainedState {
         let index = self.events.iter().position(
             |event| matches!(event, UiEvent::TextBoxChanged { text_box, .. } if text_box == handle),
         )?;
+
         let event = self.events.remove(index)?;
+
         match event {
             UiEvent::TextBoxChanged { text, .. } => Some(text),
             _ => None,
@@ -141,7 +147,9 @@ impl RetainedState {
         let index = self.events.iter().position(
             |event| matches!(event, UiEvent::CheckboxChanged { checkbox, .. } if checkbox == handle),
         )?;
+
         let event = self.events.remove(index)?;
+
         match event {
             UiEvent::CheckboxChanged { checked, .. } => Some(checked),
             _ => None,
@@ -152,7 +160,9 @@ impl RetainedState {
         let index = self.events.iter().position(
             |event| matches!(event, UiEvent::SliderChanged { slider, .. } if slider == handle),
         )?;
+
         let event = self.events.remove(index)?;
+
         match event {
             UiEvent::SliderChanged { value, .. } => Some(value),
             _ => None,
@@ -163,7 +173,9 @@ impl RetainedState {
         let index = self.events.iter().position(|event| {
             matches!(event, UiEvent::RadioButtonChanged { radio_button, .. } if radio_button == handle)
         })?;
+
         let event = self.events.remove(index)?;
+
         match event {
             UiEvent::RadioButtonChanged { selected, .. } => Some(selected),
             _ => None,
@@ -177,7 +189,9 @@ impl RetainedState {
         let index = self.events.iter().position(
             |event| matches!(event, UiEvent::ComboBoxChanged { combo_box, .. } if combo_box == handle),
         )?;
+
         let event = self.events.remove(index)?;
+
         match event {
             UiEvent::ComboBoxChanged {
                 selected_index,

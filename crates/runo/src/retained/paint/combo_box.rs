@@ -76,6 +76,12 @@ fn draw_text_run<'a>(
     combo_box: &'a ComboBoxNode,
 ) {
     let text_x = combo_box.rect.x0 + TEXT_HORIZONTAL_PADDING;
+    let color = if combo_box.enabled {
+        combo_box.text_color
+    } else {
+        color::Neutral::tone_147_153_161()
+    };
+
     draw_text_run_at(
         scene,
         font,
@@ -83,17 +89,14 @@ fn draw_text_run<'a>(
         text_x,
         combo_box.rect,
         combo_box.font_size,
-        if combo_box.enabled {
-            combo_box.text_color
-        } else {
-            color::Neutral::tone_147_153_161()
-        },
+        color,
     );
 }
 
 /// Renders the closed combo box body, border, selected text, and open/close arrow.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &ComboBoxNode) {
     let bg = RoundedRect::from_rect(combo_box.rect, COMBO_BOX_CORNER_RADIUS);
+
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
@@ -129,6 +132,12 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
         text::layout_text(font, arrow, combo_box.font_size * ARROW_FONT_SCALE)
     {
         let arrow_x = combo_box.rect.x1 - arrow_w as f64 - TEXT_HORIZONTAL_PADDING;
+        let color = if combo_box.enabled {
+            color::SoftWhite::tone_186_196_210()
+        } else {
+            color::Neutral::tone_141_147_154()
+        };
+
         draw_text_run_at(
             scene,
             font,
@@ -136,11 +145,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
             arrow_x,
             combo_box.rect,
             combo_box.font_size * ARROW_FONT_SCALE,
-            if combo_box.enabled {
-                color::SoftWhite::tone_186_196_210()
-            } else {
-                color::Neutral::tone_141_147_154()
-            },
+            color,
         );
     }
 }
@@ -154,6 +159,7 @@ pub(super) fn render_dropdown_overlay(
     if !combo_box.enabled || !combo_box.is_open || combo_box.items.is_empty() {
         return;
     }
+
     let Some(font) = font else {
         return;
     };

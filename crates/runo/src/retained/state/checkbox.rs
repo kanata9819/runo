@@ -26,9 +26,12 @@ impl RetainedState {
             text_color,
             enabled,
         } = args;
+
         let default_checked = checked.unwrap_or(false);
+
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
+
             self.widgets.insert(
                 id.clone(),
                 WidgetNode::Checkbox(CheckboxNode {
@@ -43,6 +46,7 @@ impl RetainedState {
                     changed: false,
                 }),
             );
+
             return CheckboxResponse {
                 checked: default_checked,
                 hovered: false,
@@ -60,6 +64,7 @@ impl RetainedState {
                 checkbox.font_size = font_size;
                 checkbox.text_color = text_color;
                 checkbox.enabled = enabled;
+
                 CheckboxResponse {
                     checked: checkbox.checked,
                     hovered: checkbox.hovered,
@@ -79,6 +84,7 @@ impl RetainedState {
                     pressed: false,
                     changed: false,
                 });
+
                 CheckboxResponse {
                     checked: default_checked,
                     hovered: false,
@@ -93,6 +99,7 @@ impl RetainedState {
         let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get(id.as_ref()) else {
             return CheckboxResponse::default();
         };
+
         CheckboxResponse {
             checked: checkbox.checked,
             hovered: checkbox.hovered,
@@ -105,6 +112,7 @@ impl RetainedState {
         let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         checkbox.changed = checkbox.checked != checked;
         checkbox.checked = checked;
     }
@@ -114,11 +122,14 @@ impl RetainedState {
         let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get_mut(id_ref) else {
             return;
         };
+
         checkbox.enabled = enabled;
+
         if !enabled {
             checkbox.hovered = false;
             checkbox.pressed = false;
             checkbox.changed = false;
+
             if self.active_checkbox.as_deref() == Some(id_ref) {
                 self.active_checkbox = None;
             }

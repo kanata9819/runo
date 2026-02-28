@@ -36,6 +36,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         None,
         &outer_circle,
     );
+
     scene.stroke(
         &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
@@ -51,6 +52,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
     if radio_button.selected {
         let inner_radius = indicator_radius * INNER_RADIUS_RATIO;
         let inner_circle = Circle::new((center_x, center_y), inner_radius);
+
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -67,12 +69,15 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
     let Some(font) = font else {
         return;
     };
+
     let Some(text) = radio_button.text.as_deref() else {
         return;
     };
+
     let Some((glyphs, _)) = text::layout_text(font, text, radio_button.font_size) else {
         return;
     };
+
     let text_x = center_x + indicator_radius + LABEL_TEXT_SPACING;
     let baseline_y = radio_button.rect.y0
         + radio_button.rect.height() * BASELINE_VERTICAL_RATIO

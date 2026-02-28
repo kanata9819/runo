@@ -131,6 +131,7 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
             text_color: self.text_color,
             enabled: self.enabled,
         });
+
         ButtonHandle::new(id)
     }
 }

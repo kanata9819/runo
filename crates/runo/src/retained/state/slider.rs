@@ -32,8 +32,10 @@ impl RetainedState {
             text_color,
             enabled,
         } = args;
+
         let (min, max) = normalize_range(min, max);
         let default_value = snap_and_clamp(value.unwrap_or(min), min, max, step);
+
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
             self.widgets.insert(
@@ -53,6 +55,7 @@ impl RetainedState {
                     changed: false,
                 }),
             );
+
             return SliderResponse {
                 value: default_value,
                 hovered: false,
@@ -72,6 +75,7 @@ impl RetainedState {
             slider.enabled = enabled;
             slider.value = snap_and_clamp(slider.value, slider.min, slider.max, slider.step);
             let _ = value;
+
             return SliderResponse {
                 value: slider.value,
                 hovered: slider.hovered,
@@ -97,6 +101,7 @@ impl RetainedState {
                 changed: false,
             }),
         );
+
         SliderResponse {
             value: default_value,
             hovered: false,
@@ -109,6 +114,7 @@ impl RetainedState {
         let Some(WidgetNode::Slider(slider)) = self.widgets.get(id.as_ref()) else {
             return SliderResponse::default();
         };
+
         SliderResponse {
             value: slider.value,
             hovered: slider.hovered,
@@ -121,6 +127,7 @@ impl RetainedState {
         let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         let next = snap_and_clamp(value, slider.min, slider.max, slider.step);
         slider.changed = (slider.value - next).abs() > f64::EPSILON;
         slider.value = next;
@@ -131,11 +138,14 @@ impl RetainedState {
         let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(id_ref) else {
             return;
         };
+
         slider.enabled = enabled;
+
         if !enabled {
             slider.hovered = false;
             slider.pressed = false;
             slider.changed = false;
+
             if self.active_slider.as_deref() == Some(id_ref) {
                 self.active_slider = None;
             }

@@ -30,6 +30,7 @@ fn layout_for_label<'a>(
     let font = font?;
     let (glyphs, _) = text::layout_text(font, &label.text, label.font_size)?;
     let baseline_y = label.rect.y0 + label.font_size as f64;
+
     Some((font, glyphs, baseline_y))
 }
 

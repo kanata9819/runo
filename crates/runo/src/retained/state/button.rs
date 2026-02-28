@@ -17,6 +17,7 @@ impl RetainedState {
     ) -> ButtonResponse {
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
+
             self.widgets.insert(
                 id.clone(),
                 WidgetNode::Button(ButtonNode {
@@ -31,6 +32,7 @@ impl RetainedState {
                     clicked: false,
                 }),
             );
+
             return ButtonResponse::default();
         }
 
@@ -38,12 +40,15 @@ impl RetainedState {
         match entry {
             WidgetNode::Button(button) => {
                 button.rect = rect;
+
                 if !button.text_overridden {
                     button.text = text;
                 }
+
                 button.font_size = font_size;
                 button.text_color = text_color;
                 button.enabled = enabled;
+
                 ButtonResponse {
                     hovered: button.hovered,
                     pressed: button.pressed,
@@ -62,6 +67,7 @@ impl RetainedState {
                     pressed: false,
                     clicked: false,
                 });
+
                 ButtonResponse::default()
             }
         }
@@ -71,6 +77,7 @@ impl RetainedState {
         let Some(WidgetNode::Button(button)) = self.widgets.get(id.as_ref()) else {
             return ButtonResponse::default();
         };
+
         ButtonResponse {
             hovered: button.hovered,
             pressed: button.pressed,
@@ -82,6 +89,7 @@ impl RetainedState {
         let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         button.text = text;
         button.text_overridden = true;
     }
@@ -91,11 +99,14 @@ impl RetainedState {
         let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         button.enabled = enabled;
+
         if !enabled {
             button.hovered = false;
             button.pressed = false;
             button.clicked = false;
+
             if self.active_button.as_deref() == Some(id_ref) {
                 self.active_button = None;
             }

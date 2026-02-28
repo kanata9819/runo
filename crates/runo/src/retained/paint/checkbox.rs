@@ -48,14 +48,17 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         None,
         &indicator_rect,
     );
+
+    let color = if checkbox.enabled {
+        color::Neutral::tone_130_145_163()
+    } else {
+        color::Neutral::tone_88_94_102()
+    };
+
     scene.stroke(
         &Stroke::new(INDICATOR_BORDER_WIDTH),
         Affine::IDENTITY,
-        if checkbox.enabled {
-            color::Neutral::tone_130_145_163()
-        } else {
-            color::Neutral::tone_88_94_102()
-        },
+        color,
         None,
         &indicator_rect,
     );
@@ -72,6 +75,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         let y1 = indicator_y + indicator_size * CHECK_Y1_RATIO;
         let x2 = indicator_x + indicator_size * CHECK_X2_RATIO;
         let y2 = indicator_y + indicator_size * CHECK_Y2_RATIO;
+
         scene.stroke(
             &Stroke::new(CHECK_STROKE_WIDTH),
             Affine::IDENTITY,
@@ -79,6 +83,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
             None,
             &Line::new((x0, y0), (x1, y1)),
         );
+
         scene.stroke(
             &Stroke::new(CHECK_STROKE_WIDTH),
             Affine::IDENTITY,
@@ -91,9 +96,11 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
     let Some(font) = font else {
         return;
     };
+
     let Some(text) = checkbox.text.as_deref() else {
         return;
     };
+
     let Some((glyphs, _)) = text::layout_text(font, text, checkbox.font_size) else {
         return;
     };
@@ -102,6 +109,12 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
     let baseline_y = checkbox.rect.y0
         + checkbox.rect.height() * BASELINE_VERTICAL_RATIO
         + checkbox.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
+    let color = if checkbox.enabled {
+        checkbox.text_color
+    } else {
+        color::Neutral::tone_146_152_160()
+    };
+
     text::draw_text_run(
         scene,
         font,
@@ -109,11 +122,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         text_x,
         baseline_y,
         checkbox.font_size,
-        if checkbox.enabled {
-            checkbox.text_color
-        } else {
-            color::Neutral::tone_146_152_160()
-        },
+        color,
     );
 }
 

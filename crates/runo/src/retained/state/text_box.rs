@@ -35,6 +35,7 @@ impl RetainedState {
             overflow_x,
             overflow_y,
         } = args;
+
         if !self.widgets.contains_key(&id) {
             let text = text.unwrap_or_default();
             let text_advance = estimate_text_width(&text, font_size) as f64;
@@ -63,6 +64,7 @@ impl RetainedState {
                     changed: false,
                 }),
             );
+
             return TextBoxResponse {
                 text: response_text,
                 hovered: false,
@@ -72,27 +74,33 @@ impl RetainedState {
         }
 
         let entry = self.widgets.get_mut(&id).expect("text box entry missing");
+
         match entry {
             WidgetNode::TextBox(text_box) => {
                 text_box.rect = rect;
+
                 if let Some(next_text) = text {
                     text_box.text = next_text;
                     text_box.text_advance =
                         estimate_text_width(&text_box.text, text_box.font_size) as f64;
                     text_box.caret_index = text_box.text.chars().count();
                 }
+
                 text_box.placeholder = placeholder;
+
                 if (text_box.font_size - font_size).abs() > f32::EPSILON {
                     text_box.font_size = font_size;
                     text_box.text_advance =
                         estimate_text_width(&text_box.text, text_box.font_size) as f64;
                 }
+
                 text_box.text_color = text_color;
                 text_box.bg_color = bg_color;
                 text_box.border_color = border_color;
                 text_box.enabled = enabled;
                 text_box.overflow_x = overflow_x;
                 text_box.overflow_y = overflow_y;
+
                 TextBoxResponse {
                     text: text_box.text.clone(),
                     hovered: text_box.hovered,
@@ -105,6 +113,7 @@ impl RetainedState {
                 let text_advance = estimate_text_width(&text, font_size) as f64;
                 let caret_index = text.chars().count();
                 let response_text = text.clone();
+
                 *entry = WidgetNode::TextBox(TextBoxNode {
                     rect,
                     text,
@@ -124,6 +133,7 @@ impl RetainedState {
                     focused: false,
                     changed: false,
                 });
+
                 TextBoxResponse {
                     text: response_text,
                     hovered: false,
@@ -138,6 +148,7 @@ impl RetainedState {
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get(id.as_ref()) else {
             return TextBoxResponse::default();
         };
+
         TextBoxResponse {
             text: text_box.text.clone(),
             hovered: text_box.hovered,
@@ -150,6 +161,7 @@ impl RetainedState {
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(id.as_ref()) else {
             return;
         };
+
         text_box.text = text.into();
         text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
         text_box.caret_index = text_box.text.chars().count();
@@ -161,14 +173,18 @@ impl RetainedState {
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(id_ref) else {
             return;
         };
+
         text_box.enabled = enabled;
+
         if !enabled {
             text_box.hovered = false;
             text_box.focused = false;
             text_box.changed = false;
+
             if self.focused_text_box.as_deref() == Some(id_ref) {
                 self.focused_text_box = None;
             }
+
             if self.active_text_box_scrollbar.as_deref() == Some(id_ref) {
                 self.active_text_box_scrollbar = None;
             }

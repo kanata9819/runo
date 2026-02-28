@@ -40,6 +40,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
 
     let metrics = text_metrics(text_box);
     let text_color = resolve_text_color(text_box);
+
     draw_text_content(scene, font, text_box, text_color, metrics);
     draw_caret(scene, font, text_box, metrics);
     render_horizontal_scrollbar(scene, text_box);
@@ -48,6 +49,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, text_box: &mut 
 /// Draws text box background fill and border stroke.
 fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
     let bg = RoundedRect::from_rect(text_box.rect, BOX_CORNER_RADIUS);
+
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
@@ -67,6 +69,7 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
     } else {
         text_box.border_color
     };
+
     scene.stroke(
         &vello::kurbo::Stroke::new(BORDER_STROKE_WIDTH),
         Affine::IDENTITY,
@@ -109,6 +112,7 @@ fn draw_text_content(
 ) {
     if text_box.text.is_empty() {
         let placeholder = text_box.placeholder.as_deref().unwrap_or("");
+
         if let Some((glyphs, advance)) = text::layout_text(font, placeholder, text_box.font_size) {
             let visible_glyphs = if text_box.overflow_x.clips() {
                 clip_glyphs_horizontally(
@@ -121,6 +125,7 @@ fn draw_text_content(
             } else {
                 glyphs
             };
+
             if !visible_glyphs.is_empty() {
                 text::draw_text_run(
                     scene,
@@ -133,6 +138,7 @@ fn draw_text_content(
                 );
             }
         }
+
         text_box.text_advance = 0.0;
     } else {
         let mut max_advance = 0.0_f64;
@@ -142,7 +148,9 @@ fn draw_text_content(
             else {
                 continue;
             };
+
             max_advance = max_advance.max(advance as f64);
+
             let visible_glyphs = if text_box.overflow_x.clips() {
                 clip_glyphs_horizontally(
                     glyphs,
@@ -154,6 +162,7 @@ fn draw_text_content(
             } else {
                 glyphs
             };
+
             if !visible_glyphs.is_empty() {
                 text::draw_text_run(
                     scene,
@@ -166,6 +175,7 @@ fn draw_text_content(
                 );
             }
         }
+
         text_box.text_advance = max_advance;
     }
 }
@@ -190,6 +200,7 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
         let caret_h = text_box.font_size as f64 * CARET_HEIGHT_RATIO;
         let caret_y0 = baseline_y - text_box.font_size as f64 * CARET_TOP_OFFSET_RATIO;
         let caret = Rect::new(caret_x, caret_y0, caret_x + CARET_WIDTH, caret_y0 + caret_h);
+
         scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -224,6 +235,7 @@ fn clip_glyphs_horizontally(
             out.push(*glyph);
         }
     }
+
     out
 }
 
@@ -251,6 +263,7 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     } else {
         color::WhiteAlpha::tone_255_255_255_20()
     };
+
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
@@ -276,6 +289,7 @@ fn render_horizontal_scrollbar(scene: &mut Scene, text_box: &TextBoxNode) {
     } else {
         color::WhiteAlpha::tone_255_255_255_90()
     };
+
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
@@ -309,6 +323,7 @@ fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
             col += 1;
         }
     }
+
     (line, col)
 }
 

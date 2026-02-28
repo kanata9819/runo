@@ -23,6 +23,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &Button
     let (Some(font), Some(text)) = (font, button.text.as_deref()) else {
         return;
     };
+
     let Some((glyphs, total_advance)) = text::layout_text(font, text, button.font_size) else {
         return;
     };
@@ -56,19 +57,13 @@ fn draw_text_run(
         + button.rect.height() * TEXT_CENTER_RATIO
         + button.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
 
-    text::draw_text_run(
-        scene,
-        font,
-        glyphs,
-        text_x,
-        text_y,
-        button.font_size,
-        if button.enabled {
-            button.text_color
-        } else {
-            color::Neutral::tone_178_184_192()
-        },
-    );
+    let color = if button.enabled {
+        button.text_color
+    } else {
+        color::Neutral::tone_178_184_192()
+    };
+
+    text::draw_text_run(scene, font, glyphs, text_x, text_y, button.font_size, color);
 }
 
 #[cfg(test)]

@@ -1,4 +1,3 @@
-
 use super::*;
 use crate::font::load_default_font;
 use vello::peniko::Color;

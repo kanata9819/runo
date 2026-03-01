@@ -1,4 +1,3 @@
-
 use super::resolve_interaction_color;
 use vello::peniko::Color;
 

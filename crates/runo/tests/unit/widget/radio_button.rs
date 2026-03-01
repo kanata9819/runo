@@ -1,4 +1,3 @@
-
 use vello::Scene;
 use vello::peniko::Color;
 

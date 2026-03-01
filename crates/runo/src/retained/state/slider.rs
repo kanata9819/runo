@@ -5,6 +5,10 @@ use crate::SliderResponse;
 use crate::retained::node::{SliderNode, WidgetNode};
 use crate::retained::state::{RetainedState, normalize_range, snap_and_clamp};
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/slider.rs"]
+mod tests;
+
 pub(crate) struct UpsertSliderArgs {
     pub(crate) id: String,
     pub(crate) rect: Rect,
@@ -129,7 +133,3 @@ impl RetainedState {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/slider.rs"]
-mod tests;

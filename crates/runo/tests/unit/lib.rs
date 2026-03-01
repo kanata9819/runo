@@ -215,7 +215,7 @@ fn ui_use_state_returns_value_and_setter() {
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
         let (count, set_count) = ui.use_state("counter", || 0_u32);
         assert_eq!(count, 0);
-        assert!(set_count.set(&mut ui, 3));
+        assert!(set_count.set(&mut ui, 3_u32));
         let (updated, _) = ui.use_state("counter", || 99_u32);
         assert_eq!(updated, 3);
     }
@@ -233,7 +233,7 @@ fn ui_use_state_persists_across_ui_instances_with_frame_lifecycle() {
     {
         let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
         let (_, set_value) = ui.use_state("persist", || 1_u32);
-        set_value.set(&mut ui, 8_u32);
+        let _ = set_value.set(&mut ui, 8_u32);
     }
     states.end_frame();
 

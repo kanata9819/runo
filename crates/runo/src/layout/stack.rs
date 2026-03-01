@@ -1,5 +1,9 @@
 use crate::layout::{LayoutDirection, LayoutNode};
 
+#[cfg(test)]
+#[path = "../../tests/unit/layout/stack.rs"]
+mod tests;
+
 pub(crate) struct LayoutStack {
     stack: Vec<LayoutNode>,
 }
@@ -55,7 +59,3 @@ impl LayoutStack {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/layout/stack.rs"]
-mod tests;

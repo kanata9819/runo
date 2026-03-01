@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
+#[cfg(test)]
+#[path = "../../tests/unit/hooks/use_effect.rs"]
+mod tests;
+
 pub type EffectCleanup = Box<dyn FnMut() + 'static>;
 
 struct EffectEntry {
@@ -89,7 +93,3 @@ fn hash_value<T: Hash>(value: &T) -> u64 {
     value.hash(&mut hasher);
     hasher.finish()
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/hooks/use_effect.rs"]
-mod tests;

@@ -5,6 +5,10 @@ use crate::ComboBoxResponse;
 use crate::retained::node::{ComboBoxNode, WidgetNode};
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/combo_box.rs"]
+mod tests;
+
 pub(crate) struct UpsertComboBoxArgs {
     pub(crate) id: String,
     pub(crate) rect: Rect,
@@ -257,7 +261,3 @@ fn combo_box_response(combo_box: &ComboBoxNode) -> ComboBoxResponse {
         is_open: combo_box.is_open,
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/combo_box.rs"]
-mod tests;

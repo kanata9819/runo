@@ -3,6 +3,10 @@ use std::sync::Arc;
 
 use vello::peniko::{Blob, FontData};
 
+#[cfg(test)]
+#[path = "../tests/unit/font.rs"]
+mod tests;
+
 pub(crate) fn load_default_font() -> Option<FontData> {
     const CANDIDATES: &[&str] = &[
         "C:\\Windows\\Fonts\\segoeui.ttf",
@@ -25,7 +29,3 @@ fn load_font_from_path(path: &str) -> Option<FontData> {
     let blob = Blob::new(Arc::new(bytes.into_boxed_slice()));
     Some(FontData::new(blob, 0))
 }
-
-#[cfg(test)]
-#[path = "../tests/unit/font.rs"]
-mod tests;

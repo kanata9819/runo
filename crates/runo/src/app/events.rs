@@ -6,6 +6,10 @@ use winit::window::WindowId;
 
 use crate::app::{AppRunner, RunoApplication};
 
+#[cfg(test)]
+#[path = "../../tests/unit/app/events.rs"]
+mod tests;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ClipboardShortcut {
     Copy,
@@ -164,7 +168,3 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/app/events.rs"]
-mod tests;

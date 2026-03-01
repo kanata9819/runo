@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowLabelArgs;
 use crate::widget::text::{estimate_text_width, layout_text};
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/label.rs"]
+mod tests;
+
 pub struct LabelBuilder<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
     id: String,
@@ -108,7 +112,3 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         LabelHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/label.rs"]
-mod tests;

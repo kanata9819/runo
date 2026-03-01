@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowSliderArgs;
 use crate::ui::UiEvents;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/slider.rs"]
+mod tests;
+
 #[derive(Clone, Debug, Default)]
 pub struct SliderResponse {
     pub value: f64,
@@ -162,7 +166,3 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
         SliderHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/slider.rs"]
-mod tests;

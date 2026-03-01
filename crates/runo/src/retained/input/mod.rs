@@ -6,6 +6,10 @@ use vello::peniko::FontData;
 use crate::input::InputFrame;
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/input/mod.rs"]
+mod tests;
+
 impl RetainedState {
     pub(crate) fn begin_frame_input(&mut self, input: InputFrame, font: Option<&FontData>) {
         self.update_hover_flags(input.cursor_pos);
@@ -31,7 +35,3 @@ impl RetainedState {
         self.apply_text_input(&input, font);
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/input/mod.rs"]
-mod tests;

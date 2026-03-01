@@ -4,6 +4,10 @@ use crate::event::UiEvent;
 use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/input/pointer.rs"]
+mod tests;
+
 impl RetainedState {
     pub(super) fn update_hover_flags(&mut self, cursor_pos: (f64, f64)) {
         let open_overlay_id = self.order.iter().rev().find_map(|id| {
@@ -490,7 +494,3 @@ fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x
 
     value.clamp(slider.min, slider.max)
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/input/pointer.rs"]
-mod tests;

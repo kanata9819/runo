@@ -3,6 +3,10 @@ use vello::{AaConfig, RenderParams};
 
 use crate::Color;
 
+#[cfg(test)]
+#[path = "../../tests/unit/app/gpu.rs"]
+mod tests;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum SurfaceAcquireAction {
     SkipFrame,
@@ -30,7 +34,3 @@ pub(super) fn map_surface_error(error: &wgpu::SurfaceError) -> SurfaceAcquireAct
         wgpu::SurfaceError::OutOfMemory => SurfaceAcquireAction::FatalOutOfMemory,
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/app/gpu.rs"]
-mod tests;

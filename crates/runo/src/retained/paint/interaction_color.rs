@@ -1,5 +1,9 @@
 use vello::peniko::color::{AlphaColor, Srgb};
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/interaction_color.rs"]
+mod tests;
+
 /// Resolves interaction color with priority: disabled > pressed > hovered > default.
 #[inline]
 pub(super) fn resolve_interaction_color(
@@ -21,7 +25,3 @@ pub(super) fn resolve_interaction_color(
         default_color
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/interaction_color.rs"]
-mod tests;

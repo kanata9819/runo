@@ -5,6 +5,10 @@ use crate::ButtonResponse;
 use crate::retained::node::{ButtonNode, WidgetNode};
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/button.rs"]
+mod tests;
+
 impl RetainedState {
     pub(crate) fn upsert_button(
         &mut self,
@@ -95,7 +99,3 @@ impl RetainedState {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/button.rs"]
-mod tests;

@@ -7,6 +7,10 @@ use vello::peniko::{Color, Fill, FontData};
 
 use crate::cache::text_layout;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/text.rs"]
+mod tests;
+
 pub(crate) fn layout_text(
     font: &FontData,
     text: &str,
@@ -61,7 +65,3 @@ pub(crate) fn draw_text_run(
 pub(crate) fn estimate_text_width(text: &str, font_size: f32) -> f32 {
     text.chars().count() as f32 * font_size * 0.56
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/text.rs"]
-mod tests;

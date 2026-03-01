@@ -1,6 +1,10 @@
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
+#[cfg(test)]
+#[path = "../../tests/unit/hooks/use_state.rs"]
+mod tests;
+
 struct StateEntry {
     type_id: TypeId,
     value: Box<dyn Any>,
@@ -103,7 +107,3 @@ fn ensure_type<T: 'static>(key: &str, actual: TypeId) {
         "state `{key}` was requested with a different type"
     );
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/hooks/use_state.rs"]
-mod tests;

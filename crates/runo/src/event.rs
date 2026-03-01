@@ -5,6 +5,10 @@ use crate::widget::radio_button::RadioButtonHandle;
 use crate::widget::slider::SliderHandle;
 use crate::widget::text_box::TextBoxHandle;
 
+#[cfg(test)]
+#[path = "../tests/unit/event.rs"]
+mod tests;
+
 #[derive(Clone, Debug)]
 pub enum UiEvent {
     ButtonClicked {
@@ -33,7 +37,3 @@ pub enum UiEvent {
         selected_text: String,
     },
 }
-
-#[cfg(test)]
-#[path = "../tests/unit/event.rs"]
-mod tests;

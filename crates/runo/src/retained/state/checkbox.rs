@@ -5,6 +5,10 @@ use crate::CheckboxResponse;
 use crate::retained::node::{CheckboxNode, WidgetNode};
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/checkbox.rs"]
+mod tests;
+
 pub(crate) struct UpsertCheckboxArgs {
     pub(crate) id: String,
     pub(crate) rect: Rect,
@@ -113,7 +117,3 @@ impl RetainedState {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/checkbox.rs"]
-mod tests;

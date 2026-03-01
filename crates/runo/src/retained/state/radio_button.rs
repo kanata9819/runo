@@ -7,6 +7,10 @@ use crate::RadioButtonResponse;
 use crate::retained::node::{RadioButtonNode, WidgetNode};
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/radio_button.rs"]
+mod tests;
+
 pub(crate) struct UpsertRadioButtonArgs {
     pub(crate) id: String,
     pub(crate) group: String,
@@ -151,7 +155,3 @@ impl RetainedState {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/radio_button.rs"]
-mod tests;

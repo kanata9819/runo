@@ -12,6 +12,10 @@ pub use state::{
 };
 pub use widgets::UiWidgets;
 
+#[cfg(test)]
+#[path = "../../tests/unit/ui/mod.rs"]
+mod tests;
+
 pub(crate) use show::button::ShowButtonArgs;
 pub(crate) use show::checkbox::ShowCheckboxArgs;
 pub(crate) use show::combo_box::ShowComboBoxArgs;
@@ -223,7 +227,3 @@ impl<'a> Ui<'a> {
         self.enabled_stack.last().copied().unwrap_or(true)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/ui/mod.rs"]
-mod tests;

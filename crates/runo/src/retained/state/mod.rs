@@ -19,6 +19,10 @@ pub(crate) use radio_button::UpsertRadioButtonArgs;
 pub(crate) use slider::UpsertSliderArgs;
 pub(crate) use text_box::UpsertTextBoxArgs;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/mod.rs"]
+mod tests;
+
 pub(crate) struct RetainedState {
     pub(super) widgets: HashMap<String, WidgetNode>,
     pub(super) order: Vec<String>,
@@ -87,7 +91,3 @@ impl RetainedState {
         new_or_replaced_response(entry)
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/mod.rs"]
-mod tests;

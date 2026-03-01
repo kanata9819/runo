@@ -9,6 +9,10 @@ use crate::retained::node::ButtonNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/button.rs"]
+mod tests;
+
 const BUTTON_CORNER_RADIUS: f64 = 10.0;
 const TEXT_CENTER_RATIO: f64 = 0.5;
 const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
@@ -65,7 +69,3 @@ fn draw_text_run(
 
     text::draw_text_run(scene, font, glyphs, text_x, text_y, button.font_size, color);
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/button.rs"]
-mod tests;

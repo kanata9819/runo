@@ -13,6 +13,10 @@ use crate::widget::text_box::TextBoxHandle;
 use crate::widget::text_box::TextBoxResponse;
 use crate::{ButtonResponse, ComboBoxResponse};
 
+#[cfg(test)]
+#[path = "../../tests/unit/ui/state.rs"]
+mod tests;
+
 pub struct UiState<'ui, 'a> {
     pub(super) ui: &'ui mut Ui<'a>,
 }
@@ -354,7 +358,3 @@ impl<'ui, 'a> UiDivState<'ui, 'a> {
         self.clear_background(handle.id());
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/ui/state.rs"]
-mod tests;

@@ -13,6 +13,10 @@ use vello::peniko::FontData;
 use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/mod.rs"]
+mod tests;
+
 impl RetainedState {
     /// Renders base widgets first, then paints overlay layers that must appear on top.
     pub(crate) fn render(&mut self, scene: &mut Scene, font: Option<&FontData>) {
@@ -52,7 +56,3 @@ impl RetainedState {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/mod.rs"]
-mod tests;

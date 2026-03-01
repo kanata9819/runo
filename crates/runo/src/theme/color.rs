@@ -1,5 +1,9 @@
 use crate::Color;
 
+#[cfg(test)]
+#[path = "../../tests/unit/theme/color.rs"]
+mod tests;
+
 pub type Rgb = (u8, u8, u8);
 pub type Rgba = (u8, u8, u8, u8);
 
@@ -280,7 +284,3 @@ pub fn rgb(rgb: Rgb) -> Color {
 pub fn rgba(rgba: Rgba) -> Color {
     Color::from_rgba8(rgba.0, rgba.1, rgba.2, rgba.3)
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/theme/color.rs"]
-mod tests;

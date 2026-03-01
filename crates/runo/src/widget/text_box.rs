@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowTextBoxArgs;
 use crate::ui::UiEvents;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/text_box.rs"]
+mod tests;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Overflow {
     Visible,
@@ -191,7 +195,3 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
         TextBoxHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/text_box.rs"]
-mod tests;

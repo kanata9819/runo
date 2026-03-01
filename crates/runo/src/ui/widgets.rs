@@ -8,6 +8,10 @@ use crate::widget::radio_button::RadioButtonBuilder;
 use crate::widget::slider::SliderBuilder;
 use crate::widget::text_box::TextBoxBuilder;
 
+#[cfg(test)]
+#[path = "../../tests/unit/ui/widgets.rs"]
+mod tests;
+
 pub struct UiWidgets<'ui, 'a> {
     pub(super) ui: &'ui mut Ui<'a>,
 }
@@ -45,7 +49,3 @@ impl<'ui, 'a> UiWidgets<'ui, 'a> {
         self.ui.div()
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/ui/widgets.rs"]
-mod tests;

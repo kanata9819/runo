@@ -9,6 +9,10 @@ use crate::ui::{EventBindings, Ui};
 pub(crate) use runner::AppRunner;
 pub use runtime::run;
 
+#[cfg(test)]
+#[path = "../../tests/unit/app/mod.rs"]
+mod tests;
+
 #[derive(Clone, Debug)]
 pub struct RunOptions {
     pub window_title: String,
@@ -43,7 +47,3 @@ pub(crate) fn build_runner<A: RunoApplication + 'static>(application: A) -> AppR
     let options = application.options();
     AppRunner::new(application, options)
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/app/mod.rs"]
-mod tests;

@@ -4,6 +4,10 @@ use std::sync::{LazyLock, Mutex};
 use vello::Glyph;
 use vello::peniko::FontData;
 
+#[cfg(test)]
+#[path = "../../tests/unit/cache/text_layout.rs"]
+mod tests;
+
 const MAX_TEXT_LAYOUT_CACHE_ENTRIES: usize = 4096;
 type TextLayoutValue = (Vec<Glyph>, f32);
 type TextLayoutMap = HashMap<TextLayoutCacheKey, TextLayoutValue>;
@@ -50,7 +54,3 @@ pub(crate) fn get_or_insert_layout(
 
     Some(value)
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/cache/text_layout.rs"]
-mod tests;

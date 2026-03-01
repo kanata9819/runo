@@ -6,6 +6,10 @@ use crate::retained::node::LabelNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/label.rs"]
+mod tests;
+
 /// Renders single-line label text at the label rectangle origin.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, label: &LabelNode) {
     let Some((font, glyphs, baseline_y)) = layout_for_label(font, label) else {
@@ -41,7 +45,3 @@ fn resolve_label_text_color(label: &LabelNode) -> vello::peniko::Color {
         color::Neutral::tone_142_148_156()
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/label.rs"]
-mod tests;

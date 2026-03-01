@@ -8,6 +8,10 @@ use crate::retained::node::CheckboxNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/checkbox.rs"]
+mod tests;
+
 const INDICATOR_X_OFFSET: f64 = 2.0;
 const INDICATOR_CORNER_RADIUS: f64 = 4.0;
 const INDICATOR_BORDER_WIDTH: f64 = 1.0;
@@ -147,7 +151,3 @@ fn indicator_bg_color(checkbox: &CheckboxNode) -> AlphaColor<Srgb> {
         },
     )
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/checkbox.rs"]
-mod tests;

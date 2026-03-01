@@ -17,6 +17,10 @@ use crate::hooks::use_state::StateStore;
 use crate::input::InputState;
 use crate::retained::RetainedState;
 
+#[cfg(test)]
+#[path = "../../tests/unit/app/runner.rs"]
+mod tests;
+
 fn sanitize_window_size(width: u32, height: u32) -> (u32, u32) {
     (width.max(1), height.max(1))
 }
@@ -127,7 +131,3 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         &self.window_options
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/app/runner.rs"]
-mod tests;

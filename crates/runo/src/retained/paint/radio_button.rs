@@ -8,6 +8,10 @@ use crate::retained::node::RadioButtonNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/radio_button.rs"]
+mod tests;
+
 const INDICATOR_X_OFFSET: f64 = 2.0;
 const INDICATOR_BORDER_WIDTH: f64 = 1.0;
 const INDICATOR_SIZE_OFFSET: f64 = 8.0;
@@ -115,7 +119,3 @@ fn outer_bg_color(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
         color::Neutral::tone_36_42_50(),
     )
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/radio_button.rs"]
-mod tests;

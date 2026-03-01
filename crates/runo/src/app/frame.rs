@@ -5,6 +5,10 @@ use crate::Color;
 use crate::app::{AppRunner, RunoApplication};
 use crate::ui::Ui;
 
+#[cfg(test)]
+#[path = "../../tests/unit/app/frame.rs"]
+mod tests;
+
 impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn render(&mut self) -> bool {
         let Some((width, height)) = self.surface_size() else {
@@ -119,7 +123,3 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.input.end_frame();
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/app/frame.rs"]
-mod tests;

@@ -1,6 +1,10 @@
 use winit::event::ElementState;
 use winit::keyboard::NamedKey;
 
+#[cfg(test)]
+#[path = "../tests/unit/input.rs"]
+mod tests;
+
 #[derive(Clone)]
 pub(crate) struct InputFrame {
     pub(crate) cursor_pos: (f64, f64),
@@ -143,7 +147,3 @@ impl InputState {
         self.ime_active
     }
 }
-
-#[cfg(test)]
-#[path = "../tests/unit/input.rs"]
-mod tests;

@@ -6,6 +6,10 @@ use crate::retained::state::RetainedState;
 use crate::widget::text::estimate_text_width;
 use crate::widget::text_box::{Overflow, TextBoxResponse};
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/state/text_box.rs"]
+mod tests;
+
 pub(crate) struct UpsertTextBoxArgs {
     pub(crate) id: String,
     pub(crate) rect: Rect,
@@ -158,7 +162,3 @@ impl RetainedState {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/state/text_box.rs"]
-mod tests;

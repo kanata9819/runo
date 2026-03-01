@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowButtonArgs;
 use crate::ui::UiEvents;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/button.rs"]
+mod tests;
+
 #[derive(Clone, Copy, Debug, Default)]
 pub struct ButtonResponse {
     pub hovered: bool,
@@ -135,7 +139,3 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
         ButtonHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/button.rs"]
-mod tests;

@@ -8,6 +8,10 @@ use crate::retained::node::WidgetNode;
 use crate::retained::state::RetainedState;
 use crate::widget::text::{estimate_text_width, layout_text};
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/input/text_box.rs"]
+mod tests;
+
 impl RetainedState {
     pub(super) fn handle_text_box_scrollbar_input(
         &mut self,
@@ -372,7 +376,3 @@ fn char_index_from_line_col(lines: &[&str], line: usize, col: usize) -> usize {
 
     index
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/input/text_box.rs"]
-mod tests;

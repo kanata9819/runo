@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowComboBoxArgs;
 use crate::ui::UiEvents;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/combo_box.rs"]
+mod tests;
+
 #[derive(Clone, Debug, Default)]
 pub struct ComboBoxResponse {
     pub selected_index: usize,
@@ -175,7 +179,3 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
         ComboBoxHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/combo_box.rs"]
-mod tests;

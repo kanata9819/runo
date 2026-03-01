@@ -7,6 +7,10 @@ use crate::retained::node::TextBoxNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/text_box.rs"]
+mod tests;
+
 const BOX_CORNER_RADIUS: f64 = 8.0;
 const BORDER_STROKE_WIDTH: f64 = 1.0;
 const INNER_PADDING: f64 = 12.0;
@@ -326,7 +330,3 @@ fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
 
     (line, col)
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/text_box.rs"]
-mod tests;

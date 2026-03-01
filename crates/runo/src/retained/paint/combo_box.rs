@@ -8,6 +8,10 @@ use crate::retained::node::ComboBoxNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/combo_box.rs"]
+mod tests;
+
 const TEXT_HORIZONTAL_PADDING: f64 = 12.0;
 const BASELINE_VERTICAL_RATIO: f64 = 0.5;
 const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
@@ -204,7 +208,3 @@ pub(super) fn render_dropdown_overlay(
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/combo_box.rs"]
-mod tests;

@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::layout::LayoutDirection;
 use crate::ui::ShowDivArgs;
 
+#[cfg(test)]
+#[path = "../../tests/unit/layout/div.rs"]
+mod tests;
+
 #[derive(Clone)]
 struct DivConfig {
     id: String,
@@ -200,7 +204,3 @@ impl<'ui, 'a> DivBuilder<'ui, 'a> {
         (handle, result)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/layout/div.rs"]
-mod tests;

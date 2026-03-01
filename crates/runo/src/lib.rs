@@ -21,6 +21,9 @@ pub use ui::{
     UiComboBoxState, UiDivState, UiEvents, UiLabelState, UiRadioButtonState, UiSliderState,
     UiState, UiStateSetter, UiTextBoxState, UiWidgets,
 };
+#[cfg(test)]
+#[path = "../tests/unit/lib.rs"]
+mod tests;
 pub use vello::peniko::Color;
 pub use widget::button::ButtonHandle;
 pub use widget::button::ButtonResponse;
@@ -42,7 +45,3 @@ pub mod prelude {
         OptionalRadioButtonHandleExt, OptionalSliderHandleExt, OptionalTextBoxHandleExt,
     };
 }
-
-#[cfg(test)]
-#[path = "../tests/unit/lib.rs"]
-mod tests;

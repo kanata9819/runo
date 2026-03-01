@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowRadioButtonArgs;
 use crate::ui::UiEvents;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/radio_button.rs"]
+mod tests;
+
 #[derive(Clone, Debug, Default)]
 pub struct RadioButtonResponse {
     pub selected: bool,
@@ -150,7 +154,3 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
         RadioButtonHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/radio_button.rs"]
-mod tests;

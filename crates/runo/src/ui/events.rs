@@ -8,6 +8,10 @@ use crate::widget::slider::SliderHandle;
 use crate::widget::text_box::TextBoxHandle;
 use std::collections::HashMap;
 
+#[cfg(test)]
+#[path = "../../tests/unit/ui/events.rs"]
+mod tests;
+
 pub struct ActionBindings<A> {
     button: HashMap<ButtonHandle, A>,
     checkbox: HashMap<CheckboxHandle, A>,
@@ -400,7 +404,3 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         }
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/ui/events.rs"]
-mod tests;

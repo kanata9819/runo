@@ -4,6 +4,10 @@ use crate::Ui;
 use crate::ui::ShowCheckboxArgs;
 use crate::ui::UiEvents;
 
+#[cfg(test)]
+#[path = "../../tests/unit/widget/checkbox.rs"]
+mod tests;
+
 #[derive(Clone, Debug, Default)]
 pub struct CheckboxResponse {
     pub checked: bool,
@@ -142,7 +146,3 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
         CheckboxHandle::new(id)
     }
 }
-
-#[cfg(test)]
-#[path = "../../tests/unit/widget/checkbox.rs"]
-mod tests;

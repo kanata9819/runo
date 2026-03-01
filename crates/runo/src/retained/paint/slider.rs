@@ -6,6 +6,10 @@ use crate::retained::node::SliderNode;
 use crate::theme::color;
 use crate::widget::text;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/slider.rs"]
+mod tests;
+
 const TRACK_HEIGHT: f64 = 6.0;
 const TRACK_HORIZONTAL_PADDING: f64 = 12.0;
 const TRACK_VERTICAL_RATIO: f64 = 0.62;
@@ -175,7 +179,3 @@ fn value_ratio(value: f64, min: f64, max: f64) -> f64 {
 
     ((value - min) / (max - min)).clamp(0.0, 1.0)
 }
-
-#[cfg(test)]
-#[path = "../../../tests/unit/retained/paint/slider.rs"]
-mod tests;

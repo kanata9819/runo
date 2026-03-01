@@ -3,10 +3,6 @@ use super::*;
 struct App;
 impl RunoApplication for App {
     type Event = ();
-
-    fn event_bindings(&self) -> EventBindings<Self::Event> {
-        EventBindings::new()
-    }
 }
 
 #[test]
@@ -29,10 +25,6 @@ fn application_default_options_delegate_to_run_options_default() {
 struct CustomApp;
 impl RunoApplication for CustomApp {
     type Event = ();
-
-    fn event_bindings(&self) -> EventBindings<Self::Event> {
-        EventBindings::new()
-    }
 
     fn options(&self) -> RunOptions {
         RunOptions {

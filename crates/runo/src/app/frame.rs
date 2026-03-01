@@ -34,6 +34,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         let Some(surface) = self.surface.as_mut() else {
             return false;
         };
+
         let Some(renderer) = self.renderer.as_mut() else {
             return false;
         };
@@ -82,25 +83,32 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     fn run_ui_frame(&mut self) {
         self.effects.begin_frame();
         self.states.begin_frame();
-        self.retained.begin_build_pass();
 
-        {
-            let mut ui = Ui::new(
-                &mut self.scene,
-                self.font.clone(),
-                &mut self.effects,
-                &mut self.states,
-                &mut self.retained,
-            );
+        if self.mount_required {
+            self.retained.begin_build_pass();
 
-            self.user_app.build(&mut ui);
+            let bindings = {
+                let mut ui = Ui::new(
+                    &mut self.scene,
+                    self.font.clone(),
+                    &mut self.effects,
+                    &mut self.states,
+                    &mut self.retained,
+                );
+
+                self.user_app.build(&mut ui)
+            };
+
+            self.bindings = bindings;
+            self.retained.prune_unseen_widgets();
+            self.mount_required = false;
         }
-
-        self.retained.prune_unseen_widgets();
 
         self.retained
             .begin_frame_input(self.input.snapshot(), self.font.as_ref());
 
+        let mut request_remount = false;
+
         {
             let mut ui = Ui::new(
                 &mut self.scene,
@@ -110,10 +118,14 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 &mut self.retained,
             );
 
-            let bindings = self.user_app.event_bindings();
-            for event in ui.drain_bound_events(&bindings) {
-                self.user_app.on_event(&mut ui, event);
+            for event in ui.drain_bound_events(&self.bindings) {
+                request_remount |= self.user_app.on_event(&mut ui, event);
             }
+        }
+
+        if request_remount {
+            self.mount_required = true;
+            self.request_redraw();
         }
 
         self.effects.end_frame();

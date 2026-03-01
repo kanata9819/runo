@@ -117,7 +117,7 @@ fn upsert_radio_button_updates_existing_entry_fields() {
         text_color: color,
         enabled: false,
     });
-    assert!(!response.selected);
+    assert!(response.selected);
     if let Some(WidgetNode::RadioButton(rb)) = state.widgets.get("r1") {
         assert_eq!(rb.group, "g2");
         assert_eq!(rb.text.as_deref(), Some("b"));
@@ -127,4 +127,33 @@ fn upsert_radio_button_updates_existing_entry_fields() {
     } else {
         panic!("radio button missing");
     }
+}
+
+#[test]
+fn upsert_radio_button_keeps_existing_selected_when_selected_arg_is_none() {
+    let mut state = RetainedState::new();
+    let color = Color::from_rgb8(240, 240, 240);
+    state.upsert_radio_button(UpsertRadioButtonArgs {
+        id: "r1".to_string(),
+        group: "g".to_string(),
+        rect: rect(),
+        text: Some("a".to_string()),
+        selected: Some(true),
+        font_size: 16.0,
+        text_color: color,
+        enabled: true,
+    });
+
+    state.upsert_radio_button(UpsertRadioButtonArgs {
+        id: "r1".to_string(),
+        group: "g".to_string(),
+        rect: rect(),
+        text: Some("b".to_string()),
+        selected: None,
+        font_size: 16.0,
+        text_color: color,
+        enabled: true,
+    });
+
+    assert!(state.radio_button_response("r1").selected);
 }

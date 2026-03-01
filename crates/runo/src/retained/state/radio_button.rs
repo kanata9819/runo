@@ -39,9 +39,11 @@ impl RetainedState {
         } = args;
 
         let default_selected = selected.unwrap_or(false);
-        if default_selected && !matches!(self.widgets.get(&id), Some(WidgetNode::RadioButton(_))) {
+
+        if selected == Some(true) {
             Self::clear_radio_group_selection(&mut self.widgets, &group);
         }
+
         let group_for_update = group.clone();
         let text_for_update = text.clone();
 
@@ -66,7 +68,11 @@ impl RetainedState {
                     radio_button.rect = rect;
                     radio_button.group = group_for_update;
                     radio_button.text = text_for_update;
-                    let _ = selected;
+
+                    if let Some(selected) = selected {
+                        radio_button.selected = selected;
+                    }
+
                     radio_button.font_size = font_size;
                     radio_button.text_color = text_color;
                     radio_button.enabled = enabled;

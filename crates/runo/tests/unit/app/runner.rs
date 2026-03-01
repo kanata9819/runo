@@ -4,10 +4,6 @@ use crate::app::RunOptions;
 struct DummyApp;
 impl RunoApplication for DummyApp {
     type Event = ();
-
-    fn event_bindings(&self) -> crate::EventBindings<Self::Event> {
-        crate::EventBindings::new()
-    }
 }
 
 #[test]

@@ -71,3 +71,38 @@ fn ui_use_state_and_setter_roundtrip() {
     let (value2, _) = ui.use_state("counter", || 0_u32);
     assert_eq!(value2, 9);
 }
+
+#[test]
+fn ui_with_stable_key_keeps_auto_widget_id_stable_across_sibling_changes() {
+    let mut scene = Scene::new();
+    let mut effects = EffectStore::new();
+    let mut states = StateStore::new();
+    let mut retained = RetainedState::new();
+
+    let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+    let without_key_prev = ui.widgets().checkbox().show();
+    let without_key_target = ui.widgets().checkbox().show();
+    let without_key_target_id = without_key_target.id().to_string();
+    let _ = without_key_prev;
+
+    let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+    let without_key_target_after = ui.widgets().checkbox().show();
+    let without_key_target_after_id = without_key_target_after.id().to_string();
+    assert_ne!(without_key_target_id, without_key_target_after_id);
+
+    let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+    ui.with_stable_key("prev", |ui| {
+        let _ = ui.widgets().checkbox().show();
+    });
+    let with_key_target_id = ui
+        .with_stable_key("target", |ui| ui.widgets().checkbox().show())
+        .id()
+        .to_string();
+
+    let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+    let with_key_target_after_id = ui
+        .with_stable_key("target", |ui| ui.widgets().checkbox().show())
+        .id()
+        .to_string();
+    assert_eq!(with_key_target_id, with_key_target_after_id);
+}

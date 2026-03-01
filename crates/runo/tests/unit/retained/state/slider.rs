@@ -115,3 +115,36 @@ fn upsert_slider_updates_existing_entry_and_clamps_current_value() {
     });
     assert!(response.value <= 5.0);
 }
+
+#[test]
+fn upsert_slider_keeps_existing_value_when_value_arg_is_none() {
+    let mut state = RetainedState::new();
+    let color = Color::from_rgb8(240, 240, 240);
+    state.upsert_slider(UpsertSliderArgs {
+        id: "s".to_string(),
+        rect: rect(),
+        min: 0.0,
+        max: 10.0,
+        value: Some(4.0),
+        step: Some(1.0),
+        text: None,
+        font_size: 16.0,
+        text_color: color,
+        enabled: true,
+    });
+
+    let response = state.upsert_slider(UpsertSliderArgs {
+        id: "s".to_string(),
+        rect: rect(),
+        min: 0.0,
+        max: 10.0,
+        value: None,
+        step: Some(1.0),
+        text: None,
+        font_size: 16.0,
+        text_color: color,
+        enabled: true,
+    });
+
+    assert!((response.value - 4.0).abs() < f64::EPSILON);
+}

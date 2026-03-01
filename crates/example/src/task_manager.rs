@@ -106,11 +106,7 @@ impl RunoApplication for TaskApp {
         }
     }
 
-    fn event_bindings(&self) -> EventBindings<Self::Event> {
-        self.build_event_bindings()
-    }
-
-    fn build(&mut self, ui: &mut Ui<'_>) {
+    fn build(&mut self, ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
         ui.vertical(|ui| {
             ui.widgets()
                 .label()
@@ -167,69 +163,77 @@ impl RunoApplication for TaskApp {
 
                     let mut task_rows = Vec::new();
                     for task in &self.tasks {
-                        ui.widgets()
-                            .div()
-                            .horizontal()
-                            .width(728)
-                            .padding(10)
-                            .gap(8)
-                            .background(colors::rgb(if task.done {
-                                colors::PANEL_BG_ACTIVE
-                            } else {
-                                colors::APP_BG
-                            }))
-                            .border(colors::rgb(colors::PANEL_BORDER), 1)
-                            .radius(10)
-                            .show(|ui| {
-                                let label = if task.done {
-                                    format!("[done] {}", task.title)
+                        ui.with_stable_key(task.id.to_string(), |ui| {
+                            ui.widgets()
+                                .div()
+                                .horizontal()
+                                .width(728)
+                                .padding(10)
+                                .gap(8)
+                                .background(colors::rgb(if task.done {
+                                    colors::PANEL_BG_ACTIVE
                                 } else {
-                                    task.title.clone()
-                                };
+                                    colors::APP_BG
+                                }))
+                                .border(colors::rgb(colors::PANEL_BORDER), 1)
+                                .radius(10)
+                                .show(|ui| {
+                                    let label = if task.done {
+                                        format!("[done] {}", task.title)
+                                    } else {
+                                        task.title.clone()
+                                    };
 
-                                let checkbox = ui
-                                    .widgets()
-                                    .checkbox()
-                                    .width(620)
-                                    .height(36)
-                                    .font_size(18)
-                                    .text(label)
-                                    .checked(task.done)
-                                    .show();
+                                    let checkbox = ui
+                                        .widgets()
+                                        .checkbox()
+                                        .width(620)
+                                        .height(36)
+                                        .font_size(18)
+                                        .text(label)
+                                        .checked(task.done)
+                                        .show();
 
-                                let delete_button = ui
-                                    .widgets()
-                                    .button()
-                                    .width(84)
-                                    .height(36)
-                                    .font_size(15)
-                                    .text("Delete")
-                                    .show();
+                                    let delete_button = ui
+                                        .widgets()
+                                        .button()
+                                        .width(84)
+                                        .height(36)
+                                        .font_size(15)
+                                        .text("Delete")
+                                        .show();
 
-                                task_rows.push(TaskRowHandles {
-                                    task_id: task.id,
-                                    checkbox,
-                                    delete_button,
+                                    task_rows.push(TaskRowHandles {
+                                        task_id: task.id,
+                                        checkbox,
+                                        delete_button,
+                                    });
                                 });
-                            });
+                        });
                     }
                     self.task_rows = task_rows;
                 });
         });
+
+        self.build_event_bindings()
     }
 
-    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) {
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) -> bool {
         let mut clear_input = false;
+        let mut remount = false;
         match event {
             Event::AddClicked => {
                 self.add_task();
                 clear_input = true;
+                remount = true;
             }
             Event::ClearDoneClicked => {
                 self.clear_done();
+                remount = true;
             }
             Event::DeleteTask(task_id) => {
                 self.tasks.retain(|task| task.id != task_id);
+                remount = true;
             }
             Event::DraftChanged(text) => {
                 self.draft = text;
@@ -238,6 +242,7 @@ impl RunoApplication for TaskApp {
                 if let Some(task) = self.tasks.iter_mut().find(|task| task.id == task_id) {
                     task.done = checked;
                 }
+                remount = true;
             }
         }
 
@@ -267,6 +272,7 @@ impl RunoApplication for TaskApp {
 
         let (_, set_summary) = ui.use_state(SUMMARY_STATE_ID, String::new);
         set_summary.set(ui, self.summary_text());
+        remount
     }
 }
 

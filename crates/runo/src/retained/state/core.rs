@@ -4,7 +4,7 @@ use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::event::UiEvent;
-use crate::retained::node::{LabelNode, WidgetNode};
+use crate::retained::node::{DivNode, LabelNode, WidgetNode};
 use crate::retained::state::RetainedState;
 use crate::widget::button::ButtonHandle;
 use crate::widget::checkbox::CheckboxHandle;
@@ -72,6 +72,48 @@ impl RetainedState {
         );
     }
 
+    pub(crate) fn upsert_div(
+        &mut self,
+        id: String,
+        rect: Rect,
+        radius: f64,
+        default_bg_color: Option<Color>,
+        border_color: Option<Color>,
+        border_width: f64,
+    ) {
+        let visible = self.div_visible(&id);
+        let bg_color = self.div_background(&id).or(default_bg_color);
+        self.upsert_widget_node(
+            id,
+            || {
+                WidgetNode::Div(DivNode {
+                    rect,
+                    radius,
+                    visible,
+                    bg_color,
+                    default_bg_color,
+                    border_color,
+                    border_width,
+                })
+            },
+            |entry| {
+                let WidgetNode::Div(div) = entry else {
+                    return None;
+                };
+
+                div.rect = rect;
+                div.radius = radius;
+                div.visible = visible;
+                div.bg_color = bg_color;
+                div.default_bg_color = default_bg_color;
+                div.border_color = border_color;
+                div.border_width = border_width;
+                Some(())
+            },
+            |_node| (),
+        );
+    }
+
     pub(crate) fn set_label_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         let Some(WidgetNode::Label(label)) = self.widgets.get_mut(id.as_ref()) else {
             return;
@@ -93,7 +135,11 @@ impl RetainedState {
     }
 
     pub(crate) fn set_div_visible(&mut self, id: impl Into<String>, visible: bool) {
-        self.div_visible.insert(id.into(), visible);
+        let id = id.into();
+        self.div_visible.insert(id.clone(), visible);
+        if let Some(WidgetNode::Div(div)) = self.widgets.get_mut(&id) {
+            div.visible = visible;
+        }
     }
 
     pub(crate) fn set_div_enabled(&mut self, id: impl Into<String>, enabled: bool) {
@@ -101,11 +147,19 @@ impl RetainedState {
     }
 
     pub(crate) fn set_div_background(&mut self, id: impl Into<String>, color: Color) {
-        self.div_background.insert(id.into(), color);
+        let id = id.into();
+        self.div_background.insert(id.clone(), color);
+        if let Some(WidgetNode::Div(div)) = self.widgets.get_mut(&id) {
+            div.bg_color = Some(color);
+        }
     }
 
     pub(crate) fn clear_div_background(&mut self, id: impl AsRef<str>) {
-        self.div_background.remove(id.as_ref());
+        let id = id.as_ref();
+        self.div_background.remove(id);
+        if let Some(WidgetNode::Div(div)) = self.widgets.get_mut(id) {
+            div.bg_color = div.default_bg_color;
+        }
     }
 
     pub(crate) fn pop_event(&mut self) -> Option<UiEvent> {

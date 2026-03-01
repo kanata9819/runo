@@ -69,9 +69,12 @@ impl RetainedState {
                     slider.font_size = font_size;
                     slider.text_color = text_color;
                     slider.enabled = enabled;
-                    slider.value =
-                        snap_and_clamp(slider.value, slider.min, slider.max, slider.step);
-                    let _ = value;
+                    slider.value = snap_and_clamp(
+                        value.unwrap_or(slider.value),
+                        slider.min,
+                        slider.max,
+                        slider.step,
+                    );
 
                     Some(SliderResponse {
                         value: slider.value,

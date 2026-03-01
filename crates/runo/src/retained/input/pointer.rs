@@ -27,6 +27,7 @@ impl RetainedState {
 
         for (id, node) in &mut self.widgets {
             match node {
+                WidgetNode::Div(_) => {}
                 WidgetNode::Button(button) => {
                     button.clicked = false;
                     button.hovered = if !button.enabled || open_overlay_id.is_some() {

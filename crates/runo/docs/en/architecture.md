@@ -33,16 +33,20 @@ Current built-in widgets:
 
 ```rust
 pub trait RunoApplication {
-    fn build(&mut self, _ui: &mut Ui<'_>) {}
-    fn update(&mut self, _ui: &mut Ui<'_>) {}
+    fn mount(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+        EventBindings::new()
+    }
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+        false
+    }
     fn options(&self) -> RunOptions {
         RunOptions::default()
     }
 }
 ```
 
-1. `build`: initial UI construction (typically once)
-2. `update`: per-frame state updates
+1. `mount`: initial UI construction and event binding setup
+2. `on_event`: event-driven state updates; return `true` when remount is required
 
 ## 4. Frame flow
 
@@ -51,7 +55,7 @@ pub trait RunoApplication {
 3. Start render
 4. Draw background
 5. Update retained widget interaction state (`hovered`, `pressed`, `focused`, `is_open`)
-6. Run `RunoApplication::update()`
+6. Dispatch retained input events to `RunoApplication::on_event()`
 7. Render retained widgets
 8. Submit/present via GPU
 

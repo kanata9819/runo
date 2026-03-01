@@ -175,7 +175,7 @@ impl RunoApplication for MyApp {
         }
     }
 
-    fn build(&mut self, ui: &mut Ui<'_>) {
+    fn build(&mut self, ui: &mut Ui<'_>) -> runo::EventBindings<Self::Event> {
         ui.vertical(|ui| {
             Self::build_title(ui);
             let (main_panel, _) = ui
@@ -200,9 +200,6 @@ impl RunoApplication for MyApp {
                 });
             self.main_panel = Some(main_panel);
         });
-    }
-
-    fn event_bindings(&self) -> runo::EventBindings<Self::Event> {
         let mut builder = runo::EventBindings::builder();
         if let Some(input_name) = &self.input_name {
             builder = builder.text_box(input_name.clone(), Event::NameChanged);
@@ -234,7 +231,7 @@ impl RunoApplication for MyApp {
         builder.build()
     }
 
-    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) {
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) -> bool {
         match event {
             Event::NameChanged(text) => {
                 self.input_text = text;
@@ -278,6 +275,7 @@ impl RunoApplication for MyApp {
             println!("toggled changed: {}", toggled);
             None
         });
+        false
     }
 }
 

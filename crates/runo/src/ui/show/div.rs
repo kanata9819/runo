@@ -1,5 +1,4 @@
-use vello::kurbo::{Affine, Rect, RoundedRect, Stroke};
-use vello::peniko::Fill;
+use vello::kurbo::Rect;
 
 use crate::Color;
 use crate::layout::LayoutDirection;
@@ -21,16 +20,6 @@ pub(crate) struct ShowDivArgs {
     pub(crate) radius: f64,
 }
 
-struct DivPaintArgs {
-    origin: (f64, f64),
-    size: (f64, f64),
-    radius: f64,
-    div_visible: bool,
-    bg_color: Option<Color>,
-    border_color: Option<Color>,
-    border_width: f64,
-}
-
 impl<'a> Ui<'a> {
     pub(crate) fn show_div<R>(&mut self, args: ShowDivArgs, f: impl FnOnce(&mut Ui<'a>) -> R) -> R {
         let ShowDivArgs {
@@ -50,7 +39,20 @@ impl<'a> Ui<'a> {
         } = args;
 
         let origin = self.layout_stack.peek_next_position();
-        let (div_visible, effective_enabled, bg_color) = self.resolve_div_style(&id, bg_color);
+        let effective_enabled = self.resolve_div_enabled(&id);
+
+        // Register the div before children so retained render order keeps the background
+        // behind child widgets.
+        let initial_rect = Rect::new(origin.0, origin.1, origin.0, origin.1);
+        self.retained.upsert_div(
+            id.clone(),
+            initial_rect,
+            radius,
+            bg_color,
+            border_color,
+            border_width,
+        );
+
         let (result, content_w, content_h) = self.layout_div_children(
             origin,
             (padding_left, padding_top),
@@ -65,30 +67,22 @@ impl<'a> Ui<'a> {
         let div_w = width.unwrap_or(auto_w);
         let div_h = height.unwrap_or(auto_h);
 
-        self.paint_div(DivPaintArgs {
-            origin,
-            size: (div_w, div_h),
+        self.retained.upsert_div(
+            id,
+            Rect::new(origin.0, origin.1, origin.0 + div_w, origin.1 + div_h),
             radius,
-            div_visible,
             bg_color,
             border_color,
             border_width,
-        });
+        );
 
         self.layout_stack.advance_current(div_w, div_h);
         result
     }
 
-    fn resolve_div_style(
-        &self,
-        id: &str,
-        default_bg_color: Option<Color>,
-    ) -> (bool, bool, Option<Color>) {
-        let div_visible = self.retained.div_visible(id);
+    fn resolve_div_enabled(&self, id: &str) -> bool {
         let div_enabled = self.retained.div_enabled(id);
-        let effective_enabled = self.current_enabled() && div_enabled;
-        let bg_color = self.retained.div_background(id).or(default_bg_color);
-        (div_visible, effective_enabled, bg_color)
+        self.current_enabled() && div_enabled
     }
 
     fn layout_div_children<R>(
@@ -108,34 +102,5 @@ impl<'a> Ui<'a> {
         let _ = self.enabled_stack.pop();
         let (content_w, content_h) = self.layout_stack.pop_layout_consumed();
         (result, content_w, content_h)
-    }
-
-    fn paint_div(&mut self, args: DivPaintArgs) {
-        let DivPaintArgs {
-            origin,
-            size,
-            radius,
-            div_visible,
-            bg_color,
-            border_color,
-            border_width,
-        } = args;
-        let rect = Rect::new(origin.0, origin.1, origin.0 + size.0, origin.1 + size.1);
-        let rounded = RoundedRect::from_rect(rect, radius);
-
-        if div_visible && let Some(color) = bg_color {
-            self.scene
-                .fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
-        }
-
-        if div_visible && let Some(color) = border_color {
-            self.scene.stroke(
-                &Stroke::new(border_width.max(0.0)),
-                Affine::IDENTITY,
-                color,
-                None,
-                &rounded,
-            );
-        }
     }
 }

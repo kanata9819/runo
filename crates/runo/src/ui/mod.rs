@@ -44,7 +44,8 @@ pub struct Ui<'a> {
     retained: &'a mut RetainedState,
     layout_stack: LayoutStack,
     enabled_stack: Vec<bool>,
-    auto_id_counter: u64,
+    key_scope_stack: Vec<String>,
+    auto_id_counter_stack: Vec<u64>,
 }
 
 pub struct UiStateSetter<T> {
@@ -86,7 +87,8 @@ impl<'a> Ui<'a> {
             retained,
             layout_stack: LayoutStack::new((24.0, 24.0), LayoutDirection::Vertical, 12.0),
             enabled_stack: vec![true],
-            auto_id_counter: 0,
+            key_scope_stack: Vec::new(),
+            auto_id_counter_stack: vec![0],
         }
     }
 
@@ -112,6 +114,19 @@ impl<'a> Ui<'a> {
 
     pub fn horizontal<R>(&mut self, f: impl FnOnce(&mut Self) -> R) -> R {
         self.with_layout(LayoutDirection::Horizontal, 12.0, f)
+    }
+
+    pub fn with_stable_key<R, K>(&mut self, key: K, f: impl FnOnce(&mut Self) -> R) -> R
+    where
+        K: Into<String>,
+    {
+        self.key_scope_stack.push(key.into());
+        self.auto_id_counter_stack.push(0);
+        let result = f(self);
+        let _ = self.auto_id_counter_stack.pop();
+        let _ = self.key_scope_stack.pop();
+
+        result
     }
 
     pub fn fill_rect(&mut self, x: f64, y: f64, w: f64, h: f64, color: Color) {
@@ -146,52 +161,44 @@ impl<'a> Ui<'a> {
     }
 
     pub(crate) fn button(&mut self) -> crate::widget::button::ButtonBuilder<'_, 'a> {
-        let id = format!("__auto_button_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("button");
         crate::widget::button::ButtonBuilder::new(self, id)
     }
 
     pub(crate) fn label(&mut self) -> crate::widget::label::LabelBuilder<'_, 'a> {
-        let id = format!("__auto_label_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("label");
         crate::widget::label::LabelBuilder::new(self, id)
     }
 
     pub(crate) fn checkbox(&mut self) -> crate::widget::checkbox::CheckboxBuilder<'_, 'a> {
-        let id = format!("__auto_checkbox_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("checkbox");
         crate::widget::checkbox::CheckboxBuilder::new(self, id)
     }
 
     pub(crate) fn text_box(&mut self) -> crate::widget::text_box::TextBoxBuilder<'_, 'a> {
-        let id = format!("__auto_text_box_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("text_box");
         crate::widget::text_box::TextBoxBuilder::new(self, id)
     }
 
     pub(crate) fn combo_box(&mut self) -> crate::widget::combo_box::ComboBoxBuilder<'_, 'a> {
-        let id = format!("__auto_combo_box_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("combo_box");
         crate::widget::combo_box::ComboBoxBuilder::new(self, id)
     }
 
     pub(crate) fn slider(&mut self) -> crate::widget::slider::SliderBuilder<'_, 'a> {
-        let id = format!("__auto_slider_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("slider");
         crate::widget::slider::SliderBuilder::new(self, id)
     }
 
     pub(crate) fn radio_button(
         &mut self,
     ) -> crate::widget::radio_button::RadioButtonBuilder<'_, 'a> {
-        let id = format!("__auto_radio_button_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("radio_button");
         crate::widget::radio_button::RadioButtonBuilder::new(self, id)
     }
 
     pub(crate) fn div(&mut self) -> crate::layout::div::DivBuilder<'_, 'a> {
-        let id = format!("__auto_div_{}", self.auto_id_counter);
-        self.auto_id_counter += 1;
+        let id = self.next_auto_id("div");
         crate::layout::div::DivBuilder::new(self, id)
     }
 
@@ -225,5 +232,22 @@ impl<'a> Ui<'a> {
 
     fn current_enabled(&self) -> bool {
         self.enabled_stack.last().copied().unwrap_or(true)
+    }
+
+    fn next_auto_id(&mut self, kind: &str) -> String {
+        let counter = self
+            .auto_id_counter_stack
+            .last_mut()
+            .expect("auto id counter stack should never be empty");
+
+        let index = *counter;
+        *counter += 1;
+
+        if self.key_scope_stack.is_empty() {
+            format!("__auto_{kind}_{index}")
+        } else {
+            let scope = self.key_scope_stack.join(".");
+            format!("__auto_{kind}_{scope}_{index}")
+        }
     }
 }

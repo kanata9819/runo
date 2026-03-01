@@ -1,6 +1,7 @@
 mod button;
 mod checkbox;
 mod combo_box;
+mod div;
 mod interaction_color;
 mod label;
 mod radio_button;
@@ -26,6 +27,7 @@ impl RetainedState {
             };
 
             match node {
+                WidgetNode::Div(div_node) => div::render(scene, div_node),
                 WidgetNode::Button(button) => button::render(scene, font, button),
                 WidgetNode::Checkbox(checkbox) => checkbox::render(scene, font, checkbox),
                 WidgetNode::RadioButton(radio_button) => {
@@ -46,7 +48,8 @@ impl RetainedState {
                 WidgetNode::ComboBox(combo_box) => {
                     combo_box::render_dropdown_overlay(scene, font, combo_box)
                 }
-                WidgetNode::Button(_)
+                WidgetNode::Div(_)
+                | WidgetNode::Button(_)
                 | WidgetNode::Checkbox(_)
                 | WidgetNode::RadioButton(_)
                 | WidgetNode::Slider(_)

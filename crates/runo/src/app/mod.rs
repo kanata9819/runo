@@ -35,9 +35,14 @@ impl Default for RunOptions {
 pub trait RunoApplication {
     type Event: 'static;
 
-    fn build(&mut self, _ui: &mut Ui<'_>) {}
-    fn event_bindings(&self) -> EventBindings<Self::Event>;
-    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) {}
+    fn build(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+        EventBindings::new()
+    }
+
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+        false
+    }
+
     fn options(&self) -> RunOptions {
         RunOptions::default()
     }

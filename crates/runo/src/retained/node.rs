@@ -4,6 +4,7 @@ use vello::peniko::Color;
 use crate::widget::text_box::Overflow;
 
 pub(super) enum WidgetNode {
+    Div(DivNode),
     Button(ButtonNode),
     Checkbox(CheckboxNode),
     RadioButton(RadioButtonNode),
@@ -11,6 +12,16 @@ pub(super) enum WidgetNode {
     Label(LabelNode),
     TextBox(TextBoxNode),
     ComboBox(ComboBoxNode),
+}
+
+pub(super) struct DivNode {
+    pub(super) rect: Rect,
+    pub(super) radius: f64,
+    pub(super) visible: bool,
+    pub(super) bg_color: Option<Color>,
+    pub(super) default_bg_color: Option<Color>,
+    pub(super) border_color: Option<Color>,
+    pub(super) border_width: f64,
 }
 
 pub(super) struct ButtonNode {

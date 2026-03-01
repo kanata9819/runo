@@ -16,6 +16,7 @@ use crate::hooks::use_effect::EffectStore;
 use crate::hooks::use_state::StateStore;
 use crate::input::InputState;
 use crate::retained::RetainedState;
+use crate::ui::EventBindings;
 
 #[cfg(test)]
 #[path = "../../tests/unit/app/runner.rs"]
@@ -48,6 +49,8 @@ pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) effects: EffectStore,
     pub(super) states: StateStore,
     pub(super) retained: RetainedState,
+    pub(super) bindings: EventBindings<A::Event>,
+    pub(super) mount_required: bool,
     window_options: RunOptions,
 }
 
@@ -69,6 +72,8 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             effects: EffectStore::new(),
             states: StateStore::new(),
             retained: RetainedState::new(),
+            bindings: EventBindings::new(),
+            mount_required: true,
             window_options,
         }
     }

@@ -33,18 +33,22 @@ GUI フレームワークは主に次を行います。
 
 ```rust
 pub trait RunoApplication {
-    fn build(&mut self, _ui: &mut Ui<'_>) {}
-    fn update(&mut self, _ui: &mut Ui<'_>) {}
+    fn mount(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+        EventBindings::new()
+    }
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+        false
+    }
     fn options(&self) -> RunOptions {
         RunOptions::default()
     }
 }
 ```
 
-1. `build`
-   初期 UI を構築するフェーズ（通常は最初の 1 回）
-2. `update`
-   毎フレーム呼ばれ、入力に応じて状態を更新するフェーズ
+1. `mount`
+   初期 UI 構築とイベントバインディングを行うフェーズ
+2. `on_event`
+   入力イベント駆動で状態更新し、再構築が必要なら `true` を返す
 
 ## 4. 1 フレームの処理フロー
 
@@ -53,7 +57,7 @@ pub trait RunoApplication {
 3. `render()` 開始
 4. 背景を描画
 5. `RetainedState::begin_frame_input()` で `hovered/pressed/focused/open` などを更新
-6. `RunoApplication::update()` を実行
+6. `RunoApplication::on_event()` に保持イベントをディスパッチ
 7. `RetainedState::render()` で保持されたウィジェットを描画
 8. `wgpu` で swapchain に転送して表示
 

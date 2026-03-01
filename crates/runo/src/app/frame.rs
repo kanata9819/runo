@@ -48,6 +48,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 return true;
             }
         };
+
         let device = &self.render_cx.devices[dev_id].device;
         let queue = &self.render_cx.devices[dev_id].queue;
 
@@ -81,34 +82,44 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn run_ui_frame(&mut self) {
-        self.effects.begin_frame();
-        self.states.begin_frame();
-
-        if self.mount_required {
-            self.retained.begin_build_pass();
-
-            let bindings = {
-                let mut ui = Ui::new(
-                    &mut self.scene,
-                    self.font.clone(),
-                    &mut self.effects,
-                    &mut self.states,
-                    &mut self.retained,
-                );
-
-                self.user_app.build(&mut ui)
-            };
-
-            self.bindings = bindings;
-            self.retained.prune_unseen_widgets();
-            self.mount_required = false;
-        }
-
+        self.remount_if_needed();
         self.retained
             .begin_frame_input(self.input.snapshot(), self.font.as_ref());
+        let request_remount = self.dispatch_bound_events();
+        self.apply_frame_updates(request_remount);
+        self.input.end_frame();
+    }
 
+    fn remount_if_needed(&mut self) {
+        if !self.mount_required {
+            return;
+        }
+
+        self.effects.begin_frame();
+        self.states.begin_frame();
+        self.retained.begin_build_pass();
+
+        let bindings = {
+            let mut ui = Ui::new(
+                &mut self.scene,
+                self.font.clone(),
+                &mut self.effects,
+                &mut self.states,
+                &mut self.retained,
+            );
+
+            self.user_app.build(&mut ui)
+        };
+
+        self.bindings = bindings;
+        self.retained.prune_unseen_widgets();
+        self.effects.end_frame();
+        self.states.end_frame();
+        self.mount_required = false;
+    }
+
+    fn dispatch_bound_events(&mut self) -> bool {
         let mut request_remount = false;
-
         {
             let mut ui = Ui::new(
                 &mut self.scene,
@@ -123,18 +134,13 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             }
         }
 
-        if request_remount {
+        request_remount
+    }
+
+    fn apply_frame_updates(&mut self, request_remount: bool) {
+        if request_remount || self.states.take_changed() {
             self.mount_required = true;
             self.request_redraw();
         }
-
-        self.effects.end_frame();
-        self.states.end_frame();
-
-        if self.states.take_changed() {
-            self.request_redraw();
-        }
-
-        self.input.end_frame();
     }
 }

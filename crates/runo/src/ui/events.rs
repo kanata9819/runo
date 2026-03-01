@@ -127,24 +127,6 @@ impl<E> EventBindings<E> {
     }
 }
 
-impl<A> Default for ActionBindings<A> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<E> Default for EventBindings<E> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<E> Default for EventBindingsBuilder<E> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl<E> EventBindingsBuilder<E> {
     pub fn new() -> Self {
         Self {
@@ -210,6 +192,24 @@ impl<E> EventBindingsBuilder<E> {
 
     pub fn build(self) -> EventBindings<E> {
         self.bindings
+    }
+}
+
+impl<A> Default for ActionBindings<A> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<E> Default for EventBindings<E> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<E> Default for EventBindingsBuilder<E> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -281,13 +281,13 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
     }
 
     pub fn on_button_clicked(&mut self, handle: &ButtonHandle, f: impl FnOnce()) {
-        if self.ui.retained.take_button_clicked(handle) {
+        if self.take_button_clicked(handle) {
             f();
         }
     }
 
     pub fn button_clicked(&mut self, handle: &ButtonHandle) -> bool {
-        self.ui.retained.take_button_clicked(handle)
+        self.take_button_clicked(handle)
     }
 
     pub fn on_button_clicked_with_ui(
@@ -295,19 +295,18 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         handle: &ButtonHandle,
         f: impl FnOnce(&mut Ui<'a>),
     ) {
-        if self.ui.retained.take_button_clicked(handle) {
+        if self.take_button_clicked(handle) {
             f(self.ui);
         }
     }
 
     pub fn on_text_box_changed(&mut self, handle: &TextBoxHandle, f: impl FnOnce(String)) {
-        if let Some(text) = self.ui.retained.take_text_box_changed(handle) {
-            f(text);
-        }
+        let changed = self.take_text_box_changed(handle);
+        self.on_some(changed, f);
     }
 
     pub fn text_box_changed(&mut self, handle: &TextBoxHandle) -> Option<String> {
-        self.ui.retained.take_text_box_changed(handle)
+        self.take_text_box_changed(handle)
     }
 
     pub fn on_text_box_changed_with_ui(
@@ -315,19 +314,17 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         handle: &TextBoxHandle,
         f: impl FnOnce(&mut Ui<'a>, String),
     ) {
-        if let Some(text) = self.ui.retained.take_text_box_changed(handle) {
-            f(self.ui, text);
-        }
+        let changed = self.take_text_box_changed(handle);
+        self.on_some_with_ui(changed, f);
     }
 
     pub fn on_checkbox_changed(&mut self, handle: &CheckboxHandle, f: impl FnOnce(bool)) {
-        if let Some(checked) = self.ui.retained.take_checkbox_changed(handle) {
-            f(checked);
-        }
+        let changed = self.take_checkbox_changed(handle);
+        self.on_some(changed, f);
     }
 
     pub fn checkbox_changed(&mut self, handle: &CheckboxHandle) -> Option<bool> {
-        self.ui.retained.take_checkbox_changed(handle)
+        self.take_checkbox_changed(handle)
     }
 
     pub fn on_checkbox_changed_with_ui(
@@ -335,19 +332,17 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         handle: &CheckboxHandle,
         f: impl FnOnce(&mut Ui<'a>, bool),
     ) {
-        if let Some(checked) = self.ui.retained.take_checkbox_changed(handle) {
-            f(self.ui, checked);
-        }
+        let changed = self.take_checkbox_changed(handle);
+        self.on_some_with_ui(changed, f);
     }
 
     pub fn on_slider_changed(&mut self, handle: &SliderHandle, f: impl FnOnce(f64)) {
-        if let Some(value) = self.ui.retained.take_slider_changed(handle) {
-            f(value);
-        }
+        let changed = self.take_slider_changed(handle);
+        self.on_some(changed, f);
     }
 
     pub fn slider_changed(&mut self, handle: &SliderHandle) -> Option<f64> {
-        self.ui.retained.take_slider_changed(handle)
+        self.take_slider_changed(handle)
     }
 
     pub fn on_slider_changed_with_ui(
@@ -355,19 +350,17 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         handle: &SliderHandle,
         f: impl FnOnce(&mut Ui<'a>, f64),
     ) {
-        if let Some(value) = self.ui.retained.take_slider_changed(handle) {
-            f(self.ui, value);
-        }
+        let changed = self.take_slider_changed(handle);
+        self.on_some_with_ui(changed, f);
     }
 
     pub fn on_radio_button_changed(&mut self, handle: &RadioButtonHandle, f: impl FnOnce(bool)) {
-        if let Some(selected) = self.ui.retained.take_radio_button_changed(handle) {
-            f(selected);
-        }
+        let changed = self.take_radio_button_changed(handle);
+        self.on_some(changed, f);
     }
 
     pub fn radio_button_changed(&mut self, handle: &RadioButtonHandle) -> Option<bool> {
-        self.ui.retained.take_radio_button_changed(handle)
+        self.take_radio_button_changed(handle)
     }
 
     pub fn on_radio_button_changed_with_ui(
@@ -375,21 +368,18 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         handle: &RadioButtonHandle,
         f: impl FnOnce(&mut Ui<'a>, bool),
     ) {
-        if let Some(selected) = self.ui.retained.take_radio_button_changed(handle) {
-            f(self.ui, selected);
-        }
+        let changed = self.take_radio_button_changed(handle);
+        self.on_some_with_ui(changed, f);
     }
 
     pub fn on_combo_box_changed(&mut self, handle: &ComboBoxHandle, f: impl FnOnce(usize, String)) {
-        if let Some((selected_index, selected_text)) =
-            self.ui.retained.take_combo_box_changed(handle)
-        {
+        if let Some((selected_index, selected_text)) = self.take_combo_box_changed(handle) {
             f(selected_index, selected_text);
         }
     }
 
     pub fn combo_box_changed(&mut self, handle: &ComboBoxHandle) -> Option<(usize, String)> {
-        self.ui.retained.take_combo_box_changed(handle)
+        self.take_combo_box_changed(handle)
     }
 
     pub fn on_combo_box_changed_with_ui(
@@ -397,10 +387,44 @@ impl<'ui, 'a> UiEvents<'ui, 'a> {
         handle: &ComboBoxHandle,
         f: impl FnOnce(&mut Ui<'a>, usize, String),
     ) {
-        if let Some((selected_index, selected_text)) =
-            self.ui.retained.take_combo_box_changed(handle)
-        {
+        if let Some((selected_index, selected_text)) = self.take_combo_box_changed(handle) {
             f(self.ui, selected_index, selected_text);
+        }
+    }
+
+    fn take_button_clicked(&mut self, handle: &ButtonHandle) -> bool {
+        self.ui.retained.take_button_clicked(handle)
+    }
+
+    fn take_text_box_changed(&mut self, handle: &TextBoxHandle) -> Option<String> {
+        self.ui.retained.take_text_box_changed(handle)
+    }
+
+    fn take_checkbox_changed(&mut self, handle: &CheckboxHandle) -> Option<bool> {
+        self.ui.retained.take_checkbox_changed(handle)
+    }
+
+    fn take_slider_changed(&mut self, handle: &SliderHandle) -> Option<f64> {
+        self.ui.retained.take_slider_changed(handle)
+    }
+
+    fn take_radio_button_changed(&mut self, handle: &RadioButtonHandle) -> Option<bool> {
+        self.ui.retained.take_radio_button_changed(handle)
+    }
+
+    fn take_combo_box_changed(&mut self, handle: &ComboBoxHandle) -> Option<(usize, String)> {
+        self.ui.retained.take_combo_box_changed(handle)
+    }
+
+    fn on_some<T>(&mut self, value: Option<T>, f: impl FnOnce(T)) {
+        if let Some(value) = value {
+            f(value);
+        }
+    }
+
+    fn on_some_with_ui<T>(&mut self, value: Option<T>, f: impl FnOnce(&mut Ui<'a>, T)) {
+        if let Some(value) = value {
+            f(self.ui, value);
         }
     }
 }

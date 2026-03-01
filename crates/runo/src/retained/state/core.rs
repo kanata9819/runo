@@ -13,6 +13,14 @@ use crate::widget::radio_button::RadioButtonHandle;
 use crate::widget::slider::SliderHandle;
 use crate::widget::text_box::TextBoxHandle;
 
+fn retain_seen_map<T>(map: &mut HashMap<String, T>, seen: &HashSet<String>) {
+    map.retain(|id, _| seen.contains(id));
+}
+
+fn retain_seen_order(order: &mut Vec<String>, seen: &HashSet<String>) {
+    order.retain(|id| seen.contains(id));
+}
+
 impl RetainedState {
     pub(crate) fn new() -> Self {
         Self {
@@ -40,8 +48,11 @@ impl RetainedState {
 
     pub(crate) fn prune_unseen_widgets(&mut self) {
         let seen = self.seen_widget_ids.clone();
-        self.widgets.retain(|id, _| seen.contains(id));
-        self.order.retain(|id| seen.contains(id));
+        retain_seen_map(&mut self.widgets, &seen);
+        retain_seen_order(&mut self.order, &seen);
+        retain_seen_map(&mut self.div_visible, &seen);
+        retain_seen_map(&mut self.div_enabled, &seen);
+        retain_seen_map(&mut self.div_background, &seen);
         self.prune_active_widget_ids();
         self.events
             .retain(|event| seen.contains(event_widget_id(event)));
@@ -175,87 +186,80 @@ impl RetainedState {
     }
 
     pub(crate) fn take_button_clicked(&mut self, handle: &ButtonHandle) -> bool {
-        let Some(index) = self.events.iter().position(
+        self.take_event(
             |event| matches!(event, UiEvent::ButtonClicked { button } if button == handle),
-        ) else {
-            return false;
-        };
-
-        let _ = self.events.remove(index);
-
-        true
+            |_event| Some(()),
+        )
+        .is_some()
     }
 
     pub(crate) fn take_text_box_changed(&mut self, handle: &TextBoxHandle) -> Option<String> {
-        let index = self.events.iter().position(
+        self.take_event(
             |event| matches!(event, UiEvent::TextBoxChanged { text_box, .. } if text_box == handle),
-        )?;
-
-        let event = self.events.remove(index)?;
-
-        match event {
-            UiEvent::TextBoxChanged { text, .. } => Some(text),
-            _ => None,
-        }
+            |event| match event {
+                UiEvent::TextBoxChanged { text, .. } => Some(text),
+                _ => None,
+            },
+        )
     }
 
     pub(crate) fn take_checkbox_changed(&mut self, handle: &CheckboxHandle) -> Option<bool> {
-        let index = self.events.iter().position(
+        self.take_event(
             |event| matches!(event, UiEvent::CheckboxChanged { checkbox, .. } if checkbox == handle),
-        )?;
-
-        let event = self.events.remove(index)?;
-
-        match event {
-            UiEvent::CheckboxChanged { checked, .. } => Some(checked),
-            _ => None,
-        }
+            |event| match event {
+                UiEvent::CheckboxChanged { checked, .. } => Some(checked),
+                _ => None,
+            },
+        )
     }
 
     pub(crate) fn take_slider_changed(&mut self, handle: &SliderHandle) -> Option<f64> {
-        let index = self.events.iter().position(
+        self.take_event(
             |event| matches!(event, UiEvent::SliderChanged { slider, .. } if slider == handle),
-        )?;
-
-        let event = self.events.remove(index)?;
-
-        match event {
-            UiEvent::SliderChanged { value, .. } => Some(value),
-            _ => None,
-        }
+            |event| match event {
+                UiEvent::SliderChanged { value, .. } => Some(value),
+                _ => None,
+            },
+        )
     }
 
     pub(crate) fn take_radio_button_changed(&mut self, handle: &RadioButtonHandle) -> Option<bool> {
-        let index = self.events.iter().position(|event| {
-            matches!(event, UiEvent::RadioButtonChanged { radio_button, .. } if radio_button == handle)
-        })?;
-
-        let event = self.events.remove(index)?;
-
-        match event {
-            UiEvent::RadioButtonChanged { selected, .. } => Some(selected),
-            _ => None,
-        }
+        self.take_event(
+            |event| {
+                matches!(event, UiEvent::RadioButtonChanged { radio_button, .. } if radio_button == handle)
+            },
+            |event| match event {
+                UiEvent::RadioButtonChanged { selected, .. } => Some(selected),
+                _ => None,
+            },
+        )
     }
 
     pub(crate) fn take_combo_box_changed(
         &mut self,
         handle: &ComboBoxHandle,
     ) -> Option<(usize, String)> {
-        let index = self.events.iter().position(
+        self.take_event(
             |event| matches!(event, UiEvent::ComboBoxChanged { combo_box, .. } if combo_box == handle),
-        )?;
+            |event| match event {
+                UiEvent::ComboBoxChanged {
+                    selected_index,
+                    selected_text,
+                    ..
+                } => Some((selected_index, selected_text)),
+                _ => None,
+            },
+        )
+    }
 
+    fn take_event<T>(
+        &mut self,
+        matches: impl Fn(&UiEvent) -> bool,
+        map: impl FnOnce(UiEvent) -> Option<T>,
+    ) -> Option<T> {
+        let index = self.events.iter().position(matches)?;
         let event = self.events.remove(index)?;
-
-        match event {
-            UiEvent::ComboBoxChanged {
-                selected_index,
-                selected_text,
-                ..
-            } => Some((selected_index, selected_text)),
-            _ => None,
-        }
+        map(event)
     }
 
     fn prune_active_widget_ids(&mut self) {

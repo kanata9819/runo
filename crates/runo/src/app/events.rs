@@ -36,10 +36,12 @@ fn clipboard_shortcut(logical_key: &Key) -> Option<ClipboardShortcut> {
         if text.eq_ignore_ascii_case("c") {
             return Some(ClipboardShortcut::Copy);
         }
+
         if text.eq_ignore_ascii_case("v") {
             return Some(ClipboardShortcut::Paste);
         }
     }
+
     None
 }
 
@@ -80,6 +82,37 @@ fn keyboard_actions(
     }
 }
 
+fn apply_keyboard_actions<A: RunoApplication + 'static>(
+    runner: &mut AppRunner<A>,
+    actions: KeyboardActions,
+) {
+    if let Some(text) = actions.push_text.as_deref() {
+        runner.input.push_text_input(text);
+    }
+
+    if let Some(named) = actions.named_key {
+        runner.input.on_named_key_pressed(named);
+    }
+
+    if let Some(shortcut) = actions.clipboard {
+        match shortcut {
+            ClipboardShortcut::Copy => runner.input.on_copy_pressed(),
+            ClipboardShortcut::Paste => runner.input.on_paste_pressed(),
+        }
+    }
+
+    if actions.request_redraw {
+        runner.request_redraw();
+    }
+}
+
+impl<A: RunoApplication + 'static> AppRunner<A> {
+    fn update_input_and_request_redraw(&mut self, update: impl FnOnce(&mut crate::input::InputState)) {
+        update(&mut self.input);
+        self.request_redraw();
+    }
+}
+
 impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if self.window.is_none() {
@@ -105,21 +138,24 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 self.request_redraw();
             }
             WindowEvent::CursorMoved { position, .. } => {
-                self.input.set_cursor_pos(position.x, position.y);
-                self.request_redraw();
+                self.update_input_and_request_redraw(|input| {
+                    input.set_cursor_pos(position.x, position.y);
+                });
             }
             WindowEvent::MouseInput {
                 state,
                 button: MouseButton::Left,
                 ..
             } => {
-                self.input.on_mouse_input(state);
-                self.request_redraw();
+                self.update_input_and_request_redraw(|input| {
+                    input.on_mouse_input(state);
+                });
             }
             WindowEvent::MouseWheel { delta, .. } => {
                 let (dx, dy) = scroll_delta_to_pixels(delta);
-                self.input.on_mouse_wheel(dx, dy);
-                self.request_redraw();
+                self.update_input_and_request_redraw(|input| {
+                    input.on_mouse_wheel(dx, dy);
+                });
             }
             WindowEvent::KeyboardInput { event, .. } => {
                 let actions = keyboard_actions(
@@ -129,22 +165,7 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                     self.input.ctrl_pressed(),
                     self.input.ime_active(),
                 );
-
-                if let Some(text) = actions.push_text.as_deref() {
-                    self.input.push_text_input(text);
-                }
-                if let Some(named) = actions.named_key {
-                    self.input.on_named_key_pressed(named);
-                }
-                if let Some(shortcut) = actions.clipboard {
-                    match shortcut {
-                        ClipboardShortcut::Copy => self.input.on_copy_pressed(),
-                        ClipboardShortcut::Paste => self.input.on_paste_pressed(),
-                    }
-                }
-                if actions.request_redraw {
-                    self.request_redraw();
-                }
+                apply_keyboard_actions(self, actions);
             }
             WindowEvent::ModifiersChanged(modifiers) => {
                 self.input.set_ctrl_pressed(modifiers.state().control_key());
@@ -156,8 +177,9 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 self.input.set_ime_active(false);
             }
             WindowEvent::Ime(Ime::Commit(text)) => {
-                self.input.push_text_input(&text);
-                self.request_redraw();
+                self.update_input_and_request_redraw(|input| {
+                    input.push_text_input(&text);
+                });
             }
             WindowEvent::RedrawRequested => {
                 if self.render() {

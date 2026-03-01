@@ -256,4 +256,26 @@ fn prune_unseen_widgets_removes_stale_entries_after_build_pass() {
     assert!(state.widgets.contains_key("row_0"));
     assert!(!state.widgets.contains_key("row_1"));
     assert_eq!(state.order, vec!["row_0".to_string()]);
+
+    state.set_div_visible("row_1", false);
+    state.set_div_enabled("row_1", false);
+    state.set_div_background("row_1", Color::from_rgb8(1, 2, 3));
+    assert!(!state.div_visible("row_1"));
+    assert!(!state.div_enabled("row_1"));
+    assert!(state.div_background("row_1").is_some());
+
+    state.begin_build_pass();
+    state.upsert_label(
+        "row_0".to_string(),
+        rect(),
+        "row 0".to_string(),
+        14.0,
+        color,
+        true,
+    );
+    state.prune_unseen_widgets();
+
+    assert!(state.div_visible("row_1"));
+    assert!(state.div_enabled("row_1"));
+    assert!(state.div_background("row_1").is_none());
 }

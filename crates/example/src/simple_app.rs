@@ -95,6 +95,7 @@ impl MyApp {
             .text("Channel: Email")
             .selected(true)
             .show();
+
         let sms = ui
             .widgets()
             .radio_button()
@@ -102,6 +103,7 @@ impl MyApp {
             .height(36)
             .text("Channel: SMS")
             .show();
+
         let push = ui
             .widgets()
             .radio_button()
@@ -109,6 +111,7 @@ impl MyApp {
             .height(36)
             .text("Channel: Push")
             .show();
+
         (email, sms, push)
     }
 

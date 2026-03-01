@@ -35,3 +35,21 @@ fn build_scene_and_run_ui_frame_execute_without_gpu() {
     assert_eq!(runner.user_app.mount_calls, 1);
     assert_eq!(runner.user_app.event_calls, 0);
 }
+
+#[test]
+fn state_change_requests_remount_on_next_frame() {
+    let mut runner = AppRunner::new(DummyApp::default(), RunOptions::default());
+    runner.build_scene(320, 180);
+    runner.run_ui_frame();
+    assert_eq!(runner.user_app.mount_calls, 1);
+
+    assert!(runner.states.set_state("counter", 1_u32));
+    assert!(!runner.mount_required);
+
+    runner.run_ui_frame();
+    assert!(runner.mount_required);
+    assert_eq!(runner.user_app.mount_calls, 1);
+
+    runner.run_ui_frame();
+    assert_eq!(runner.user_app.mount_calls, 2);
+}

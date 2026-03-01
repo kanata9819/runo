@@ -53,7 +53,11 @@ impl RetainedState {
                 WidgetNode::Checkbox(checkbox) => {
                     checkbox.rect = rect;
                     checkbox.text = text_for_update;
-                    let _ = checked;
+
+                    if let Some(checked) = checked {
+                        checkbox.checked = checked;
+                    }
+
                     checkbox.font_size = font_size;
                     checkbox.text_color = text_color;
                     checkbox.enabled = enabled;

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use vello::kurbo::Rect;
 use vello::peniko::Color;
@@ -18,6 +18,7 @@ impl RetainedState {
         Self {
             widgets: HashMap::new(),
             order: Vec::new(),
+            seen_widget_ids: HashSet::new(),
             active_button: None,
             active_checkbox: None,
             active_radio_button: None,
@@ -31,6 +32,19 @@ impl RetainedState {
             div_enabled: HashMap::new(),
             div_background: HashMap::new(),
         }
+    }
+
+    pub(crate) fn begin_build_pass(&mut self) {
+        self.seen_widget_ids.clear();
+    }
+
+    pub(crate) fn prune_unseen_widgets(&mut self) {
+        let seen = self.seen_widget_ids.clone();
+        self.widgets.retain(|id, _| seen.contains(id));
+        self.order.retain(|id| seen.contains(id));
+        self.prune_active_widget_ids();
+        self.events
+            .retain(|event| seen.contains(event_widget_id(event)));
     }
 
     pub(crate) fn upsert_label(
@@ -188,5 +202,74 @@ impl RetainedState {
             } => Some((selected_index, selected_text)),
             _ => None,
         }
+    }
+
+    fn prune_active_widget_ids(&mut self) {
+        if self
+            .active_button
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.active_button = None;
+        }
+
+        if self
+            .active_checkbox
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.active_checkbox = None;
+        }
+
+        if self
+            .active_radio_button
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.active_radio_button = None;
+        }
+
+        if self
+            .active_slider
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.active_slider = None;
+        }
+
+        if self
+            .active_combo_box
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.active_combo_box = None;
+        }
+
+        if self
+            .active_text_box_scrollbar
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.active_text_box_scrollbar = None;
+        }
+
+        if self
+            .focused_text_box
+            .as_ref()
+            .is_some_and(|id| !self.widgets.contains_key(id))
+        {
+            self.focused_text_box = None;
+        }
+    }
+}
+
+fn event_widget_id(event: &UiEvent) -> &str {
+    match event {
+        UiEvent::ButtonClicked { button } => button.id(),
+        UiEvent::CheckboxChanged { checkbox, .. } => checkbox.id(),
+        UiEvent::RadioButtonChanged { radio_button, .. } => radio_button.id(),
+        UiEvent::SliderChanged { slider, .. } => slider.id(),
+        UiEvent::TextBoxChanged { text_box, .. } => text_box.id(),
+        UiEvent::ComboBoxChanged { combo_box, .. } => combo_box.id(),
     }
 }

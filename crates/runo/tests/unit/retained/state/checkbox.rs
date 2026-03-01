@@ -35,6 +35,32 @@ fn upsert_checkbox_keeps_existing_checked_when_checked_arg_is_none() {
 }
 
 #[test]
+fn upsert_checkbox_updates_existing_checked_when_checked_arg_is_some() {
+    let mut state = RetainedState::new();
+    let color = Color::from_rgb8(240, 240, 240);
+    state.upsert_checkbox(UpsertCheckboxArgs {
+        id: "cb".to_string(),
+        rect: rect(),
+        text: Some("cb".to_string()),
+        checked: Some(true),
+        font_size: 16.0,
+        text_color: color,
+        enabled: true,
+    });
+    state.upsert_checkbox(UpsertCheckboxArgs {
+        id: "cb".to_string(),
+        rect: rect(),
+        text: Some("cb".to_string()),
+        checked: Some(false),
+        font_size: 16.0,
+        text_color: color,
+        enabled: true,
+    });
+
+    assert!(!state.checkbox_response("cb").checked);
+}
+
+#[test]
 fn set_checkbox_enabled_false_clears_flags_and_active_id() {
     let mut state = RetainedState::new();
     let color = Color::from_rgb8(240, 240, 240);

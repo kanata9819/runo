@@ -6,7 +6,7 @@ mod radio_button;
 mod slider;
 mod text_box;
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use vello::peniko::Color;
 
@@ -26,6 +26,7 @@ mod tests;
 pub(crate) struct RetainedState {
     pub(super) widgets: HashMap<String, WidgetNode>,
     pub(super) order: Vec<String>,
+    pub(super) seen_widget_ids: HashSet<String>,
     pub(super) active_button: Option<String>,
     pub(super) active_checkbox: Option<String>,
     pub(super) active_radio_button: Option<String>,
@@ -70,6 +71,8 @@ impl RetainedState {
         FUpdate: FnOnce(&mut WidgetNode) -> Option<R>,
         FNewResponse: FnOnce(&WidgetNode) -> R,
     {
+        self.seen_widget_ids.insert(id.clone());
+
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
             self.widgets.insert(id.clone(), make_new_node());

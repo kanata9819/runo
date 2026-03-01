@@ -215,3 +215,45 @@ fn upsert_helper_keeps_order_unique_and_supports_type_replacement() {
         Some(crate::retained::node::WidgetNode::Button(_))
     ));
 }
+
+#[test]
+fn prune_unseen_widgets_removes_stale_entries_after_build_pass() {
+    let mut state = RetainedState::new();
+    let color = Color::from_rgb8(220, 220, 220);
+
+    state.begin_build_pass();
+    state.upsert_label(
+        "row_0".to_string(),
+        rect(),
+        "row 0".to_string(),
+        14.0,
+        color,
+        true,
+    );
+    state.upsert_label(
+        "row_1".to_string(),
+        rect(),
+        "row 1".to_string(),
+        14.0,
+        color,
+        true,
+    );
+    state.prune_unseen_widgets();
+    assert!(state.widgets.contains_key("row_0"));
+    assert!(state.widgets.contains_key("row_1"));
+    assert_eq!(state.order, vec!["row_0".to_string(), "row_1".to_string()]);
+
+    state.begin_build_pass();
+    state.upsert_label(
+        "row_0".to_string(),
+        rect(),
+        "row 0".to_string(),
+        14.0,
+        color,
+        true,
+    );
+    state.prune_unseen_widgets();
+    assert!(state.widgets.contains_key("row_0"));
+    assert!(!state.widgets.contains_key("row_1"));
+    assert_eq!(state.order, vec!["row_0".to_string()]);
+}

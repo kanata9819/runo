@@ -82,6 +82,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     fn run_ui_frame(&mut self) {
         self.effects.begin_frame();
         self.states.begin_frame();
+        self.retained.begin_build_pass();
 
         {
             let mut ui = Ui::new(
@@ -94,6 +95,8 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
             self.user_app.build(&mut ui);
         }
+
+        self.retained.prune_unseen_widgets();
 
         self.retained
             .begin_frame_input(self.input.snapshot(), self.font.as_ref());

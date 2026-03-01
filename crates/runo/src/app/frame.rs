@@ -86,6 +86,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 &mut self.states,
                 &mut self.retained,
             );
+
             self.user_app.build(&mut ui);
         }
 

@@ -36,13 +36,16 @@ impl EffectStore {
 
         if let Some(entry) = self.entries.get_mut(&key) {
             entry.seen_this_frame = true;
+
             if entry.deps_hash != deps_hash {
                 if let Some(mut cleanup) = entry.cleanup.take() {
                     cleanup();
                 }
+
                 entry.deps_hash = deps_hash;
                 entry.cleanup = effect();
             }
+
             return;
         }
 
@@ -64,6 +67,7 @@ impl EffectStore {
                 if let Some(mut cleanup) = entry.cleanup.take() {
                     cleanup();
                 }
+
                 false
             }
         });

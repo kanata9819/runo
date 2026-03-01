@@ -55,6 +55,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn new(user_app: A, mut window_options: RunOptions) -> Self {
         (window_options.window_width, window_options.window_height) =
             sanitize_window_size(window_options.window_width, window_options.window_height);
+
         Self {
             user_app,
             window: None,
@@ -80,6 +81,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
                 .create_window(attributes)
                 .expect("failed to create window"),
         );
+
         window.set_ime_allowed(true);
         let size = window.inner_size();
 
@@ -125,7 +127,6 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         }
     }
 
-    #[cfg(test)]
     #[cfg(test)]
     pub(super) fn window_options(&self) -> &RunOptions {
         &self.window_options

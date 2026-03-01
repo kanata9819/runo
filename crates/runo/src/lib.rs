@@ -13,7 +13,7 @@ mod widget;
 
 pub use app::{RunOptions, RunoApplication, run};
 pub use event::UiEvent;
-pub use hooks::effect::EffectCleanup;
+pub use hooks::use_effect::EffectCleanup;
 pub use layout::div::DivHandle;
 pub use theme::color as colors;
 pub use ui::{
@@ -49,8 +49,8 @@ mod tests {
     use vello::kurbo::Rect;
     use vello::peniko::Color;
 
-    use crate::hooks::effect::EffectStore;
-    use crate::hooks::state::StateStore;
+    use crate::hooks::use_effect::EffectStore;
+    use crate::hooks::use_state::StateStore;
     use crate::layout::{LayoutDirection, LayoutNode};
     use crate::retained::{
         RetainedState, UpsertCheckboxArgs, UpsertComboBoxArgs, UpsertRadioButtonArgs,

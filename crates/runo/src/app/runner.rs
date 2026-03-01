@@ -12,8 +12,8 @@ use winit::window::{Window, WindowAttributes, WindowId};
 
 use crate::app::{RunOptions, RunoApplication};
 use crate::font::load_default_font;
-use crate::hooks::effect::EffectStore;
-use crate::hooks::state::StateStore;
+use crate::hooks::use_effect::EffectStore;
+use crate::hooks::use_state::StateStore;
 use crate::input::InputState;
 use crate::retained::RetainedState;
 

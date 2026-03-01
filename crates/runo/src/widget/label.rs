@@ -114,8 +114,8 @@ mod tests {
     use vello::Scene;
     use vello::peniko::Color;
 
-    use crate::hooks::effect::EffectStore;
-    use crate::hooks::state::StateStore;
+    use crate::hooks::use_effect::EffectStore;
+    use crate::hooks::use_state::StateStore;
     use crate::retained::RetainedState;
     use crate::ui::Ui;
 

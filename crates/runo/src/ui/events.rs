@@ -407,8 +407,8 @@ mod tests {
 
     use super::{ActionBindings, EventBindings};
     use crate::event::UiEvent;
-    use crate::hooks::effect::EffectStore;
-    use crate::hooks::state::StateStore;
+    use crate::hooks::use_effect::EffectStore;
+    use crate::hooks::use_state::StateStore;
     use crate::retained::RetainedState;
     use crate::ui::Ui;
     use crate::widget::button::ButtonHandle;

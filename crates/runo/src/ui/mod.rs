@@ -26,8 +26,8 @@ use vello::kurbo::{Affine, Rect};
 use vello::peniko::{Fill, FontData};
 
 use crate::Color;
-use crate::hooks::effect::{EffectCleanup, EffectStore};
-use crate::hooks::state::StateStore;
+use crate::hooks::use_state::StateStore;
+use crate::hooks::use_effect::{EffectCleanup, EffectStore};
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
@@ -232,8 +232,8 @@ mod tests {
     use vello::Scene;
 
     use crate::Color;
-    use crate::hooks::effect::EffectStore;
-    use crate::hooks::state::StateStore;
+    use crate::hooks::use_state::StateStore;
+    use crate::hooks::use_effect::EffectStore;
     use crate::retained::RetainedState;
 
     use super::Ui;

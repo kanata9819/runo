@@ -107,7 +107,10 @@ fn apply_keyboard_actions<A: RunoApplication + 'static>(
 }
 
 impl<A: RunoApplication + 'static> AppRunner<A> {
-    fn update_input_and_request_redraw(&mut self, update: impl FnOnce(&mut crate::input::InputState)) {
+    fn update_input_and_request_redraw(
+        &mut self,
+        update: impl FnOnce(&mut crate::input::InputState),
+    ) {
         update(&mut self.input);
         self.request_redraw();
     }

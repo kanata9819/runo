@@ -14,23 +14,28 @@ pub enum UiEvent {
     ButtonClicked {
         button: ButtonHandle,
     },
+
     CheckboxChanged {
         checkbox: CheckboxHandle,
         checked: bool,
     },
+
     RadioButtonChanged {
         radio_button: RadioButtonHandle,
         group: String,
         selected: bool,
     },
+
     SliderChanged {
         slider: SliderHandle,
         value: f64,
     },
+
     TextBoxChanged {
         text_box: TextBoxHandle,
         text: String,
     },
+
     ComboBoxChanged {
         combo_box: ComboBoxHandle,
         selected_index: usize,

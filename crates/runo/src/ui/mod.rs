@@ -1,3 +1,7 @@
+//! Immediate-style facade over the retained core.
+//!
+//! Application code uses `Ui` builders each frame, while `Ui` writes into
+//! `retained::state` so interaction and rendering remain stable across frames.
 mod events;
 mod show;
 mod state;
@@ -230,8 +234,17 @@ impl<'a> Ui<'a> {
         self.layout_stack.allocate_rect(width, height)
     }
 
+    pub(crate) fn allocate_widget_rect(&mut self, width: f64, height: f64) -> Rect {
+        let (x, y) = self.allocate_rect(width, height);
+        Rect::new(x, y, x + width, y + height)
+    }
+
     fn current_enabled(&self) -> bool {
         self.enabled_stack.last().copied().unwrap_or(true)
+    }
+
+    pub(crate) fn resolve_enabled(&self, enabled: bool) -> bool {
+        enabled && self.current_enabled()
     }
 
     fn next_auto_id(&mut self, kind: &str) -> String {

@@ -3,7 +3,7 @@ use vello::peniko::Color;
 
 use crate::CheckboxResponse;
 use crate::retained::node::{CheckboxNode, WidgetNode};
-use crate::retained::state::RetainedState;
+use crate::retained::state::{RetainedState, clear_slot_if_matches};
 
 #[cfg(test)]
 #[path = "../../../tests/unit/retained/state/checkbox.rs"]
@@ -114,10 +114,7 @@ impl RetainedState {
             checkbox.hovered = false;
             checkbox.pressed = false;
             checkbox.changed = false;
-
-            if self.active_checkbox.as_deref() == Some(id_ref) {
-                self.active_checkbox = None;
-            }
+            clear_slot_if_matches(&mut self.active_checkbox, id_ref);
         }
     }
 }

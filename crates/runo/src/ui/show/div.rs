@@ -82,7 +82,7 @@ impl<'a> Ui<'a> {
 
     fn resolve_div_enabled(&self, id: &str) -> bool {
         let div_enabled = self.retained.div_enabled(id);
-        self.current_enabled() && div_enabled
+        self.resolve_enabled(div_enabled)
     }
 
     fn layout_div_children<R>(

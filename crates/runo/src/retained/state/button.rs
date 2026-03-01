@@ -3,7 +3,7 @@ use vello::peniko::Color;
 
 use crate::ButtonResponse;
 use crate::retained::node::{ButtonNode, WidgetNode};
-use crate::retained::state::RetainedState;
+use crate::retained::state::{RetainedState, clear_slot_if_matches};
 
 #[cfg(test)]
 #[path = "../../../tests/unit/retained/state/button.rs"]
@@ -82,7 +82,7 @@ impl RetainedState {
 
     pub(crate) fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         let id_ref = id.as_ref();
-        let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id.as_ref()) else {
+        let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id_ref) else {
             return;
         };
 
@@ -92,10 +92,7 @@ impl RetainedState {
             button.hovered = false;
             button.pressed = false;
             button.clicked = false;
-
-            if self.active_button.as_deref() == Some(id_ref) {
-                self.active_button = None;
-            }
+            clear_slot_if_matches(&mut self.active_button, id_ref);
         }
     }
 }

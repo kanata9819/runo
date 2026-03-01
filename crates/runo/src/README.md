@@ -24,6 +24,13 @@
 1. `RunoApplication::build()` で初期 UI 構築
 2. `RunoApplication::update()` で毎フレーム状態更新
 
+## フレーム処理の流れ（実装対応）
+
+1. `ui/show/*` がウィジェット定義を `retained/state` に `upsert`
+2. `retained/input/*` が入力から `hovered/pressed/focused` を更新し `UiEvent` を生成
+3. `retained/paint/*` が保持ノードを描画（本体パス -> オーバーレイパス）
+4. `ui/events` がアプリへイベントを提供
+
 ## 詳細ドキュメント
 
 - `crates/runo/docs/ja/README.md`

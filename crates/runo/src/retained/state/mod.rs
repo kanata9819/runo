@@ -1,3 +1,7 @@
+//! Persistent widget state storage.
+//!
+//! `RetainedState` is the central store for widget nodes, z-order, active/focused ids,
+//! and queued `UiEvent`s. `ui::show` upserts node snapshots into this store every frame.
 mod button;
 mod checkbox;
 mod combo_box;
@@ -56,6 +60,21 @@ fn snap_and_clamp(value: f64, min: f64, max: f64, step: Option<f64>) -> f64 {
     }
 
     clamped
+}
+
+pub(super) fn clear_slot_if_matches(slot: &mut Option<String>, id: &str) {
+    if slot.as_deref() == Some(id) {
+        *slot = None;
+    }
+}
+
+pub(super) fn clear_slot_if_absent(
+    slot: &mut Option<String>,
+    widgets: &HashMap<String, WidgetNode>,
+) {
+    if slot.as_ref().is_some_and(|id| !widgets.contains_key(id)) {
+        *slot = None;
+    }
 }
 
 impl RetainedState {

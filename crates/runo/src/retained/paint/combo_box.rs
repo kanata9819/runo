@@ -4,6 +4,7 @@ use vello::peniko::{Fill, FontData};
 use vello::{Glyph, Scene};
 
 use super::interaction_color;
+use super::text_baseline;
 use crate::retained::node::ComboBoxNode;
 use crate::theme::color;
 use crate::widget::text;
@@ -13,8 +14,6 @@ use crate::widget::text;
 mod tests;
 
 const TEXT_HORIZONTAL_PADDING: f64 = 12.0;
-const BASELINE_VERTICAL_RATIO: f64 = 0.5;
-const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 const ARROW_FONT_SCALE: f32 = 0.85;
 const COMBO_BOX_CORNER_RADIUS: f64 = 8.0;
 const ITEM_CORNER_RADIUS: f64 = 0.0;
@@ -45,9 +44,7 @@ fn get_selected_text(combo_box: &ComboBoxNode) -> &str {
 #[inline]
 /// Computes the text baseline y-coordinate for a given rect and font size.
 fn baseline_y(rect: Rect, font_size: f32) -> f64 {
-    rect.y0
-        + rect.height() * BASELINE_VERTICAL_RATIO
-        + font_size as f64 * BASELINE_FONT_OFFSET_RATIO
+    text_baseline::centered(rect, font_size)
 }
 
 #[inline]
@@ -193,9 +190,7 @@ pub(super) fn render_dropdown_overlay(
 
         if let Some((glyphs, _)) = text::layout_text(font, item, combo_box.font_size) {
             let text_x = item_rect.x0 + TEXT_HORIZONTAL_PADDING;
-            let baseline_y = item_rect.y0
-                + item_rect.height() * BASELINE_VERTICAL_RATIO
-                + combo_box.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
+            let baseline_y = baseline_y(item_rect, combo_box.font_size);
             text::draw_text_run(
                 scene,
                 font,

@@ -1,3 +1,12 @@
+//! `runo` is a retained-mode oriented GUI core on top of `winit + wgpu + vello`.
+//!
+//! Runtime flow (high level):
+//! 1. `ui` builds widgets each frame and upserts them into `retained::state`.
+//! 2. `retained::input` updates interaction flags and emits `UiEvent`s.
+//! 3. `retained::paint` renders nodes in stable order (base layer -> overlay layer).
+//! 4. `ui::events` exposes events/actions to application code.
+//!
+//! This crate keeps widget state in a central retained tree so builders stay lightweight.
 mod app;
 mod cache;
 mod event;
@@ -5,7 +14,6 @@ mod font;
 mod hooks;
 mod input;
 mod layout;
-mod option_ext;
 mod retained;
 mod theme;
 mod ui;
@@ -38,10 +46,3 @@ pub use widget::slider::SliderHandle;
 pub use widget::slider::SliderResponse;
 pub use widget::text_box::TextBoxHandle;
 pub use widget::text_box::{Overflow, TextBoxResponse};
-
-pub mod prelude {
-    pub use crate::option_ext::{
-        OptionalButtonHandleExt, OptionalCheckboxHandleExt, OptionalComboBoxHandleExt,
-        OptionalRadioButtonHandleExt, OptionalSliderHandleExt, OptionalTextBoxHandleExt,
-    };
-}

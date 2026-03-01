@@ -151,6 +151,7 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
             text_color: self.text_color,
             enabled: self.enabled,
         });
+
         RadioButtonHandle::new(id)
     }
 }

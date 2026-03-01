@@ -21,11 +21,13 @@ pub(crate) fn load_default_font() -> Option<FontData> {
             return Some(font);
         }
     }
+
     None
 }
 
 fn load_font_from_path(path: &str) -> Option<FontData> {
     let bytes = fs::read(path).ok()?;
     let blob = Blob::new(Arc::new(bytes.into_boxed_slice()));
+
     Some(FontData::new(blob, 0))
 }

@@ -1,3 +1,8 @@
+//! Paint phase for retained widgets.
+//!
+//! Rendering is split into two passes:
+//! 1. base widgets in layout order
+//! 2. overlay elements that must stay on top (e.g. combo-box dropdowns)
 mod button;
 mod checkbox;
 mod combo_box;
@@ -6,6 +11,7 @@ mod interaction_color;
 mod label;
 mod radio_button;
 mod slider;
+mod text_baseline;
 mod text_box;
 
 use vello::Scene;

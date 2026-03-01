@@ -3,7 +3,9 @@ use vello::peniko::Color;
 
 use crate::SliderResponse;
 use crate::retained::node::{SliderNode, WidgetNode};
-use crate::retained::state::{RetainedState, normalize_range, snap_and_clamp};
+use crate::retained::state::{
+    RetainedState, clear_slot_if_matches, normalize_range, snap_and_clamp,
+};
 
 #[cfg(test)]
 #[path = "../../../tests/unit/retained/state/slider.rs"]
@@ -129,10 +131,7 @@ impl RetainedState {
             slider.hovered = false;
             slider.pressed = false;
             slider.changed = false;
-
-            if self.active_slider.as_deref() == Some(id_ref) {
-                self.active_slider = None;
-            }
+            clear_slot_if_matches(&mut self.active_slider, id_ref);
         }
     }
 }

@@ -2,6 +2,7 @@ use vello::Glyph;
 use vello::Scene;
 use vello::peniko::FontData;
 
+use super::text_baseline;
 use crate::retained::node::LabelNode;
 use crate::theme::color;
 use crate::widget::text;
@@ -33,7 +34,7 @@ fn layout_for_label<'a>(
 ) -> Option<(&'a FontData, Vec<Glyph>, f64)> {
     let font = font?;
     let (glyphs, _) = text::layout_text(font, &label.text, label.font_size)?;
-    let baseline_y = label.rect.y0 + label.font_size as f64;
+    let baseline_y = text_baseline::top_aligned(label.rect, label.font_size);
 
     Some((font, glyphs, baseline_y))
 }

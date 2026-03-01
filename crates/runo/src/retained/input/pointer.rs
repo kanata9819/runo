@@ -9,6 +9,20 @@ use crate::retained::state::RetainedState;
 mod tests;
 
 impl RetainedState {
+    fn find_topmost_widget_id<F>(&self, mut predicate: F) -> Option<String>
+    where
+        F: FnMut(&WidgetNode) -> bool,
+    {
+        self.order.iter().rev().find_map(|id| {
+            let node = self.widgets.get(id)?;
+            if predicate(node) {
+                Some(id.clone())
+            } else {
+                None
+            }
+        })
+    }
+
     pub(super) fn update_hover_flags(&mut self, cursor_pos: (f64, f64)) {
         let open_overlay_id = self.order.iter().rev().find_map(|id| {
             let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
@@ -24,49 +38,60 @@ impl RetainedState {
                 None
             }
         });
+        let overlay_blocks_other_widgets = open_overlay_id.is_some();
 
         for (id, node) in &mut self.widgets {
             match node {
                 WidgetNode::Div(_) => {}
                 WidgetNode::Button(button) => {
                     button.clicked = false;
-                    button.hovered = if !button.enabled || open_overlay_id.is_some() {
-                        false
-                    } else {
-                        contains(button.rect, cursor_pos.0, cursor_pos.1)
-                    };
+                    button.hovered = hovered_when_enabled(
+                        button.enabled,
+                        overlay_blocks_other_widgets,
+                        button.rect,
+                        cursor_pos.0,
+                        cursor_pos.1,
+                    );
                 }
                 WidgetNode::Checkbox(checkbox) => {
                     checkbox.changed = false;
-                    checkbox.hovered = if !checkbox.enabled || open_overlay_id.is_some() {
-                        false
-                    } else {
-                        contains(checkbox.rect, cursor_pos.0, cursor_pos.1)
-                    };
+                    checkbox.hovered = hovered_when_enabled(
+                        checkbox.enabled,
+                        overlay_blocks_other_widgets,
+                        checkbox.rect,
+                        cursor_pos.0,
+                        cursor_pos.1,
+                    );
                 }
                 WidgetNode::RadioButton(radio_button) => {
                     radio_button.changed = false;
-                    radio_button.hovered = if !radio_button.enabled || open_overlay_id.is_some() {
-                        false
-                    } else {
-                        contains(radio_button.rect, cursor_pos.0, cursor_pos.1)
-                    };
+                    radio_button.hovered = hovered_when_enabled(
+                        radio_button.enabled,
+                        overlay_blocks_other_widgets,
+                        radio_button.rect,
+                        cursor_pos.0,
+                        cursor_pos.1,
+                    );
                 }
                 WidgetNode::Slider(slider) => {
                     slider.changed = false;
-                    slider.hovered = if !slider.enabled || open_overlay_id.is_some() {
-                        false
-                    } else {
-                        contains(slider.rect, cursor_pos.0, cursor_pos.1)
-                    };
+                    slider.hovered = hovered_when_enabled(
+                        slider.enabled,
+                        overlay_blocks_other_widgets,
+                        slider.rect,
+                        cursor_pos.0,
+                        cursor_pos.1,
+                    );
                 }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
-                    text_box.hovered = if !text_box.enabled || open_overlay_id.is_some() {
-                        false
-                    } else {
-                        contains(text_box.rect, cursor_pos.0, cursor_pos.1)
-                    };
+                    text_box.hovered = hovered_when_enabled(
+                        text_box.enabled,
+                        overlay_blocks_other_widgets,
+                        text_box.rect,
+                        cursor_pos.0,
+                        cursor_pos.1,
+                    );
                 }
                 WidgetNode::ComboBox(combo_box) => {
                     combo_box.changed = false;
@@ -95,76 +120,32 @@ impl RetainedState {
 
     pub(super) fn handle_mouse_press(&mut self, mouse_pressed: bool) {
         if mouse_pressed {
-            self.active_button = self.order.iter().rev().find_map(|id| {
-                let WidgetNode::Button(button) = self.widgets.get(id)? else {
-                    return None;
-                };
+            self.active_button = self.find_topmost_widget_id(
+                |node| matches!(node, WidgetNode::Button(button) if button.enabled && button.hovered),
+            );
 
-                if button.enabled && button.hovered {
-                    Some(id.clone())
-                } else {
-                    None
-                }
-            });
+            self.active_checkbox = self.find_topmost_widget_id(
+                |node| matches!(node, WidgetNode::Checkbox(checkbox) if checkbox.enabled && checkbox.hovered),
+            );
 
-            self.active_checkbox = self.order.iter().rev().find_map(|id| {
-                let WidgetNode::Checkbox(checkbox) = self.widgets.get(id)? else {
-                    return None;
-                };
+            self.active_radio_button = self.find_topmost_widget_id(
+                |node| matches!(node, WidgetNode::RadioButton(radio_button) if radio_button.enabled && radio_button.hovered),
+            );
 
-                if checkbox.enabled && checkbox.hovered {
-                    Some(id.clone())
-                } else {
-                    None
-                }
-            });
+            self.active_slider = self.find_topmost_widget_id(
+                |node| matches!(node, WidgetNode::Slider(slider) if slider.enabled && slider.hovered),
+            );
 
-            self.active_radio_button = self.order.iter().rev().find_map(|id| {
-                let WidgetNode::RadioButton(radio_button) = self.widgets.get(id)? else {
-                    return None;
-                };
+            self.focused_text_box = self.find_topmost_widget_id(
+                |node| matches!(node, WidgetNode::TextBox(text_box) if text_box.enabled && text_box.hovered),
+            );
 
-                if radio_button.enabled && radio_button.hovered {
-                    Some(id.clone())
-                } else {
-                    None
-                }
-            });
-
-            self.active_slider = self.order.iter().rev().find_map(|id| {
-                let WidgetNode::Slider(slider) = self.widgets.get(id)? else {
-                    return None;
-                };
-
-                if slider.enabled && slider.hovered {
-                    Some(id.clone())
-                } else {
-                    None
-                }
-            });
-
-            self.focused_text_box = self.order.iter().rev().find_map(|id| {
-                let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
-                    return None;
-                };
-
-                if text_box.enabled && text_box.hovered {
-                    Some(id.clone())
-                } else {
-                    None
-                }
-            });
-
-            self.active_combo_box = self.order.iter().rev().find_map(|id| {
-                let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
-                    return None;
-                };
-
-                if combo_box.enabled && (combo_box.hovered || combo_box.hovered_item.is_some()) {
-                    Some(id.clone())
-                } else {
-                    None
-                }
+            self.active_combo_box = self.find_topmost_widget_id(|node| {
+                matches!(
+                    node,
+                    WidgetNode::ComboBox(combo_box)
+                    if combo_box.enabled && (combo_box.hovered || combo_box.hovered_item.is_some())
+                )
             });
         }
     }
@@ -184,20 +165,9 @@ impl RetainedState {
                     continue;
                 }
 
-                button.pressed = mouse_down
-                    && self
-                        .active_button
-                        .as_ref()
-                        .map(|active| active == id)
-                        .unwrap_or(false);
+                button.pressed = mouse_down && is_active_id(self.active_button.as_ref(), id);
 
-                if mouse_pressed
-                    && button.hovered
-                    && self
-                        .active_button
-                        .as_ref()
-                        .map(|active| active == id)
-                        .unwrap_or(false)
+                if mouse_pressed && button.hovered && is_active_id(self.active_button.as_ref(), id)
                 {
                     button.clicked = true;
                     clicked_ids.push(id.clone());
@@ -228,10 +198,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = active_checkbox
-                    .as_ref()
-                    .map(|active| active == id)
-                    .unwrap_or(false);
+                let is_active = is_active_id(active_checkbox.as_ref(), id);
 
                 checkbox.pressed = mouse_down && is_active;
 
@@ -269,10 +236,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = active_radio_button
-                    .as_ref()
-                    .map(|active| active == id)
-                    .unwrap_or(false);
+                let is_active = is_active_id(active_radio_button.as_ref(), id);
 
                 radio_button.pressed = mouse_down && is_active;
 
@@ -324,10 +288,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = active_slider
-                    .as_ref()
-                    .map(|active| active == id)
-                    .unwrap_or(false);
+                let is_active = is_active_id(active_slider.as_ref(), id);
 
                 slider.pressed = mouse_down && is_active;
 
@@ -365,10 +326,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = active_combo_box
-                    .as_ref()
-                    .map(|active| active == id)
-                    .unwrap_or(false);
+                let is_active = is_active_id(active_combo_box.as_ref(), id);
 
                 combo_box.pressed = mouse_down && is_active;
 
@@ -480,6 +438,10 @@ fn combo_expanded_contains(
     combo_item_index_at(combo_box, x, y).is_some()
 }
 
+fn hovered_when_enabled(enabled: bool, overlay_blocks: bool, rect: Rect, x: f64, y: f64) -> bool {
+    enabled && !overlay_blocks && contains(rect, x, y)
+}
+
 fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x: f64) -> f64 {
     let x0 = slider.rect.x0 + 12.0;
     let x1 = slider.rect.x1 - 12.0;
@@ -494,4 +456,8 @@ fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x
     }
 
     value.clamp(slider.min, slider.max)
+}
+
+fn is_active_id(active_id: Option<&String>, id: &str) -> bool {
+    active_id.is_some_and(|active| active == id)
 }

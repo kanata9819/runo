@@ -4,6 +4,7 @@ use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Fill, FontData};
 
 use super::interaction_color;
+use super::text_baseline;
 use crate::retained::node::CheckboxNode;
 use crate::theme::color;
 use crate::widget::text;
@@ -24,7 +25,6 @@ const CHECK_X2_RATIO: f64 = 0.80;
 const CHECK_Y2_RATIO: f64 = 0.28;
 const LABEL_TEXT_SPACING: f64 = 10.0;
 const BASELINE_VERTICAL_RATIO: f64 = 0.5;
-const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 const INDICATOR_SIZE_OFFSET: f64 = 8.0;
 const INDICATOR_SIZE_MIN: f64 = 14.0;
 const INDICATOR_SIZE_MAX: f64 = 24.0;
@@ -110,9 +110,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
     };
 
     let text_x = indicator_x + indicator_size + LABEL_TEXT_SPACING;
-    let baseline_y = checkbox.rect.y0
-        + checkbox.rect.height() * BASELINE_VERTICAL_RATIO
-        + checkbox.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
+    let baseline_y = text_baseline::centered(checkbox.rect, checkbox.font_size);
     let color = if checkbox.enabled {
         checkbox.text_color
     } else {

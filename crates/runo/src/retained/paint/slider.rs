@@ -1,7 +1,10 @@
 use vello::Scene;
 use vello::kurbo::{Affine, Circle, RoundedRect, Stroke};
+use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Fill, FontData};
 
+use super::interaction_color;
+use super::text_baseline;
 use crate::retained::node::SliderNode;
 use crate::theme::color;
 use crate::widget::text;
@@ -84,15 +87,7 @@ fn draw_active_fill(
     scene.fill(
         Fill::NonZero,
         Affine::IDENTITY,
-        if !slider.enabled {
-            color::Neutral::tone_78_82_90()
-        } else if slider.pressed {
-            color::AccentBlue::tone_37_132_214()
-        } else if slider.hovered {
-            color::AccentBlue::tone_62_154_234()
-        } else {
-            color::AccentBlue::tone_50_144_229()
-        },
+        active_fill_color(slider),
         None,
         &active_rect,
     );
@@ -128,7 +123,7 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
     if let Some(text) = slider.text.as_deref()
         && let Some((glyphs, _)) = text::layout_text(font, text, slider.font_size)
     {
-        let baseline_y = slider.rect.y0 + slider.font_size as f64;
+        let baseline_y = text_baseline::top_aligned(slider.rect, slider.font_size);
 
         text::draw_text_run(
             scene,
@@ -151,7 +146,7 @@ fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_
     let value_text = format!("{:.*}", VALUE_DECIMALS, slider.value);
 
     if let Some((glyphs, w)) = text::layout_text(font, &value_text, slider.font_size) {
-        let baseline_y = slider.rect.y0 + slider.font_size as f64;
+        let baseline_y = text_baseline::top_aligned(slider.rect, slider.font_size);
 
         text::draw_text_run(
             scene,
@@ -167,6 +162,18 @@ fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_
             },
         );
     }
+}
+
+fn active_fill_color(slider: &SliderNode) -> AlphaColor<Srgb> {
+    interaction_color::resolve_interaction_color(
+        slider.enabled,
+        slider.pressed,
+        slider.hovered,
+        color::Neutral::tone_78_82_90(),
+        color::AccentBlue::tone_37_132_214(),
+        color::AccentBlue::tone_62_154_234(),
+        color::AccentBlue::tone_50_144_229(),
+    )
 }
 
 /// Converts slider value in `[min, max]` into a clamped ratio in `[0.0, 1.0]`.

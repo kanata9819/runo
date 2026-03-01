@@ -20,6 +20,7 @@ pub(crate) fn layout_text(
         let Ok(font_ref) = FontRef::from_index(font.data.as_ref(), font.index) else {
             return None;
         };
+
         let charmap = font_ref.charmap();
         let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
 
@@ -30,6 +31,7 @@ pub(crate) fn layout_text(
             let Some(glyph_id) = charmap.map(ch) else {
                 continue;
             };
+
             let advance = glyph_metrics
                 .advance_width(glyph_id)
                 .unwrap_or(font_size * 0.56);
@@ -38,6 +40,7 @@ pub(crate) fn layout_text(
                 x: total_advance,
                 y: 0.0,
             });
+
             total_advance += advance;
         }
 

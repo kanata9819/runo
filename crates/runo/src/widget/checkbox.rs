@@ -143,6 +143,7 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
             text_color: self.text_color,
             enabled: self.enabled,
         });
+
         CheckboxHandle::new(id)
     }
 }

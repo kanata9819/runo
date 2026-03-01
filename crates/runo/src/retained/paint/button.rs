@@ -5,6 +5,7 @@ use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Fill, FontData};
 
 use super::interaction_color;
+use super::text_baseline;
 use crate::retained::node::ButtonNode;
 use crate::theme::color;
 use crate::widget::text;
@@ -15,7 +16,6 @@ mod tests;
 
 const BUTTON_CORNER_RADIUS: f64 = 10.0;
 const TEXT_CENTER_RATIO: f64 = 0.5;
-const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 
 /// Renders a button body and optional centered label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &ButtonNode) {
@@ -57,9 +57,7 @@ fn draw_text_run(
     total_advance: f32,
 ) {
     let text_x = button.rect.x0 + (button.rect.width() - total_advance as f64) * TEXT_CENTER_RATIO;
-    let text_y = button.rect.y0
-        + button.rect.height() * TEXT_CENTER_RATIO
-        + button.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
+    let text_y = text_baseline::centered(button.rect, button.font_size);
 
     let color = if button.enabled {
         button.text_color

@@ -3,7 +3,7 @@ use vello::peniko::Color;
 
 use crate::ComboBoxResponse;
 use crate::retained::node::{ComboBoxNode, WidgetNode};
-use crate::retained::state::RetainedState;
+use crate::retained::state::{RetainedState, clear_slot_if_matches};
 
 #[cfg(test)]
 #[path = "../../../tests/unit/retained/state/combo_box.rs"]
@@ -168,10 +168,7 @@ impl RetainedState {
             combo_box.pressed = false;
             combo_box.changed = false;
             combo_box.is_open = false;
-
-            if self.active_combo_box.as_deref() == Some(id_ref) {
-                self.active_combo_box = None;
-            }
+            clear_slot_if_matches(&mut self.active_combo_box, id_ref);
         }
     }
 }

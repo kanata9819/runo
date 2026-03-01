@@ -176,6 +176,7 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
             border_color: self.border_color,
             enabled: self.enabled,
         });
+
         ComboBoxHandle::new(id)
     }
 }

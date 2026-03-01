@@ -163,6 +163,7 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
             text_color: self.text_color,
             enabled: self.enabled,
         });
+
         SliderHandle::new(id)
     }
 }

@@ -1,3 +1,8 @@
+//! Input phase for retained widgets.
+//!
+//! This phase translates raw `InputFrame` data into:
+//! - transient interaction flags (`hovered`, `pressed`, `focused`, ...)
+//! - semantic UI events (`ButtonClicked`, `SliderChanged`, ...)
 mod pointer;
 mod text_box;
 

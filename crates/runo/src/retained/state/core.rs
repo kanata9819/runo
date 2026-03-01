@@ -5,7 +5,7 @@ use vello::peniko::Color;
 
 use crate::event::UiEvent;
 use crate::retained::node::{DivNode, LabelNode, WidgetNode};
-use crate::retained::state::RetainedState;
+use crate::retained::state::{RetainedState, clear_slot_if_absent};
 use crate::widget::button::ButtonHandle;
 use crate::widget::checkbox::CheckboxHandle;
 use crate::widget::combo_box::ComboBoxHandle;
@@ -259,61 +259,13 @@ impl RetainedState {
     }
 
     fn prune_active_widget_ids(&mut self) {
-        if self
-            .active_button
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.active_button = None;
-        }
-
-        if self
-            .active_checkbox
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.active_checkbox = None;
-        }
-
-        if self
-            .active_radio_button
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.active_radio_button = None;
-        }
-
-        if self
-            .active_slider
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.active_slider = None;
-        }
-
-        if self
-            .active_combo_box
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.active_combo_box = None;
-        }
-
-        if self
-            .active_text_box_scrollbar
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.active_text_box_scrollbar = None;
-        }
-
-        if self
-            .focused_text_box
-            .as_ref()
-            .is_some_and(|id| !self.widgets.contains_key(id))
-        {
-            self.focused_text_box = None;
-        }
+        clear_slot_if_absent(&mut self.active_button, &self.widgets);
+        clear_slot_if_absent(&mut self.active_checkbox, &self.widgets);
+        clear_slot_if_absent(&mut self.active_radio_button, &self.widgets);
+        clear_slot_if_absent(&mut self.active_slider, &self.widgets);
+        clear_slot_if_absent(&mut self.active_combo_box, &self.widgets);
+        clear_slot_if_absent(&mut self.active_text_box_scrollbar, &self.widgets);
+        clear_slot_if_absent(&mut self.focused_text_box, &self.widgets);
     }
 }
 

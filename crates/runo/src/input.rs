@@ -91,9 +91,11 @@ impl InputState {
         if next && !self.mouse_down {
             self.mouse_pressed = true;
         }
+
         if !next && self.mouse_down {
             self.mouse_released = true;
         }
+
         self.mouse_down = next;
     }
 

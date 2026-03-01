@@ -192,6 +192,7 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             overflow_x: self.overflow_x,
             overflow_y: self.overflow_y,
         });
+
         TextBoxHandle::new(id)
     }
 }

@@ -1,5 +1,3 @@
-use vello::kurbo::Rect;
-
 use crate::Color;
 use crate::ui::Ui;
 
@@ -24,15 +22,14 @@ impl<'a> Ui<'a> {
             text_color,
             enabled,
         } = args;
-        let (x, y) = self.allocate_rect(width, height);
-        let rect = Rect::new(x, y, x + width, y + height);
+        let rect = self.allocate_widget_rect(width, height);
         self.retained.upsert_label(
             id,
             rect,
             text,
             font_size,
             text_color,
-            enabled && self.current_enabled(),
+            self.resolve_enabled(enabled),
         );
     }
 }

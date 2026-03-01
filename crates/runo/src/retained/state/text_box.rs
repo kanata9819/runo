@@ -2,7 +2,7 @@ use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::retained::node::{TextBoxNode, WidgetNode};
-use crate::retained::state::RetainedState;
+use crate::retained::state::{RetainedState, clear_slot_if_matches};
 use crate::widget::text::estimate_text_width;
 use crate::widget::text_box::{Overflow, TextBoxResponse};
 
@@ -152,13 +152,8 @@ impl RetainedState {
             text_box.focused = false;
             text_box.changed = false;
 
-            if self.focused_text_box.as_deref() == Some(id_ref) {
-                self.focused_text_box = None;
-            }
-
-            if self.active_text_box_scrollbar.as_deref() == Some(id_ref) {
-                self.active_text_box_scrollbar = None;
-            }
+            clear_slot_if_matches(&mut self.focused_text_box, id_ref);
+            clear_slot_if_matches(&mut self.active_text_box_scrollbar, id_ref);
         }
     }
 }

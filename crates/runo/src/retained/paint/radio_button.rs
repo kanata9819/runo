@@ -4,6 +4,7 @@ use vello::peniko::color::{AlphaColor, Srgb};
 use vello::peniko::{Fill, FontData};
 
 use super::interaction_color;
+use super::text_baseline;
 use crate::retained::node::RadioButtonNode;
 use crate::theme::color;
 use crate::widget::text;
@@ -20,7 +21,6 @@ const INDICATOR_SIZE_MAX: f64 = 24.0;
 const OUTER_RADIUS_RATIO: f64 = 0.5;
 const INNER_RADIUS_RATIO: f64 = 0.45;
 const BASELINE_VERTICAL_RATIO: f64 = 0.5;
-const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 const LABEL_TEXT_SPACING: f64 = 10.0;
 
 /// Renders radio button indicator, selected dot, and optional label text.
@@ -83,9 +83,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
     };
 
     let text_x = center_x + indicator_radius + LABEL_TEXT_SPACING;
-    let baseline_y = radio_button.rect.y0
-        + radio_button.rect.height() * BASELINE_VERTICAL_RATIO
-        + radio_button.font_size as f64 * BASELINE_FONT_OFFSET_RATIO;
+    let baseline_y = text_baseline::centered(radio_button.rect, radio_button.font_size);
 
     text::draw_text_run(
         scene,

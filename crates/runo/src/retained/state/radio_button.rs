@@ -5,7 +5,7 @@ use vello::peniko::Color;
 
 use crate::RadioButtonResponse;
 use crate::retained::node::{RadioButtonNode, WidgetNode};
-use crate::retained::state::RetainedState;
+use crate::retained::state::{RetainedState, clear_slot_if_matches};
 
 #[cfg(test)]
 #[path = "../../../tests/unit/retained/state/radio_button.rs"]
@@ -143,10 +143,7 @@ impl RetainedState {
             radio_button.hovered = false;
             radio_button.pressed = false;
             radio_button.changed = false;
-
-            if self.active_radio_button.as_deref() == Some(id_ref) {
-                self.active_radio_button = None;
-            }
+            clear_slot_if_matches(&mut self.active_radio_button, id_ref);
         }
     }
 

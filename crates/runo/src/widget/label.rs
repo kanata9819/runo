@@ -96,6 +96,7 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
         } else {
             estimate_text_width(&self.text, self.font_size)
         };
+
         let width = self.width.unwrap_or(intrinsic_width as f64);
         let height = self.height.unwrap_or(intrinsic_height);
         let id = self.id;
@@ -109,6 +110,7 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
             text_color: self.text_color,
             enabled: self.enabled,
         });
+
         LabelHandle::new(id)
     }
 }

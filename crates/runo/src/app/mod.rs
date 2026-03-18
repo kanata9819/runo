@@ -35,6 +35,10 @@ impl Default for RunOptions {
 pub trait RunoApplication {
     type Event: 'static;
 
+    fn update(&mut self, _ui: &mut Ui<'_>) -> bool {
+        false
+    }
+
     fn build(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
         EventBindings::new()
     }
@@ -46,9 +50,14 @@ pub trait RunoApplication {
     fn options(&self) -> RunOptions {
         RunOptions::default()
     }
+
+    fn wants_continuous_redraw(&self) -> bool {
+        false
+    }
 }
 
 pub(crate) fn build_runner<A: RunoApplication + 'static>(application: A) -> AppRunner<A> {
     let options = application.options();
     AppRunner::new(application, options)
 }
+

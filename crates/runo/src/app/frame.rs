@@ -85,7 +85,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.remount_if_needed();
         self.retained
             .begin_frame_input(self.input.snapshot(), self.font.as_ref());
-        let request_remount = self.dispatch_bound_events();
+        let request_remount = self.run_app_update() || self.dispatch_bound_events();
         self.apply_frame_updates(request_remount);
         self.input.end_frame();
     }
@@ -118,6 +118,18 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.mount_required = false;
     }
 
+    fn run_app_update(&mut self) -> bool {
+        let mut ui = Ui::new(
+            &mut self.scene,
+            self.font.clone(),
+            &mut self.effects,
+            &mut self.states,
+            &mut self.retained,
+        );
+
+        self.user_app.update(&mut ui)
+    }
+
     fn dispatch_bound_events(&mut self) -> bool {
         let mut request_remount = false;
         {
@@ -138,9 +150,14 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn apply_frame_updates(&mut self, request_remount: bool) {
-        if request_remount || self.states.take_changed() {
+        let state_changed = self.states.take_changed();
+        if request_remount || state_changed {
             self.mount_required = true;
+        }
+
+        if request_remount || state_changed || self.user_app.wants_continuous_redraw() {
             self.request_redraw();
         }
     }
 }
+

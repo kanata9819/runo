@@ -160,4 +160,3 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         }
     }
 }
-

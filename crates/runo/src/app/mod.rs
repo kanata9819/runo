@@ -60,4 +60,3 @@ pub(crate) fn build_runner<A: RunoApplication + 'static>(application: A) -> AppR
     let options = application.options();
     AppRunner::new(application, options)
 }
-

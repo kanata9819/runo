@@ -118,3 +118,9 @@ fn horizontal_scrollbar_draws_only_when_scrollable() {
     text_box.scroll_x = 100.0;
     render_horizontal_scrollbar(&mut scene, &text_box);
 }
+
+#[test]
+fn line_intersects_vertical_clip_detects_visibility() {
+    assert!(line_intersects_vertical_clip(20.0, 16.0, 8.0, 24.0));
+    assert!(!line_intersects_vertical_clip(60.0, 16.0, 8.0, 24.0));
+}

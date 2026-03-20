@@ -85,8 +85,9 @@ impl RetainedState {
                 }
                 WidgetNode::TextBox(text_box) => {
                     text_box.changed = false;
-                    text_box.hovered = hovered_when_enabled(
+                    text_box.hovered = text_box_hovered(
                         text_box.enabled,
+                        text_box.overflow_x.allows_scroll() || text_box.overflow_y.allows_scroll(),
                         overlay_blocks_other_widgets,
                         text_box.rect,
                         cursor_pos.0,
@@ -440,6 +441,17 @@ fn combo_expanded_contains(
 
 fn hovered_when_enabled(enabled: bool, overlay_blocks: bool, rect: Rect, x: f64, y: f64) -> bool {
     enabled && !overlay_blocks && contains(rect, x, y)
+}
+
+fn text_box_hovered(
+    enabled: bool,
+    scrollable: bool,
+    overlay_blocks: bool,
+    rect: Rect,
+    x: f64,
+    y: f64,
+) -> bool {
+    (enabled || scrollable) && !overlay_blocks && contains(rect, x, y)
 }
 
 fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x: f64) -> f64 {

@@ -211,3 +211,25 @@ fn scrollbar_input_sets_active_and_drag_updates_scroll() {
     state.handle_text_box_scrollbar_input(false, false, true, (120.0, 40.0));
     assert!(state.active_text_box_scrollbar.is_none());
 }
+
+#[test]
+fn apply_text_box_scroll_allows_disabled_scrollable_text_box() {
+    let mut state = state_with_text_box("tb", "very long text that should overflow width");
+    if let Some(WidgetNode::TextBox(tb)) = state.widgets.get_mut("tb") {
+        tb.enabled = false;
+        tb.hovered = true;
+        tb.text_advance = 1000.0;
+        tb.overflow_x = Overflow::Auto;
+        tb.overflow_y = Overflow::Auto;
+    }
+
+    let mut input = empty_input();
+    input.scroll_y = 20.0;
+    state.apply_text_box_scroll(&input);
+
+    if let Some(WidgetNode::TextBox(tb)) = state.widgets.get("tb") {
+        assert!(tb.scroll_x > 0.0 || tb.scroll_y > 0.0);
+    } else {
+        panic!("textbox missing");
+    }
+}

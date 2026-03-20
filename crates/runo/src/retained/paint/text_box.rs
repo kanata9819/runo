@@ -32,6 +32,8 @@ struct TextMetrics {
     line_height: f64,
     inner_left: f64,
     inner_right: f64,
+    inner_top: f64,
+    inner_bottom: f64,
 }
 
 /// Renders text box background, border, text/placeholder, caret, and horizontal scrollbar.
@@ -103,6 +105,8 @@ fn text_metrics(text_box: &TextBoxNode) -> TextMetrics {
         line_height: text_box.font_size as f64 * LINE_HEIGHT_RATIO,
         inner_left: text_box.rect.x0 + INNER_PADDING,
         inner_right: text_box.rect.x1 - INNER_PADDING,
+        inner_top: text_box.rect.y0 + INNER_PADDING,
+        inner_bottom: text_box.rect.y1 - INNER_PADDING,
     }
 }
 
@@ -116,6 +120,17 @@ fn draw_text_content(
 ) {
     if text_box.text.is_empty() {
         let placeholder = text_box.placeholder.as_deref().unwrap_or("");
+        if text_box.overflow_y.clips()
+            && !line_intersects_vertical_clip(
+                metrics.first_line_baseline,
+                text_box.font_size as f64,
+                metrics.inner_top,
+                metrics.inner_bottom,
+            )
+        {
+            text_box.text_advance = 0.0;
+            return;
+        }
 
         if let Some((glyphs, advance)) = text::layout_text(font, placeholder, text_box.font_size) {
             let visible_glyphs = if text_box.overflow_x.clips() {
@@ -148,6 +163,16 @@ fn draw_text_content(
         let mut max_advance = 0.0_f64;
         for (line_index, line_text) in text_box.text.split('\n').enumerate() {
             let baseline_y = metrics.first_line_baseline + line_index as f64 * metrics.line_height;
+            if text_box.overflow_y.clips()
+                && !line_intersects_vertical_clip(
+                    baseline_y,
+                    text_box.font_size as f64,
+                    metrics.inner_top,
+                    metrics.inner_bottom,
+                )
+            {
+                continue;
+            }
             let Some((glyphs, advance)) = text::layout_text(font, line_text, text_box.font_size)
             else {
                 continue;
@@ -201,6 +226,16 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
             caret_x
         };
         let baseline_y = metrics.first_line_baseline + caret_line as f64 * metrics.line_height;
+        if text_box.overflow_y.clips()
+            && !line_intersects_vertical_clip(
+                baseline_y,
+                text_box.font_size as f64,
+                metrics.inner_top,
+                metrics.inner_bottom,
+            )
+        {
+            return;
+        }
         let caret_h = text_box.font_size as f64 * CARET_HEIGHT_RATIO;
         let caret_y0 = baseline_y - text_box.font_size as f64 * CARET_TOP_OFFSET_RATIO;
         let caret = Rect::new(caret_x, caret_y0, caret_x + CARET_WIDTH, caret_y0 + caret_h);
@@ -329,4 +364,15 @@ fn line_col_from_char_index(text: &str, caret_index: usize) -> (usize, usize) {
     }
 
     (line, col)
+}
+
+fn line_intersects_vertical_clip(
+    baseline_y: f64,
+    font_size: f64,
+    clip_top: f64,
+    clip_bottom: f64,
+) -> bool {
+    let line_top = baseline_y - font_size;
+    let line_bottom = baseline_y + font_size * (LINE_HEIGHT_RATIO - 1.0);
+    line_bottom >= clip_top && line_top <= clip_bottom
 }

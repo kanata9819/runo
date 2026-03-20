@@ -26,7 +26,9 @@ impl RetainedState {
                     return None;
                 };
 
-                if text_box.enabled
+                if (text_box.enabled
+                    || text_box.overflow_x.allows_scroll()
+                    || text_box.overflow_y.allows_scroll())
                     && text_box.overflow_x.allows_scroll()
                     && text_box_max_scroll_x(text_box) > 0.0
                     && text_box_scrollbar_track_contains(text_box, cursor_pos.0, cursor_pos.1)
@@ -43,7 +45,6 @@ impl RetainedState {
         if mouse_down
             && let Some(id) = self.active_text_box_scrollbar.clone()
             && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
-            && text_box.enabled
             && text_box.overflow_x.allows_scroll()
             && text_box_max_scroll_x(text_box) > 0.0
         {
@@ -155,7 +156,11 @@ impl RetainedState {
                 return None;
             };
 
-            if text_box.enabled && (text_box.hovered || text_box.focused) {
+            if (text_box.enabled
+                || text_box.overflow_x.allows_scroll()
+                || text_box.overflow_y.allows_scroll())
+                && (text_box.hovered || text_box.focused)
+            {
                 Some(id.clone())
             } else {
                 None

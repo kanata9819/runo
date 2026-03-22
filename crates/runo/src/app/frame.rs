@@ -1,6 +1,6 @@
+use vello::Scene;
 use vello::kurbo::{Affine, Rect};
 use vello::peniko::Fill;
-use vello::Scene;
 
 use crate::Color;
 use crate::app::{AppRunner, RunoApplication};

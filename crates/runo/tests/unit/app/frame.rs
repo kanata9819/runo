@@ -30,7 +30,7 @@ fn render_returns_false_when_surface_is_missing() {
 #[test]
 fn build_scene_and_run_ui_frame_execute_without_gpu() {
     let mut runner = AppRunner::new(DummyApp::default(), RunOptions::default());
-    runner.build_scene(320, 180);
+    runner.build_scene(320.0, 180.0);
     runner.run_ui_frame();
     assert_eq!(runner.user_app.mount_calls, 1);
     assert_eq!(runner.user_app.event_calls, 0);
@@ -39,7 +39,7 @@ fn build_scene_and_run_ui_frame_execute_without_gpu() {
 #[test]
 fn state_change_requests_remount_on_next_frame() {
     let mut runner = AppRunner::new(DummyApp::default(), RunOptions::default());
-    runner.build_scene(320, 180);
+    runner.build_scene(320.0, 180.0);
     runner.run_ui_frame();
     assert_eq!(runner.user_app.mount_calls, 1);
 

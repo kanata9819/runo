@@ -141,8 +141,9 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 self.request_redraw();
             }
             WindowEvent::CursorMoved { position, .. } => {
+                let logical_position = position.to_logical::<f64>(self.scale_factor());
                 self.update_input_and_request_redraw(|input| {
-                    input.set_cursor_pos(position.x, position.y);
+                    input.set_cursor_pos(logical_position.x, logical_position.y);
                 });
             }
             WindowEvent::MouseInput {
@@ -156,9 +157,13 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
             }
             WindowEvent::MouseWheel { delta, .. } => {
                 let (dx, dy) = scroll_delta_to_pixels(delta);
+                let scale_factor = self.scale_factor();
                 self.update_input_and_request_redraw(|input| {
-                    input.on_mouse_wheel(dx, dy);
+                    input.on_mouse_wheel(dx / scale_factor, dy / scale_factor);
                 });
+            }
+            WindowEvent::ScaleFactorChanged { .. } => {
+                self.request_redraw();
             }
             WindowEvent::KeyboardInput { event, .. } => {
                 let actions = keyboard_actions(

@@ -1,5 +1,6 @@
 use vello::kurbo::{Affine, Rect};
 use vello::peniko::Fill;
+use vello::Scene;
 
 use crate::Color;
 use crate::app::{AppRunner, RunoApplication};
@@ -11,12 +12,15 @@ mod tests;
 
 impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn render(&mut self) -> bool {
-        let Some((width, height)) = self.surface_size() else {
+        let Some((physical_width, physical_height)) = self.surface_size() else {
+            return false;
+        };
+        let Some((logical_width, logical_height)) = self.logical_surface_size() else {
             return false;
         };
 
-        self.compose_frame(width, height);
-        self.submit_frame(width, height)
+        self.compose_frame(logical_width, logical_height);
+        self.submit_frame(physical_width, physical_height)
     }
 
     fn surface_size(&self) -> Option<(u32, u32)> {
@@ -24,13 +28,14 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         Some((surface.config.width, surface.config.height))
     }
 
-    fn compose_frame(&mut self, width: u32, height: u32) {
+    fn compose_frame(&mut self, width: f64, height: f64) {
         self.build_scene(width, height);
         self.run_ui_frame();
         self.retained.render(&mut self.scene, self.font.as_ref());
     }
 
     fn submit_frame(&mut self, width: u32, height: u32) -> bool {
+        let scale_factor = self.scale_factor();
         let Some(surface) = self.surface.as_mut() else {
             return false;
         };
@@ -51,12 +56,14 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
         let device = &self.render_cx.devices[dev_id].device;
         let queue = &self.render_cx.devices[dev_id].queue;
+        let mut scaled_scene = Scene::new();
+        scaled_scene.append(&self.scene, Some(Affine::scale(scale_factor)));
 
         if let Err(err) = Self::render_scene_to_target(
             renderer,
             device,
             queue,
-            &self.scene,
+            &scaled_scene,
             &surface.target_view,
             width,
             height,
@@ -69,9 +76,9 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         false
     }
 
-    fn build_scene(&mut self, width: u32, height: u32) {
+    fn build_scene(&mut self, width: f64, height: f64) {
         self.scene.reset();
-        let bg = Rect::new(0.0, 0.0, width as f64, height as f64);
+        let bg = Rect::new(0.0, 0.0, width, height);
         self.scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,

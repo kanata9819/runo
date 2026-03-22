@@ -55,6 +55,16 @@ pub(crate) struct AppRunner<A: RunoApplication + 'static> {
 }
 
 impl<A: RunoApplication + 'static> AppRunner<A> {
+    pub(super) fn scale_factor(&self) -> f64 {
+        self.window.as_ref().map(|window| window.scale_factor()).unwrap_or(1.0)
+    }
+
+    pub(super) fn logical_surface_size(&self) -> Option<(f64, f64)> {
+        let window = self.window.as_ref()?;
+        let logical_size = window.inner_size().to_logical::<f64>(window.scale_factor());
+        Some((logical_size.width.max(1.0), logical_size.height.max(1.0)))
+    }
+
     pub(super) fn new(user_app: A, mut window_options: RunOptions) -> Self {
         (window_options.window_width, window_options.window_height) =
             sanitize_window_size(window_options.window_width, window_options.window_height);

@@ -69,6 +69,7 @@ impl RetainedState {
         if let Some(id) = self.focused_text_box.clone()
             && let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(&id)
             && text_box.enabled
+            && !text_box.read_only
         {
             text_box.focused = true;
 

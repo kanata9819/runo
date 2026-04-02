@@ -15,6 +15,7 @@ pub(crate) struct ShowTextBoxArgs {
     pub(crate) bg_color: Color,
     pub(crate) border_color: Color,
     pub(crate) enabled: bool,
+    pub(crate) read_only: bool,
     pub(crate) overflow_x: Overflow,
     pub(crate) overflow_y: Overflow,
 }
@@ -32,6 +33,7 @@ impl<'a> Ui<'a> {
             bg_color,
             border_color,
             enabled: enabled_arg,
+            read_only,
             overflow_x,
             overflow_y,
         } = args;
@@ -46,6 +48,7 @@ impl<'a> Ui<'a> {
             bg_color,
             border_color,
             enabled: self.resolve_enabled(enabled_arg),
+            read_only,
             overflow_x,
             overflow_y,
         })

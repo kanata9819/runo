@@ -20,6 +20,7 @@ pub(crate) struct UpsertTextBoxArgs {
     pub(crate) bg_color: Color,
     pub(crate) border_color: Color,
     pub(crate) enabled: bool,
+    pub(crate) read_only: bool,
     pub(crate) overflow_x: Overflow,
     pub(crate) overflow_y: Overflow,
 }
@@ -36,6 +37,7 @@ impl RetainedState {
             bg_color,
             border_color,
             enabled,
+            read_only,
             overflow_x,
             overflow_y,
         } = args;
@@ -57,6 +59,7 @@ impl RetainedState {
                     bg_color,
                     border_color,
                     enabled,
+                    read_only,
                     overflow_x,
                     overflow_y,
                     text_advance: initial_text_advance,
@@ -91,6 +94,7 @@ impl RetainedState {
                     text_box.bg_color = bg_color;
                     text_box.border_color = border_color;
                     text_box.enabled = enabled;
+                    text_box.read_only = read_only;
                     text_box.overflow_x = overflow_x;
                     text_box.overflow_y = overflow_y;
 
@@ -136,7 +140,7 @@ impl RetainedState {
         text_box.text = text.into();
         text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
         text_box.caret_index = text_box.text.chars().count();
-        text_box.changed = true;
+        text_box.changed = false;
     }
 
     pub(crate) fn set_text_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {

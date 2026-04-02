@@ -80,6 +80,7 @@ fn render_visits_base_and_overlay_passes() {
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: color,
         enabled: true,
+        read_only: false,
         overflow_x: Overflow::Auto,
         overflow_y: Overflow::Auto,
     });

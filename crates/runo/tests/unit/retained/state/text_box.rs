@@ -23,6 +23,7 @@ fn upsert_text_box_updates_text_when_text_is_provided() {
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: color,
         enabled: true,
+        read_only: false,
         overflow_x: Overflow::Auto,
         overflow_y: Overflow::Hidden,
     });
@@ -37,6 +38,7 @@ fn upsert_text_box_updates_text_when_text_is_provided() {
         bg_color: Color::from_rgb8(40, 40, 40),
         border_color: color,
         enabled: true,
+        read_only: false,
         overflow_x: Overflow::Scroll,
         overflow_y: Overflow::Auto,
     });
@@ -59,6 +61,7 @@ fn set_text_box_enabled_false_clears_focus_and_active_scrollbar() {
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: color,
         enabled: true,
+        read_only: false,
         overflow_x: Overflow::Auto,
         overflow_y: Overflow::Hidden,
     });

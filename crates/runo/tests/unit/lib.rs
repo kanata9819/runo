@@ -162,6 +162,7 @@ fn retained_text_box_set_text_updates_response() {
         bg_color: Color::from_rgb8(20, 20, 20),
         border_color: white(),
         enabled: true,
+        read_only: false,
         overflow_x: Overflow::Auto,
         overflow_y: Overflow::Hidden,
     });
@@ -169,7 +170,7 @@ fn retained_text_box_set_text_updates_response() {
     retained.set_text_box_text("tb", "updated");
     let response = retained.text_box_response("tb");
     assert_eq!(response.text, "updated");
-    assert!(response.changed);
+    assert!(!response.changed);
 }
 
 #[test]

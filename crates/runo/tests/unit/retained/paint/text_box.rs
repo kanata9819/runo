@@ -14,6 +14,7 @@ fn sample_text_box() -> TextBoxNode {
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: Color::from_rgb8(80, 80, 80),
         enabled: true,
+        read_only: false,
         overflow_x: Overflow::Auto,
         overflow_y: Overflow::Hidden,
         text_advance: 0.0,

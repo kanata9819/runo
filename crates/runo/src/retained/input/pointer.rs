@@ -138,7 +138,7 @@ impl RetainedState {
             );
 
             self.focused_text_box = self.find_topmost_widget_id(
-                |node| matches!(node, WidgetNode::TextBox(text_box) if text_box.enabled && text_box.hovered),
+                |node| matches!(node, WidgetNode::TextBox(text_box) if text_box.enabled && !text_box.read_only && text_box.hovered),
             );
 
             self.active_combo_box = self.find_topmost_widget_id(|node| {

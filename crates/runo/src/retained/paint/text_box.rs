@@ -70,7 +70,7 @@ fn draw_background_and_border(scene: &mut Scene, text_box: &TextBoxNode) {
 
     let border_color = if !text_box.enabled {
         color::Neutral::tone_86_92_101()
-    } else if text_box.focused {
+    } else if text_box.focused && !text_box.read_only {
         color::AccentBlue::tone_89_176_255()
     } else {
         text_box.border_color
@@ -211,7 +211,7 @@ fn draw_text_content(
 
 /// Draws caret when focused and enabled using the current text metrics.
 fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metrics: TextMetrics) {
-    if text_box.focused && text_box.enabled {
+    if text_box.focused && text_box.enabled && !text_box.read_only {
         let (caret_line, caret_col) =
             line_col_from_char_index(&text_box.text, text_box.caret_index);
         let caret_line_text = text_box.text.split('\n').nth(caret_line).unwrap_or("");

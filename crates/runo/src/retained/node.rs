@@ -93,6 +93,7 @@ pub(super) struct TextBoxNode {
     pub(super) bg_color: Color,
     pub(super) border_color: Color,
     pub(super) enabled: bool,
+    pub(super) read_only: bool,
     pub(super) overflow_x: Overflow,
     pub(super) overflow_y: Overflow,
     pub(super) text_advance: f64,

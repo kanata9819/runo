@@ -140,6 +140,11 @@ impl RetainedState {
         text_box.text = text.into();
         text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
         text_box.caret_index = text_box.text.chars().count();
+
+        if text_box.read_only && text_box.overflow_y.allows_scroll() {
+            text_box.scroll_y = max_scroll_y(text_box);
+        }
+
         text_box.changed = false;
     }
 
@@ -160,4 +165,11 @@ impl RetainedState {
             clear_slot_if_matches(&mut self.active_text_box_scrollbar, id_ref);
         }
     }
+}
+
+fn max_scroll_y(text_box: &TextBoxNode) -> f64 {
+    let line_count = text_box.text.split('\n').count().max(1) as f64;
+    let content_height = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
+    let inner_height = (text_box.rect.height() - 12.0).max(1.0);
+    (content_height - inner_height).max(0.0)
 }

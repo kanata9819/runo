@@ -19,6 +19,7 @@ impl RunoApplication for CustomOptionsApp {
             window_width: 1280,
             window_height: 720,
             window_resizable: true,
+            immediate_mode: false,
         }
     }
 }

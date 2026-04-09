@@ -51,7 +51,7 @@ pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) retained: RetainedState,
     pub(super) bindings: EventBindings<A::Event>,
     pub(super) mount_required: bool,
-    window_options: RunOptions,
+    pub(super) window_options: RunOptions,
 }
 
 impl<A: RunoApplication + 'static> AppRunner<A> {

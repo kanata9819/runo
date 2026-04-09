@@ -162,7 +162,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             self.mount_required = true;
         }
 
-        if request_remount || state_changed || self.user_app.wants_continuous_redraw() {
+        if request_remount || state_changed || self.window_options.immediate_mode {
             self.request_redraw();
         }
     }

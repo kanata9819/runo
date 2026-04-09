@@ -175,6 +175,7 @@ impl RunoApplication for MyApp {
             window_width: 1200,
             window_height: 700,
             window_resizable: true,
+            immediate_mode: false,
         }
     }
 

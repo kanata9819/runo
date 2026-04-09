@@ -19,6 +19,7 @@ pub struct RunOptions {
     pub window_width: u32,
     pub window_height: u32,
     pub window_resizable: bool,
+    pub immediate_mode: bool,
 }
 
 impl Default for RunOptions {
@@ -28,6 +29,7 @@ impl Default for RunOptions {
             window_width: 640,
             window_height: 480,
             window_resizable: true,
+            immediate_mode: false,
         }
     }
 }
@@ -49,10 +51,6 @@ pub trait RunoApplication {
 
     fn options(&self) -> RunOptions {
         RunOptions::default()
-    }
-
-    fn wants_continuous_redraw(&self) -> bool {
-        false
     }
 }
 

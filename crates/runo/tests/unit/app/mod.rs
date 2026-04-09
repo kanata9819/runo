@@ -32,6 +32,7 @@ impl RunoApplication for CustomApp {
             window_width: 111,
             window_height: 222,
             window_resizable: false,
+            immediate_mode: false,
         }
     }
 }

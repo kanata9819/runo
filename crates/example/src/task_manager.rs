@@ -103,6 +103,7 @@ impl RunoApplication for TaskApp {
             window_width: 1100,
             window_height: 760,
             window_resizable: false,
+            immediate_mode: false,
         }
     }
 

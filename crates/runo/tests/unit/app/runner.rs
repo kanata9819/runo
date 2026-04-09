@@ -23,6 +23,7 @@ fn new_clamps_window_dimensions_to_minimum_one() {
             window_width: 0,
             window_height: 0,
             window_resizable: true,
+            immediate_mode: false,
         },
     );
     assert_eq!(runner.window_options.window_width, 1);
@@ -47,6 +48,7 @@ fn window_attributes_follow_run_options() {
         window_width: 123,
         window_height: 456,
         window_resizable: false,
+        immediate_mode: false,
     };
     let attrs = window_attributes_from_options(&options);
     assert_eq!(attrs.title, "My Window");

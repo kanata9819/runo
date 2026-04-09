@@ -89,7 +89,7 @@ impl<'a> Ui<'a> {
             effects,
             states,
             retained,
-            layout_stack: LayoutStack::new((24.0, 24.0), LayoutDirection::Vertical, 12.0),
+            layout_stack: LayoutStack::new((0.0, 0.0), LayoutDirection::Vertical, 12.0),
             enabled_stack: vec![true],
             key_scope_stack: Vec::new(),
             auto_id_counter_stack: vec![0],

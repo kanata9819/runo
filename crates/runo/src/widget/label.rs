@@ -58,12 +58,12 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
     }
 
     pub fn width(mut self, px: u32) -> Self {
-        self.width = Some(px as f64);
+        self.width = Some(f64::from(px));
         self
     }
 
     pub fn height(mut self, px: u32) -> Self {
-        self.height = Some(px as f64);
+        self.height = Some(f64::from(px));
         self
     }
 
@@ -88,16 +88,14 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> LabelHandle {
-        let intrinsic_height = self.font_size as f64 * 1.35;
+        let intrinsic_height = f64::from(self.font_size) * 1.35;
         let intrinsic_width = if let Some(font) = self.ui.font.as_ref() {
-            layout_text(font, &self.text, self.font_size)
-                .map(|(_, width)| width)
-                .unwrap_or_else(|| estimate_text_width(&self.text, self.font_size))
+            layout_text(font, &self.text, self.font_size).map_or_else(|| estimate_text_width(&self.text, self.font_size), |(_, width)| width)
         } else {
             estimate_text_width(&self.text, self.font_size)
         };
 
-        let width = self.width.unwrap_or(intrinsic_width as f64);
+        let width = self.width.unwrap_or(f64::from(intrinsic_width));
         let height = self.height.unwrap_or(intrinsic_height);
         let id = self.id;
 

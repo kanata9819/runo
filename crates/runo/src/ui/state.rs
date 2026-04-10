@@ -53,7 +53,7 @@ pub struct UiDivState<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
 }
 
-impl<'ui, 'a> UiState<'ui, 'a> {
+impl<'a> UiState<'_, 'a> {
     pub fn button(&mut self) -> UiButtonState<'_, 'a> {
         UiButtonState { ui: &mut *self.ui }
     }
@@ -87,7 +87,7 @@ impl<'ui, 'a> UiState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiButtonState<'ui, 'a> {
+impl UiButtonState<'_, '_> {
     pub fn response(&self, id: impl AsRef<str>) -> ButtonResponse {
         self.ui.retained.button_response(id)
     }
@@ -96,10 +96,12 @@ impl<'ui, 'a> UiButtonState<'ui, 'a> {
         self.response(id).clicked
     }
 
+    #[must_use] 
     pub fn response_handle(&self, handle: &ButtonHandle) -> ButtonResponse {
         self.response(handle.id())
     }
 
+    #[must_use] 
     pub fn clicked_handle(&self, handle: &ButtonHandle) -> bool {
         self.clicked(handle.id())
     }
@@ -121,7 +123,7 @@ impl<'ui, 'a> UiButtonState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiTextBoxState<'ui, 'a> {
+impl UiTextBoxState<'_, '_> {
     pub fn response(&self, id: impl AsRef<str>) -> TextBoxResponse {
         self.ui.retained.text_box_response(id)
     }
@@ -130,10 +132,12 @@ impl<'ui, 'a> UiTextBoxState<'ui, 'a> {
         self.response(id).text
     }
 
+    #[must_use] 
     pub fn response_handle(&self, handle: &TextBoxHandle) -> TextBoxResponse {
         self.response(handle.id())
     }
 
+    #[must_use] 
     pub fn text_handle(&self, handle: &TextBoxHandle) -> String {
         self.text(handle.id())
     }
@@ -155,7 +159,7 @@ impl<'ui, 'a> UiTextBoxState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiCheckboxState<'ui, 'a> {
+impl UiCheckboxState<'_, '_> {
     pub fn response(&self, id: impl AsRef<str>) -> CheckboxResponse {
         self.ui.retained.checkbox_response(id)
     }
@@ -164,10 +168,12 @@ impl<'ui, 'a> UiCheckboxState<'ui, 'a> {
         self.response(id).checked
     }
 
+    #[must_use] 
     pub fn response_handle(&self, handle: &CheckboxHandle) -> CheckboxResponse {
         self.response(handle.id())
     }
 
+    #[must_use] 
     pub fn checked_handle(&self, handle: &CheckboxHandle) -> bool {
         self.checked(handle.id())
     }
@@ -189,7 +195,7 @@ impl<'ui, 'a> UiCheckboxState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiRadioButtonState<'ui, 'a> {
+impl UiRadioButtonState<'_, '_> {
     pub fn response(&self, id: impl AsRef<str>) -> RadioButtonResponse {
         self.ui.retained.radio_button_response(id)
     }
@@ -198,10 +204,12 @@ impl<'ui, 'a> UiRadioButtonState<'ui, 'a> {
         self.response(id).selected
     }
 
+    #[must_use] 
     pub fn response_handle(&self, handle: &RadioButtonHandle) -> RadioButtonResponse {
         self.response(handle.id())
     }
 
+    #[must_use] 
     pub fn selected_handle(&self, handle: &RadioButtonHandle) -> bool {
         self.selected(handle.id())
     }
@@ -223,7 +231,7 @@ impl<'ui, 'a> UiRadioButtonState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiSliderState<'ui, 'a> {
+impl UiSliderState<'_, '_> {
     pub fn response(&self, id: impl AsRef<str>) -> SliderResponse {
         self.ui.retained.slider_response(id)
     }
@@ -232,10 +240,12 @@ impl<'ui, 'a> UiSliderState<'ui, 'a> {
         self.response(id).value
     }
 
+    #[must_use] 
     pub fn response_handle(&self, handle: &SliderHandle) -> SliderResponse {
         self.response(handle.id())
     }
 
+    #[must_use] 
     pub fn value_handle(&self, handle: &SliderHandle) -> f64 {
         self.value(handle.id())
     }
@@ -257,7 +267,7 @@ impl<'ui, 'a> UiSliderState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
+impl UiComboBoxState<'_, '_> {
     pub fn response(&self, id: impl AsRef<str>) -> ComboBoxResponse {
         self.ui.retained.combo_box_response(id)
     }
@@ -270,14 +280,17 @@ impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
         self.response(id).selected_index
     }
 
+    #[must_use] 
     pub fn response_handle(&self, handle: &ComboBoxHandle) -> ComboBoxResponse {
         self.response(handle.id())
     }
 
+    #[must_use] 
     pub fn selected_text_handle(&self, handle: &ComboBoxHandle) -> String {
         self.selected_text(handle.id())
     }
 
+    #[must_use] 
     pub fn selected_index_handle(&self, handle: &ComboBoxHandle) -> usize {
         self.selected_index(handle.id())
     }
@@ -315,7 +328,7 @@ impl<'ui, 'a> UiComboBoxState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiLabelState<'ui, 'a> {
+impl UiLabelState<'_, '_> {
     pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         self.ui.retained.set_label_enabled(id, enabled);
     }
@@ -325,7 +338,7 @@ impl<'ui, 'a> UiLabelState<'ui, 'a> {
     }
 }
 
-impl<'ui, 'a> UiDivState<'ui, 'a> {
+impl UiDivState<'_, '_> {
     pub fn set_visible(&mut self, id: impl Into<String>, visible: bool) {
         self.ui.retained.set_div_visible(id, visible);
     }

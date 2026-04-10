@@ -19,7 +19,7 @@ pub(crate) struct ShowSliderArgs {
     pub(crate) enabled: bool,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_slider(&mut self, args: ShowSliderArgs) -> SliderResponse {
         let ShowSliderArgs {
             id,

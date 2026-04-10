@@ -111,36 +111,47 @@ color_group!(Blue {
 pub struct Semantic;
 
 impl Semantic {
+    #[must_use] 
     pub fn app_bg() -> Color {
         rgb(APP_BG)
     }
+    #[must_use] 
     pub fn panel_bg() -> Color {
         rgb(PANEL_BG)
     }
+    #[must_use] 
     pub fn panel_active() -> Color {
         rgb(PANEL_BG_ACTIVE)
     }
+    #[must_use] 
     pub fn panel_border() -> Color {
         rgb(PANEL_BORDER)
     }
+    #[must_use] 
     pub fn text_primary() -> Color {
         rgb(TEXT_PRIMARY)
     }
+    #[must_use] 
     pub fn text_secondary() -> Color {
         rgb(TEXT_SECONDARY)
     }
+    #[must_use] 
     pub fn text_muted() -> Color {
         rgb(TEXT_MUTED)
     }
+    #[must_use] 
     pub fn success() -> Color {
         rgb(SUCCESS_500)
     }
+    #[must_use] 
     pub fn warning() -> Color {
         rgb(WARNING_500)
     }
+    #[must_use] 
     pub fn danger() -> Color {
         rgb(DANGER_500)
     }
+    #[must_use] 
     pub fn info() -> Color {
         rgb(INFO_500)
     }
@@ -149,66 +160,87 @@ impl Semantic {
 pub struct Neutral;
 
 impl Neutral {
+    #[must_use] 
     pub fn tone_36_42_50() -> Color {
         rgb((36, 42, 50))
     }
+    #[must_use] 
     pub fn tone_43_47_53() -> Color {
         rgb((43, 47, 53))
     }
+    #[must_use] 
     pub fn tone_45_49_55() -> Color {
         rgb((45, 49, 55))
     }
+    #[must_use] 
     pub fn tone_46_64_86() -> Color {
         rgb((46, 64, 86))
     }
+    #[must_use] 
     pub fn tone_48_52_58() -> Color {
         rgb((48, 52, 58))
     }
+    #[must_use] 
     pub fn tone_56_63_74() -> Color {
         rgb((56, 63, 74))
     }
+    #[must_use] 
     pub fn tone_63_80_102() -> Color {
         rgb((63, 80, 102))
     }
+    #[must_use] 
     pub fn tone_78_82_90() -> Color {
         rgb((78, 82, 90))
     }
+    #[must_use] 
     pub fn tone_78_89_104() -> Color {
         rgb((78, 89, 104))
     }
+    #[must_use] 
     pub fn tone_83_90_100() -> Color {
         rgb((83, 90, 100))
     }
+    #[must_use] 
     pub fn tone_86_92_101() -> Color {
         rgb((86, 92, 101))
     }
+    #[must_use] 
     pub fn tone_88_94_102() -> Color {
         rgb((88, 94, 102))
     }
+    #[must_use] 
     pub fn tone_130_145_163() -> Color {
         rgb((130, 145, 163))
     }
+    #[must_use] 
     pub fn tone_141_147_154() -> Color {
         rgb((141, 147, 154))
     }
+    #[must_use] 
     pub fn tone_142_148_156() -> Color {
         rgb((142, 148, 156))
     }
+    #[must_use] 
     pub fn tone_142_151_163() -> Color {
         rgb((142, 151, 163))
     }
+    #[must_use] 
     pub fn tone_146_152_160() -> Color {
         rgb((146, 152, 160))
     }
+    #[must_use] 
     pub fn tone_147_153_161() -> Color {
         rgb((147, 153, 161))
     }
+    #[must_use] 
     pub fn tone_163_169_177() -> Color {
         rgb((163, 169, 177))
     }
+    #[must_use] 
     pub fn tone_167_173_181() -> Color {
         rgb((167, 173, 181))
     }
+    #[must_use] 
     pub fn tone_178_184_192() -> Color {
         rgb((178, 184, 192))
     }
@@ -217,30 +249,39 @@ impl Neutral {
 pub struct AccentBlue;
 
 impl AccentBlue {
+    #[must_use] 
     pub fn tone_31_122_205() -> Color {
         rgb((31, 122, 205))
     }
+    #[must_use] 
     pub fn tone_37_132_214() -> Color {
         rgb((37, 132, 214))
     }
+    #[must_use] 
     pub fn tone_45_129_205() -> Color {
         rgb((45, 129, 205))
     }
+    #[must_use] 
     pub fn tone_50_144_229() -> Color {
         rgb((50, 144, 229))
     }
+    #[must_use] 
     pub fn tone_53_141_221() -> Color {
         rgb((53, 141, 221))
     }
+    #[must_use] 
     pub fn tone_62_154_234() -> Color {
         rgb((62, 154, 234))
     }
+    #[must_use] 
     pub fn tone_69_160_242() -> Color {
         rgb((69, 160, 242))
     }
+    #[must_use] 
     pub fn tone_89_176_255() -> Color {
         rgb((89, 176, 255))
     }
+    #[must_use] 
     pub fn tone_124_177_230() -> Color {
         rgb((124, 177, 230))
     }
@@ -249,12 +290,15 @@ impl AccentBlue {
 pub struct SoftWhite;
 
 impl SoftWhite {
+    #[must_use] 
     pub fn tone_186_196_210() -> Color {
         rgb((186, 196, 210))
     }
+    #[must_use] 
     pub fn tone_220_228_240() -> Color {
         rgb((220, 228, 240))
     }
+    #[must_use] 
     pub fn tone_240_246_255() -> Color {
         rgb((240, 246, 255))
     }
@@ -263,24 +307,30 @@ impl SoftWhite {
 pub struct WhiteAlpha;
 
 impl WhiteAlpha {
+    #[must_use] 
     pub fn tone_255_255_255_20() -> Color {
         rgba((255, 255, 255, 20))
     }
+    #[must_use] 
     pub fn tone_255_255_255_35() -> Color {
         rgba((255, 255, 255, 35))
     }
+    #[must_use] 
     pub fn tone_255_255_255_90() -> Color {
         rgba((255, 255, 255, 90))
     }
+    #[must_use] 
     pub fn tone_255_255_255_150() -> Color {
         rgba((255, 255, 255, 150))
     }
 }
 
+#[must_use] 
 pub fn rgb(rgb: Rgb) -> Color {
     Color::from_rgb8(rgb.0, rgb.1, rgb.2)
 }
 
+#[must_use] 
 pub fn rgba(rgba: Rgba) -> Color {
     Color::from_rgba8(rgba.0, rgba.1, rgba.2, rgba.3)
 }

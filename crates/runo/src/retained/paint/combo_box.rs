@@ -37,8 +37,7 @@ fn get_selected_text(combo_box: &ComboBoxNode) -> &str {
     combo_box
         .items
         .get(combo_box.selected_index)
-        .map(String::as_str)
-        .unwrap_or("")
+        .map_or("", String::as_str)
 }
 
 #[inline]
@@ -132,7 +131,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
     if let Some((glyphs, arrow_w)) =
         text::layout_text(font, arrow, combo_box.font_size * ARROW_FONT_SCALE)
     {
-        let arrow_x = combo_box.rect.x1 - arrow_w as f64 - TEXT_HORIZONTAL_PADDING;
+        let arrow_x = combo_box.rect.x1 - f64::from(arrow_w) - TEXT_HORIZONTAL_PADDING;
         let color = if combo_box.enabled {
             color::SoftWhite::tone_186_196_210()
         } else {

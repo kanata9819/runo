@@ -45,7 +45,7 @@ impl DivConfig {
     }
 
     fn set_padding_all(&mut self, px: u32) {
-        let px = px as f64;
+        let px = f64::from(px);
         self.padding_left = px;
         self.padding_top = px;
         self.padding_right = px;
@@ -53,13 +53,13 @@ impl DivConfig {
     }
 
     fn set_padding_x(&mut self, px: u32) {
-        let px = px as f64;
+        let px = f64::from(px);
         self.padding_left = px;
         self.padding_right = px;
     }
 
     fn set_padding_y(&mut self, px: u32) {
-        let px = px as f64;
+        let px = f64::from(px);
         self.padding_top = px;
         self.padding_bottom = px;
     }
@@ -143,23 +143,23 @@ impl<'ui, 'a> DivBuilder<'ui, 'a> {
     }
 
     pub fn gap(mut self, px: u32) -> Self {
-        self.config.gap = px as f64;
+        self.config.gap = f64::from(px);
         self
     }
 
     pub fn width(mut self, px: u32) -> Self {
-        self.config.width = Some(px as f64);
+        self.config.width = Some(f64::from(px));
         self
     }
 
     pub fn height(mut self, px: u32) -> Self {
-        self.config.height = Some(px as f64);
+        self.config.height = Some(f64::from(px));
         self
     }
 
     pub fn size(mut self, width: u32, height: u32) -> Self {
-        self.config.width = Some(width as f64);
-        self.config.height = Some(height as f64);
+        self.config.width = Some(f64::from(width));
+        self.config.height = Some(f64::from(height));
         self
     }
 
@@ -185,12 +185,12 @@ impl<'ui, 'a> DivBuilder<'ui, 'a> {
 
     pub fn border(mut self, color: Color, width: u32) -> Self {
         self.config.border_color = Some(color);
-        self.config.border_width = width as f64;
+        self.config.border_width = f64::from(width);
         self
     }
 
     pub fn radius(mut self, px: u32) -> Self {
-        self.config.radius = px as f64;
+        self.config.radius = f64::from(px);
         self
     }
 

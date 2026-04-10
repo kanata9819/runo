@@ -106,8 +106,7 @@ impl RetainedState {
                     combo_box.hovered = contains(combo_box.rect, cursor_pos.0, cursor_pos.1);
                     combo_box.hovered_item = if open_overlay_id
                         .as_ref()
-                        .map(|active| active == id)
-                        .unwrap_or(false)
+                        .is_some_and(|active| active == id)
                     {
                         combo_item_index_at(combo_box, cursor_pos.0, cursor_pos.1)
                     } else {

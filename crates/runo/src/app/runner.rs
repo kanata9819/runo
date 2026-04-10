@@ -30,8 +30,8 @@ fn window_attributes_from_options(options: &RunOptions) -> WindowAttributes {
     Window::default_attributes()
         .with_title(options.window_title.clone())
         .with_inner_size(LogicalSize::new(
-            options.window_width as f64,
-            options.window_height as f64,
+            f64::from(options.window_width),
+            f64::from(options.window_height),
         ))
         .with_resizable(options.window_resizable)
 }
@@ -58,8 +58,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     pub(super) fn scale_factor(&self) -> f64 {
         self.window
             .as_ref()
-            .map(|window| window.scale_factor())
-            .unwrap_or(1.0)
+            .map_or(1.0, |window| window.scale_factor())
     }
 
     pub(super) fn logical_surface_size(&self) -> Option<(f64, f64)> {

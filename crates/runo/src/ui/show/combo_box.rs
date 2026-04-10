@@ -18,7 +18,7 @@ pub(crate) struct ShowComboBoxArgs {
     pub(crate) enabled: bool,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_combo_box(&mut self, args: ShowComboBoxArgs) -> ComboBoxResponse {
         let ShowComboBoxArgs {
             id,

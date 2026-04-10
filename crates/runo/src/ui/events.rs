@@ -35,6 +35,7 @@ pub struct EventBindingsBuilder<E> {
 }
 
 impl<A> ActionBindings<A> {
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             button: HashMap::new(),
@@ -72,10 +73,12 @@ impl<A> ActionBindings<A> {
 }
 
 impl<E> EventBindings<E> {
+    #[must_use] 
     pub fn builder() -> EventBindingsBuilder<E> {
         EventBindingsBuilder::new()
     }
 
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             button: HashMap::new(),
@@ -128,6 +131,7 @@ impl<E> EventBindings<E> {
 }
 
 impl<E> EventBindingsBuilder<E> {
+    #[must_use] 
     pub fn new() -> Self {
         Self {
             bindings: EventBindings::new(),
@@ -180,6 +184,7 @@ impl<E> EventBindingsBuilder<E> {
         self
     }
 
+    #[must_use] 
     pub fn extend(mut self, other: EventBindings<E>) -> Self {
         self.bindings.button.extend(other.button);
         self.bindings.checkbox.extend(other.checkbox);
@@ -190,6 +195,7 @@ impl<E> EventBindingsBuilder<E> {
         self
     }
 
+    #[must_use] 
     pub fn build(self) -> EventBindings<E> {
         self.bindings
     }
@@ -217,7 +223,7 @@ pub struct UiEvents<'ui, 'a> {
     pub(super) ui: &'ui mut Ui<'a>,
 }
 
-impl<'ui, 'a> UiEvents<'ui, 'a> {
+impl<'a> UiEvents<'_, 'a> {
     pub fn next_event(&mut self) -> Option<UiEvent> {
         self.ui.retained.pop_event()
     }

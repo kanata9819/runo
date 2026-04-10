@@ -21,7 +21,7 @@ pub(crate) struct ShowTextBoxArgs {
     pub(crate) overflow_y: Overflow,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_text_box(&mut self, args: ShowTextBoxArgs) -> TextBoxResponse {
         let ShowTextBoxArgs {
             id,

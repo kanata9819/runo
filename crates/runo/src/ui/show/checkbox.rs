@@ -16,7 +16,7 @@ pub(crate) struct ShowCheckboxArgs {
     pub(crate) enabled: bool,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_checkbox(&mut self, args: ShowCheckboxArgs) -> CheckboxResponse {
         let ShowCheckboxArgs {
             id,

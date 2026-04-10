@@ -37,7 +37,7 @@ impl RetainedState {
                 WidgetNode::Button(button) => button::render(scene, font, button),
                 WidgetNode::Checkbox(checkbox) => checkbox::render(scene, font, checkbox),
                 WidgetNode::RadioButton(radio_button) => {
-                    radio_button::render(scene, font, radio_button)
+                    radio_button::render(scene, font, radio_button);
                 }
                 WidgetNode::Slider(slider) => slider::render(scene, font, slider),
                 WidgetNode::Label(label) => label::render(scene, font, label),
@@ -52,7 +52,7 @@ impl RetainedState {
             };
             match node {
                 WidgetNode::ComboBox(combo_box) => {
-                    combo_box::render_dropdown_overlay(scene, font, combo_box)
+                    combo_box::render_dropdown_overlay(scene, font, combo_box);
                 }
                 WidgetNode::Div(_)
                 | WidgetNode::Button(_)

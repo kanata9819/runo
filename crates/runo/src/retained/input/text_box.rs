@@ -176,7 +176,9 @@ impl RetainedState {
         };
 
         if text_box.overflow_x.allows_scroll() {
-            if self.active_text_box_scrollbar.as_deref() != Some(target_id.as_str()) {
+            if self.active_text_box_scrollbar.as_deref() == Some(target_id.as_str()) {
+                text_box.scroll_x = text_box.scroll_x.clamp(0.0, Self::max_scroll_x(text_box));
+            } else {
                 let wheel_x = if input.scroll_x.abs() > input.scroll_y.abs() * 0.5 {
                     -input.scroll_x
                 } else {
@@ -185,8 +187,6 @@ impl RetainedState {
 
                 text_box.scroll_x =
                     (text_box.scroll_x + wheel_x).clamp(0.0, Self::max_scroll_x(text_box));
-            } else {
-                text_box.scroll_x = text_box.scroll_x.clamp(0.0, Self::max_scroll_x(text_box));
             }
         } else {
             text_box.scroll_x = 0.0;
@@ -215,7 +215,7 @@ impl RetainedState {
 
     fn max_scroll_y(text_box: &crate::retained::node::TextBoxNode) -> f64 {
         let line_count: f64 = text_box.text.split('\n').count().max(1) as f64;
-        let content_height: f64 = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
+        let content_height: f64 = line_count * (f64::from(text_box.font_size) * 1.35) + 12.0;
         let inner_height: f64 = (text_box.rect.height() - 12.0).max(1.0);
         (content_height - inner_height).max(0.0)
     }
@@ -270,7 +270,7 @@ fn text_box_content_width(text_box: &crate::retained::node::TextBoxNode) -> f64 
     if text_box.text_advance > 0.0 {
         text_box.text_advance
     } else {
-        estimate_text_width(&text_box.text, text_box.font_size) as f64
+        f64::from(estimate_text_width(&text_box.text, text_box.font_size))
     }
 }
 
@@ -281,11 +281,11 @@ fn sync_text_box_text_advance(
     if let Some(font) = font
         && let Some((_, advance)) = layout_text(font, &text_box.text, text_box.font_size)
     {
-        text_box.text_advance = advance as f64;
+        text_box.text_advance = f64::from(advance);
         return;
     }
 
-    text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
+    text_box.text_advance = f64::from(estimate_text_width(&text_box.text, text_box.font_size));
 }
 
 fn write_system_clipboard(text: &str) {
@@ -302,8 +302,7 @@ fn read_system_clipboard() -> Option<String> {
 fn char_to_byte_index(s: &str, char_index: usize) -> usize {
     s.char_indices()
         .nth(char_index)
-        .map(|(idx, _)| idx)
-        .unwrap_or(s.len())
+        .map_or(s.len(), |(idx, _)| idx)
 }
 
 fn insert_text_at_caret(text: &mut String, caret_index: &mut usize, insert: &str) {

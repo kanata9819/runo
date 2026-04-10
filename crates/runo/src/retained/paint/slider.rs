@@ -152,7 +152,7 @@ fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_
             scene,
             font,
             glyphs,
-            slider.rect.x1 - pad_x - w as f64,
+            slider.rect.x1 - pad_x - f64::from(w),
             baseline_y,
             slider.font_size,
             if slider.enabled {

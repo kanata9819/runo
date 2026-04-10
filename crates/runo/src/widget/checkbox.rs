@@ -96,12 +96,12 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
     }
 
     pub fn width(mut self, px: u32) -> Self {
-        self.width = px as f64;
+        self.width = f64::from(px);
         self
     }
 
     pub fn height(mut self, px: u32) -> Self {
-        self.height = px as f64;
+        self.height = f64::from(px);
         self
     }
 

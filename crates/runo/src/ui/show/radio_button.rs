@@ -17,7 +17,7 @@ pub(crate) struct ShowRadioButtonArgs {
     pub(crate) enabled: bool,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_radio_button(&mut self, args: ShowRadioButtonArgs) -> RadioButtonResponse {
         let ShowRadioButtonArgs {
             id,

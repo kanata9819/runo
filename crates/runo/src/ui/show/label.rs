@@ -13,7 +13,7 @@ pub(crate) struct ShowLabelArgs {
     pub(crate) enabled: bool,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_label(&mut self, args: ShowLabelArgs) {
         let ShowLabelArgs {
             id,

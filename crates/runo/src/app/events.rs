@@ -26,7 +26,7 @@ struct KeyboardActions {
 
 fn scroll_delta_to_pixels(delta: MouseScrollDelta) -> (f64, f64) {
     match delta {
-        MouseScrollDelta::LineDelta(dx, dy) => (dx as f64 * 20.0, dy as f64 * 20.0),
+        MouseScrollDelta::LineDelta(dx, dy) => (f64::from(dx) * 20.0, f64::from(dy) * 20.0),
         MouseScrollDelta::PixelDelta(delta) => (delta.x, delta.y),
     }
 }

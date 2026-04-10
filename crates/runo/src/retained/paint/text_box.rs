@@ -100,9 +100,9 @@ fn resolve_text_color(text_box: &TextBoxNode) -> Color {
 fn text_metrics(text_box: &TextBoxNode) -> TextMetrics {
     TextMetrics {
         text_x: text_box.rect.x0 + INNER_PADDING - text_box.scroll_x,
-        first_line_baseline: text_box.rect.y0 + INNER_PADDING + text_box.font_size as f64
+        first_line_baseline: text_box.rect.y0 + INNER_PADDING + f64::from(text_box.font_size)
             - text_box.scroll_y,
-        line_height: text_box.font_size as f64 * LINE_HEIGHT_RATIO,
+        line_height: f64::from(text_box.font_size) * LINE_HEIGHT_RATIO,
         inner_left: text_box.rect.x0 + INNER_PADDING,
         inner_right: text_box.rect.x1 - INNER_PADDING,
         inner_top: text_box.rect.y0 + INNER_PADDING,
@@ -123,7 +123,7 @@ fn draw_text_content(
         if text_box.overflow_y.clips()
             && !line_intersects_vertical_clip(
                 metrics.first_line_baseline,
-                text_box.font_size as f64,
+                f64::from(text_box.font_size),
                 metrics.inner_top,
                 metrics.inner_bottom,
             )
@@ -136,7 +136,7 @@ fn draw_text_content(
             let visible_glyphs = if text_box.overflow_x.clips() {
                 clip_glyphs_horizontally(
                     glyphs,
-                    advance as f64,
+                    f64::from(advance),
                     metrics.text_x,
                     metrics.inner_left,
                     metrics.inner_right,
@@ -166,7 +166,7 @@ fn draw_text_content(
             if text_box.overflow_y.clips()
                 && !line_intersects_vertical_clip(
                     baseline_y,
-                    text_box.font_size as f64,
+                    f64::from(text_box.font_size),
                     metrics.inner_top,
                     metrics.inner_bottom,
                 )
@@ -178,12 +178,12 @@ fn draw_text_content(
                 continue;
             };
 
-            max_advance = max_advance.max(advance as f64);
+            max_advance = max_advance.max(f64::from(advance));
 
             let visible_glyphs = if text_box.overflow_x.clips() {
                 clip_glyphs_horizontally(
                     glyphs,
-                    advance as f64,
+                    f64::from(advance),
                     metrics.text_x,
                     metrics.inner_left,
                     metrics.inner_right,
@@ -217,8 +217,7 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
         let caret_line_text = text_box.text.split('\n').nth(caret_line).unwrap_or("");
         let prefix: String = caret_line_text.chars().take(caret_col).collect();
         let prefix_advance = text::layout_text(font, &prefix, text_box.font_size)
-            .map(|(_, advance)| advance as f64)
-            .unwrap_or(0.0);
+            .map_or(0.0, |(_, advance)| f64::from(advance));
         let caret_x = metrics.text_x + prefix_advance + CARET_X_OFFSET;
         let caret_x = if text_box.overflow_x.clips() {
             caret_x.clamp(metrics.inner_left, metrics.inner_right)
@@ -229,15 +228,15 @@ fn draw_caret(scene: &mut Scene, font: &FontData, text_box: &TextBoxNode, metric
         if text_box.overflow_y.clips()
             && !line_intersects_vertical_clip(
                 baseline_y,
-                text_box.font_size as f64,
+                f64::from(text_box.font_size),
                 metrics.inner_top,
                 metrics.inner_bottom,
             )
         {
             return;
         }
-        let caret_h = text_box.font_size as f64 * CARET_HEIGHT_RATIO;
-        let caret_y0 = baseline_y - text_box.font_size as f64 * CARET_TOP_OFFSET_RATIO;
+        let caret_h = f64::from(text_box.font_size) * CARET_HEIGHT_RATIO;
+        let caret_y0 = baseline_y - f64::from(text_box.font_size) * CARET_TOP_OFFSET_RATIO;
         let caret = Rect::new(caret_x, caret_y0, caret_x + CARET_WIDTH, caret_y0 + caret_h);
 
         scene.fill(
@@ -264,9 +263,9 @@ fn clip_glyphs_horizontally(
 
     let mut out = Vec::new();
     for (index, glyph) in glyphs.iter().enumerate() {
-        let x0 = draw_origin_x + glyph.x as f64;
+        let x0 = draw_origin_x + f64::from(glyph.x);
         let next_x = if let Some(next) = glyphs.get(index + 1) {
-            draw_origin_x + next.x as f64
+            draw_origin_x + f64::from(next.x)
         } else {
             draw_origin_x + total_advance
         };
@@ -343,7 +342,7 @@ fn text_box_content_width(text_box: &TextBoxNode) -> f64 {
     if text_box.text_advance > 0.0 {
         text_box.text_advance
     } else {
-        text::estimate_text_width(&text_box.text, text_box.font_size) as f64
+        f64::from(text::estimate_text_width(&text_box.text, text_box.font_size))
     }
 }
 

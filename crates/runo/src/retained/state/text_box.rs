@@ -42,7 +42,7 @@ impl RetainedState {
             overflow_y,
         } = args;
         let initial_text: String = text.clone().unwrap_or_default();
-        let initial_text_advance: f64 = estimate_text_width(&initial_text, font_size) as f64;
+        let initial_text_advance: f64 = f64::from(estimate_text_width(&initial_text, font_size));
         let initial_caret_index: usize = initial_text.chars().count();
         let text_for_update: Option<String> = text;
         let placeholder_for_update: Option<String> = placeholder.clone();
@@ -78,7 +78,7 @@ impl RetainedState {
                     if let Some(next_text) = text_for_update {
                         text_box.text = next_text;
                         text_box.text_advance =
-                            estimate_text_width(&text_box.text, text_box.font_size) as f64;
+                            f64::from(estimate_text_width(&text_box.text, text_box.font_size));
                         text_box.caret_index = text_box.text.chars().count();
                     }
 
@@ -87,7 +87,7 @@ impl RetainedState {
                     if (text_box.font_size - font_size).abs() > f32::EPSILON {
                         text_box.font_size = font_size;
                         text_box.text_advance =
-                            estimate_text_width(&text_box.text, text_box.font_size) as f64;
+                            f64::from(estimate_text_width(&text_box.text, text_box.font_size));
                     }
 
                     text_box.text_color = text_color;
@@ -138,7 +138,7 @@ impl RetainedState {
         };
 
         text_box.text = text.into();
-        text_box.text_advance = estimate_text_width(&text_box.text, text_box.font_size) as f64;
+        text_box.text_advance = f64::from(estimate_text_width(&text_box.text, text_box.font_size));
         text_box.caret_index = text_box.text.chars().count();
 
         if text_box.read_only && text_box.overflow_y.allows_scroll() {
@@ -169,7 +169,7 @@ impl RetainedState {
 
 fn max_scroll_y(text_box: &TextBoxNode) -> f64 {
     let line_count: f64 = text_box.text.split('\n').count().max(1) as f64;
-    let content_height: f64 = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
+    let content_height: f64 = line_count * (f64::from(text_box.font_size) * 1.35) + 12.0;
     let inner_height: f64 = (text_box.rect.height() - 12.0).max(1.0);
     (content_height - inner_height).max(0.0)
 }

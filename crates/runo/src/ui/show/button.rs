@@ -14,7 +14,7 @@ pub(crate) struct ShowButtonArgs {
     pub(crate) enabled: bool,
 }
 
-impl<'a> Ui<'a> {
+impl Ui<'_> {
     pub(crate) fn show_button(&mut self, args: ShowButtonArgs) -> ButtonResponse {
         let ShowButtonArgs {
             id,

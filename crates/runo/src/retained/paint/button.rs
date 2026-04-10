@@ -56,7 +56,7 @@ fn draw_text_run(
     glyphs: Vec<Glyph>,
     total_advance: f32,
 ) {
-    let text_x = button.rect.x0 + (button.rect.width() - total_advance as f64) * TEXT_CENTER_RATIO;
+    let text_x = button.rect.x0 + (button.rect.width() - f64::from(total_advance)) * TEXT_CENTER_RATIO;
     let text_y = text_baseline::centered(button.rect, button.font_size);
 
     let color = if button.enabled {

@@ -16,7 +16,7 @@ impl LayoutStack {
     }
 
     pub(crate) fn push_layout(&mut self, direction: LayoutDirection, spacing: f64) {
-        let origin = self.peek_next_position();
+        let origin: (f64, f64) = self.peek_next_position();
         self.push_layout_at(origin, direction, spacing);
     }
 
@@ -30,18 +30,18 @@ impl LayoutStack {
     }
 
     pub(crate) fn pop_layout_and_advance_parent(&mut self) {
-        let (cw, ch) = self.pop_layout_consumed();
+        let (cw, ch): (f64, f64) = self.pop_layout_consumed();
         self.advance_current(cw, ch);
     }
 
     pub(crate) fn pop_layout_consumed(&mut self) -> (f64, f64) {
-        let child = self.stack.pop().expect("layout stack underflow");
+        let child: LayoutNode = self.stack.pop().expect("layout stack underflow");
         child.consumed_size()
     }
 
     pub(crate) fn allocate_rect(&mut self, width: f64, height: f64) -> (f64, f64) {
-        let pos = {
-            let layout = self.stack.last().expect("layout stack is empty");
+        let pos: (f64, f64) = {
+            let layout: &LayoutNode = self.stack.last().expect("layout stack is empty");
             layout.place(width, height)
         };
         self.advance_current(width, height);
@@ -49,7 +49,7 @@ impl LayoutStack {
     }
 
     pub(crate) fn peek_next_position(&self) -> (f64, f64) {
-        let layout = self.stack.last().expect("layout stack is empty");
+        let layout: &LayoutNode = self.stack.last().expect("layout stack is empty");
         layout.place(0.0, 0.0)
     }
 

@@ -36,7 +36,7 @@ impl StateStore {
         T: Clone + 'static,
         F: FnOnce() -> T,
     {
-        let key = id.into();
+        let key: String = id.into();
         if let Some(entry) = self.entries.get_mut(&key) {
             entry.seen_this_frame = true;
             ensure_type::<T>(&key, entry.type_id);
@@ -47,7 +47,7 @@ impl StateStore {
                 .clone();
         }
 
-        let value = init();
+        let value: T = init();
         self.entries.insert(
             key,
             StateEntry {
@@ -63,11 +63,11 @@ impl StateStore {
     where
         T: Clone + PartialEq + 'static,
     {
-        let key = id.into();
+        let key: String = id.into();
         if let Some(entry) = self.entries.get_mut(&key) {
             entry.seen_this_frame = true;
             ensure_type::<T>(&key, entry.type_id);
-            let current = entry
+            let current: &mut T = entry
                 .value
                 .downcast_mut::<T>()
                 .expect("state type checked above");
@@ -101,7 +101,7 @@ impl StateStore {
 }
 
 fn ensure_type<T: 'static>(key: &str, actual: TypeId) {
-    let expected = TypeId::of::<T>();
+    let expected: TypeId = TypeId::of::<T>();
     assert!(
         actual == expected,
         "state `{key}` was requested with a different type"

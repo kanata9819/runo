@@ -31,8 +31,8 @@ impl RetainedState {
             enabled,
         } = args;
 
-        let default_checked = checked.unwrap_or(false);
-        let text_for_update = text.clone();
+        let default_checked: bool = checked.unwrap_or(false);
+        let text_for_update: Option<String> = text.clone();
 
         self.upsert_widget_node(
             id,
@@ -103,7 +103,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_checkbox_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        let id_ref = id.as_ref();
+        let id_ref: &str = id.as_ref();
         let Some(WidgetNode::Checkbox(checkbox)) = self.widgets.get_mut(id_ref) else {
             return;
         };

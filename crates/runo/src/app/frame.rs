@@ -35,7 +35,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn submit_frame(&mut self, width: u32, height: u32) -> bool {
-        let scale_factor = self.scale_factor();
+        let scale_factor: f64 = self.scale_factor();
         let Some(surface) = self.surface.as_mut() else {
             return false;
         };
@@ -44,7 +44,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             return false;
         };
 
-        let dev_id = surface.dev_id;
+        let dev_id: usize = surface.dev_id;
         let surface_texture = match Self::acquire_surface_texture(&mut self.render_cx, surface) {
             Ok(Some(texture)) => texture,
             Ok(None) => return false,
@@ -56,7 +56,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
         let device = &self.render_cx.devices[dev_id].device;
         let queue = &self.render_cx.devices[dev_id].queue;
-        let mut scaled_scene = Scene::new();
+        let mut scaled_scene: Scene = Scene::new();
         scaled_scene.append(&self.scene, Some(Affine::scale(scale_factor)));
 
         if let Err(err) = Self::render_scene_to_target(
@@ -78,7 +78,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
 
     fn build_scene(&mut self, width: f64, height: f64) {
         self.scene.reset();
-        let bg = Rect::new(0.0, 0.0, width, height);
+        let bg: Rect = Rect::new(0.0, 0.0, width, height);
         self.scene.fill(
             Fill::NonZero,
             Affine::IDENTITY,
@@ -92,7 +92,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.remount_if_needed();
         self.retained
             .begin_frame_input(self.input.snapshot(), self.font.as_ref());
-        let request_remount = self.run_app_update() || self.dispatch_bound_events();
+        let request_remount: bool = self.run_app_update() || self.dispatch_bound_events();
         self.apply_frame_updates(request_remount);
         self.input.end_frame();
     }
@@ -106,7 +106,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.states.begin_frame();
         self.retained.begin_build_pass();
 
-        let bindings = {
+        let bindings: crate::ui::EventBindings<A::Event> = {
             let mut ui = Ui::new(
                 &mut self.scene,
                 self.font.clone(),
@@ -138,7 +138,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn dispatch_bound_events(&mut self) -> bool {
-        let mut request_remount = false;
+        let mut request_remount: bool = false;
         {
             let mut ui = Ui::new(
                 &mut self.scene,
@@ -157,7 +157,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn apply_frame_updates(&mut self, request_remount: bool) {
-        let state_changed = self.states.take_changed();
+        let state_changed: bool = self.states.take_changed();
         if request_remount || state_changed {
             self.mount_required = true;
         }

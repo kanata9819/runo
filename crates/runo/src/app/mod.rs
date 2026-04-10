@@ -55,6 +55,6 @@ pub trait RunoApplication {
 }
 
 pub(crate) fn build_runner<A: RunoApplication + 'static>(application: A) -> AppRunner<A> {
-    let options = application.options();
+    let options: RunOptions = application.options();
     AppRunner::new(application, options)
 }

@@ -35,8 +35,8 @@ impl EffectStore {
         D: Hash,
         F: FnOnce() -> Option<EffectCleanup>,
     {
-        let key = id.into();
-        let deps_hash = hash_value(&deps);
+        let key: String = id.into();
+        let deps_hash: u64 = hash_value(&deps);
 
         if let Some(entry) = self.entries.get_mut(&key) {
             entry.seen_this_frame = true;
@@ -89,7 +89,8 @@ impl Drop for EffectStore {
 }
 
 fn hash_value<T: Hash>(value: &T) -> u64 {
-    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    let mut hasher: std::collections::hash_map::DefaultHasher =
+        std::collections::hash_map::DefaultHasher::new();
     value.hash(&mut hasher);
     hasher.finish()
 }

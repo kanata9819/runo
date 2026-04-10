@@ -35,14 +35,14 @@ impl RetainedState {
             enabled,
         } = args;
 
-        let selected_index_override = selected_index;
-        let items_for_update = items.clone();
+        let selected_index_override: Option<usize> = selected_index;
+        let items_for_update: Vec<String> = items.clone();
 
         self.upsert_widget_node(
             id,
             || {
-                let items = items.clone();
-                let initial_selected_index =
+                let items: Vec<String> = items.clone();
+                let initial_selected_index: usize =
                     initial_selected_index(&items.clone(), selected_index_override);
 
                 let args: BuildNodeParams = BuildNodeParams {
@@ -60,7 +60,7 @@ impl RetainedState {
             },
             |entry| match entry {
                 WidgetNode::ComboBox(combo_box) => {
-                    let initial_selected_index =
+                    let initial_selected_index: usize =
                         initial_selected_index(&items_for_update, selected_index_override);
                     let args: BuildNodeParams = BuildNodeParams {
                         rect,
@@ -73,7 +73,7 @@ impl RetainedState {
                         enabled,
                     };
 
-                    let replacement = build_combo_box_node(args);
+                    let replacement: ComboBoxNode = build_combo_box_node(args);
                     update_existing_combo_box(combo_box, replacement, selected_index_override);
                     Some(combo_box_response(combo_box))
                 }
@@ -116,7 +116,7 @@ impl RetainedState {
             return;
         }
 
-        let next_index = index.min(combo_box.items.len() - 1);
+        let next_index: usize = index.min(combo_box.items.len() - 1);
         combo_box.changed = combo_box.selected_index != next_index;
         combo_box.selected_index = next_index;
     }
@@ -131,7 +131,7 @@ impl RetainedState {
         };
 
         let next_items: Vec<String> = items.into_iter().map(Into::into).collect();
-        let prev_index = combo_box.selected_index;
+        let prev_index: usize = combo_box.selected_index;
         combo_box.items = next_items;
 
         if combo_box.items.is_empty() {
@@ -155,7 +155,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_combo_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        let id_ref = id.as_ref();
+        let id_ref: &str = id.as_ref();
         let Some(WidgetNode::ComboBox(combo_box)) = self.widgets.get_mut(id_ref) else {
             return;
         };

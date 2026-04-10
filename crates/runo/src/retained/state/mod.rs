@@ -50,12 +50,12 @@ fn normalize_range(min: f64, max: f64) -> (f64, f64) {
 }
 
 fn snap_and_clamp(value: f64, min: f64, max: f64, step: Option<f64>) -> f64 {
-    let mut clamped = value.clamp(min, max);
+    let mut clamped: f64 = value.clamp(min, max);
 
     if let Some(step) = step
         && step > 0.0
     {
-        let snapped = ((clamped - min) / step).round() * step + min;
+        let snapped: f64 = ((clamped - min) / step).round() * step + min;
         clamped = snapped.clamp(min, max);
     }
 
@@ -95,7 +95,7 @@ impl RetainedState {
         if !self.widgets.contains_key(&id) {
             self.order.push(id.clone());
             self.widgets.insert(id.clone(), make_new_node());
-            let node = self
+            let node: &WidgetNode = self
                 .widgets
                 .get(&id)
                 .expect("newly inserted widget entry missing");
@@ -103,7 +103,7 @@ impl RetainedState {
             return new_or_replaced_response(node);
         }
 
-        let entry = self.widgets.get_mut(&id).expect("widget entry missing");
+        let entry: &mut WidgetNode = self.widgets.get_mut(&id).expect("widget entry missing");
 
         if let Some(response) = update_existing(entry) {
             return response;

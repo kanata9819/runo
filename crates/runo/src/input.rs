@@ -87,7 +87,7 @@ impl InputState {
     }
 
     pub(crate) fn on_mouse_input(&mut self, state: ElementState) {
-        let next = state == ElementState::Pressed;
+        let next: bool = state == ElementState::Pressed;
         if next && !self.mouse_down {
             self.mouse_pressed = true;
         }

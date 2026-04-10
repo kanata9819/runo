@@ -14,7 +14,7 @@ impl RetainedState {
         F: FnMut(&WidgetNode) -> bool,
     {
         self.order.iter().rev().find_map(|id| {
-            let node = self.widgets.get(id)?;
+            let node: &WidgetNode = self.widgets.get(id)?;
             if predicate(node) {
                 Some(id.clone())
             } else {
@@ -24,7 +24,7 @@ impl RetainedState {
     }
 
     pub(super) fn update_hover_flags(&mut self, cursor_pos: (f64, f64)) {
-        let open_overlay_id = self.order.iter().rev().find_map(|id| {
+        let open_overlay_id: Option<String> = self.order.iter().rev().find_map(|id| {
             let WidgetNode::ComboBox(combo_box) = self.widgets.get(id)? else {
                 return None;
             };
@@ -38,7 +38,7 @@ impl RetainedState {
                 None
             }
         });
-        let overlay_blocks_other_widgets = open_overlay_id.is_some();
+        let overlay_blocks_other_widgets: bool = open_overlay_id.is_some();
 
         for (id, node) in &mut self.widgets {
             match node {
@@ -157,7 +157,7 @@ impl RetainedState {
         mouse_down: bool,
         mouse_released: bool,
     ) {
-        let mut clicked_ids = Vec::new();
+        let mut clicked_ids: Vec<String> = Vec::new();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::Button(button) = node {
                 if !button.enabled {
@@ -188,8 +188,8 @@ impl RetainedState {
     }
 
     pub(super) fn update_checkbox_states(&mut self, mouse_down: bool, mouse_released: bool) {
-        let mut changed = Vec::new();
-        let active_checkbox = self.active_checkbox.clone();
+        let mut changed: Vec<(String, bool)> = Vec::new();
+        let active_checkbox: Option<String> = self.active_checkbox.clone();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::Checkbox(checkbox) = node {
                 if !checkbox.enabled {
@@ -224,9 +224,9 @@ impl RetainedState {
     }
 
     pub(super) fn update_radio_button_states(&mut self, mouse_down: bool, mouse_released: bool) {
-        let active_radio_button = self.active_radio_button.clone();
+        let active_radio_button: Option<String> = self.active_radio_button.clone();
         let mut selected_id: Option<String> = None;
-        let mut selected_group = String::new();
+        let mut selected_group: String = String::new();
 
         for (id, node) in &mut self.widgets {
             if let WidgetNode::RadioButton(radio_button) = node {
@@ -278,8 +278,8 @@ impl RetainedState {
         mouse_down: bool,
         mouse_released: bool,
     ) {
-        let active_slider = self.active_slider.clone();
-        let mut changed = Vec::new();
+        let active_slider: Option<String> = self.active_slider.clone();
+        let mut changed: Vec<(String, f64)> = Vec::new();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::Slider(slider) = node {
                 if !slider.enabled {
@@ -294,7 +294,7 @@ impl RetainedState {
                 slider.pressed = mouse_down && is_active;
 
                 if (mouse_pressed || mouse_down) && is_active {
-                    let next_value = slider_value_from_cursor(slider, cursor_pos.0);
+                    let next_value: f64 = slider_value_from_cursor(slider, cursor_pos.0);
                     slider.changed = (slider.value - next_value).abs() > f64::EPSILON;
                     slider.value = next_value;
 
@@ -318,8 +318,8 @@ impl RetainedState {
     }
 
     pub(super) fn update_combo_box_states(&mut self, mouse_down: bool, mouse_released: bool) {
-        let mut changed = Vec::new();
-        let active_combo_box = self.active_combo_box.clone();
+        let mut changed: Vec<(String, usize, String)> = Vec::new();
+        let active_combo_box: Option<String> = self.active_combo_box.clone();
         for (id, node) in &mut self.widgets {
             if let WidgetNode::ComboBox(combo_box) = node {
                 if !combo_box.enabled {
@@ -415,10 +415,10 @@ fn combo_item_index_at(
         return None;
     }
 
-    let item_height = combo_box.rect.height();
+    let item_height: f64 = combo_box.rect.height();
     for index in 0..combo_box.items.len() {
-        let top = combo_box.rect.y1 + item_height * index as f64;
-        let rect = Rect::new(combo_box.rect.x0, top, combo_box.rect.x1, top + item_height);
+        let top: f64 = combo_box.rect.y1 + item_height * index as f64;
+        let rect: Rect = Rect::new(combo_box.rect.x0, top, combo_box.rect.x1, top + item_height);
 
         if contains(rect, x, y) {
             return Some(index);
@@ -455,10 +455,10 @@ fn text_box_hovered(
 }
 
 fn slider_value_from_cursor(slider: &crate::retained::node::SliderNode, cursor_x: f64) -> f64 {
-    let x0 = slider.rect.x0 + 12.0;
-    let x1 = slider.rect.x1 - 12.0;
-    let width = (x1 - x0).max(1.0);
-    let ratio = ((cursor_x - x0) / width).clamp(0.0, 1.0);
+    let x0: f64 = slider.rect.x0 + 12.0;
+    let x1: f64 = slider.rect.x1 - 12.0;
+    let width: f64 = (x1 - x0).max(1.0);
+    let ratio: f64 = ((cursor_x - x0) / width).clamp(0.0, 1.0);
     let mut value = slider.min + (slider.max - slider.min) * ratio;
 
     if let Some(step) = slider.step

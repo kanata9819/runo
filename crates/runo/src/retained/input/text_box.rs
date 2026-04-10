@@ -21,7 +21,7 @@ impl RetainedState {
         cursor_pos: (f64, f64),
     ) {
         if mouse_pressed {
-            let scrollbar_id = self.order.iter().rev().find_map(|id| {
+            let scrollbar_id: Option<String> = self.order.iter().rev().find_map(|id| {
                 let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
                     return None;
                 };
@@ -152,7 +152,7 @@ impl RetainedState {
             return;
         }
 
-        let target_id = self.order.iter().rev().find_map(|id| {
+        let target_id: Option<String> = self.order.iter().rev().find_map(|id| {
             let WidgetNode::TextBox(text_box) = self.widgets.get(id)? else {
                 return None;
             };
@@ -214,16 +214,16 @@ impl RetainedState {
     }
 
     fn max_scroll_y(text_box: &crate::retained::node::TextBoxNode) -> f64 {
-        let line_count = text_box.text.split('\n').count().max(1) as f64;
-        let content_height = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
-        let inner_height = (text_box.rect.height() - 12.0).max(1.0);
+        let line_count: f64 = text_box.text.split('\n').count().max(1) as f64;
+        let content_height: f64 = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
+        let inner_height: f64 = (text_box.rect.height() - 12.0).max(1.0);
         (content_height - inner_height).max(0.0)
     }
 }
 
 fn text_box_max_scroll_x(text_box: &crate::retained::node::TextBoxNode) -> f64 {
-    let inner_width = (text_box.rect.width() - 24.0).max(1.0);
-    let content_width = text_box_content_width(text_box);
+    let inner_width: f64 = (text_box.rect.width() - 24.0).max(1.0);
+    let content_width: f64 = text_box_content_width(text_box);
     (content_width - inner_width).max(0.0)
 }
 
@@ -232,12 +232,12 @@ fn text_box_scrollbar_track_contains(
     x: f64,
     y: f64,
 ) -> bool {
-    let inner_left = text_box.rect.x0 + 12.0;
-    let inner_right = text_box.rect.x1 - 12.0;
-    let hit_height = 12.0;
-    let hit_bottom = text_box.rect.y1 - 2.0;
-    let hit_top = (hit_bottom - hit_height).max(text_box.rect.y0);
-    let hit = Rect::new(inner_left, hit_top, inner_right, hit_bottom);
+    let inner_left: f64 = text_box.rect.x0 + 12.0;
+    let inner_right: f64 = text_box.rect.x1 - 12.0;
+    let hit_height: f64 = 12.0;
+    let hit_bottom: f64 = text_box.rect.y1 - 2.0;
+    let hit_top: f64 = (hit_bottom - hit_height).max(text_box.rect.y0);
+    let hit: Rect = Rect::new(inner_left, hit_top, inner_right, hit_bottom);
 
     contains(hit, x, y)
 }
@@ -246,23 +246,23 @@ fn set_scroll_from_scrollbar_cursor(
     text_box: &mut crate::retained::node::TextBoxNode,
     cursor_x: f64,
 ) {
-    let inner_left = text_box.rect.x0 + 12.0;
-    let inner_right = text_box.rect.x1 - 12.0;
-    let inner_width = (inner_right - inner_left).max(1.0);
-    let content_width = text_box_content_width(text_box);
-    let max_scroll = text_box_max_scroll_x(text_box);
+    let inner_left: f64 = text_box.rect.x0 + 12.0;
+    let inner_right: f64 = text_box.rect.x1 - 12.0;
+    let inner_width: f64 = (inner_right - inner_left).max(1.0);
+    let content_width: f64 = text_box_content_width(text_box);
+    let max_scroll: f64 = text_box_max_scroll_x(text_box);
 
     if max_scroll <= 0.0 {
         text_box.scroll_x = 0.0;
         return;
     }
 
-    let thumb_w = ((inner_width / content_width) * inner_width)
+    let thumb_w: f64 = ((inner_width / content_width) * inner_width)
         .clamp(18.0, inner_width)
         .min(inner_width);
 
-    let den = (inner_width - thumb_w).max(1.0);
-    let ratio = ((cursor_x - inner_left - thumb_w * 0.5) / den).clamp(0.0, 1.0);
+    let den: f64 = (inner_width - thumb_w).max(1.0);
+    let ratio: f64 = ((cursor_x - inner_left - thumb_w * 0.5) / den).clamp(0.0, 1.0);
     text_box.scroll_x = ratio * max_scroll;
 }
 
@@ -326,13 +326,13 @@ fn remove_char_before_caret(text: &mut String, caret_index: &mut usize) -> bool 
 }
 
 fn remove_char_at_caret(text: &mut String, caret_index: usize) -> bool {
-    let total = text.chars().count();
+    let total: usize = text.chars().count();
     if caret_index >= total {
         return false;
     }
 
-    let start = char_to_byte_index(text, caret_index);
-    let end = char_to_byte_index(text, caret_index + 1);
+    let start: usize = char_to_byte_index(text, caret_index);
+    let end: usize = char_to_byte_index(text, caret_index + 1);
     text.replace_range(start..end, "");
 
     true
@@ -344,8 +344,8 @@ fn move_caret_vertical(text: &str, caret_index: usize, delta_line: i32) -> usize
     if lines.is_empty() {
         return 0;
     }
-    let target_line = (line as i32 + delta_line).clamp(0, lines.len() as i32 - 1) as usize;
-    let target_col = col.min(lines[target_line].chars().count());
+    let target_line: usize = (line as i32 + delta_line).clamp(0, lines.len() as i32 - 1) as usize;
+    let target_col: usize = col.min(lines[target_line].chars().count());
 
     char_index_from_line_col(&lines, target_line, target_col)
 }

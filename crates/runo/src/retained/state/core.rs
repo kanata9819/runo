@@ -47,7 +47,7 @@ impl RetainedState {
     }
 
     pub(crate) fn prune_unseen_widgets(&mut self) {
-        let seen = self.seen_widget_ids.clone();
+        let seen: HashSet<String> = self.seen_widget_ids.clone();
         retain_seen_map(&mut self.widgets, &seen);
         retain_seen_order(&mut self.order, &seen);
         retain_seen_map(&mut self.div_visible, &seen);
@@ -92,8 +92,8 @@ impl RetainedState {
         border_color: Option<Color>,
         border_width: f64,
     ) {
-        let visible = self.div_visible(&id);
-        let bg_color = self.div_background(&id).or(default_bg_color);
+        let visible: bool = self.div_visible(&id);
+        let bg_color: Option<Color> = self.div_background(&id).or(default_bg_color);
         self.upsert_widget_node(
             id,
             || {
@@ -146,7 +146,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_div_visible(&mut self, id: impl Into<String>, visible: bool) {
-        let id = id.into();
+        let id: String = id.into();
         self.div_visible.insert(id.clone(), visible);
         if let Some(WidgetNode::Div(div)) = self.widgets.get_mut(&id) {
             div.visible = visible;
@@ -158,7 +158,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_div_background(&mut self, id: impl Into<String>, color: Color) {
-        let id = id.into();
+        let id: String = id.into();
         self.div_background.insert(id.clone(), color);
         if let Some(WidgetNode::Div(div)) = self.widgets.get_mut(&id) {
             div.bg_color = Some(color);
@@ -166,7 +166,7 @@ impl RetainedState {
     }
 
     pub(crate) fn clear_div_background(&mut self, id: impl AsRef<str>) {
-        let id = id.as_ref();
+        let id: &str = id.as_ref();
         self.div_background.remove(id);
         if let Some(WidgetNode::Div(div)) = self.widgets.get_mut(id) {
             div.bg_color = div.default_bg_color;
@@ -257,8 +257,8 @@ impl RetainedState {
         matches: impl Fn(&UiEvent) -> bool,
         map: impl FnOnce(UiEvent) -> Option<T>,
     ) -> Option<T> {
-        let index = self.events.iter().position(matches)?;
-        let event = self.events.remove(index)?;
+        let index: usize = self.events.iter().position(matches)?;
+        let event: UiEvent = self.events.remove(index)?;
         map(event)
     }
 

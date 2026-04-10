@@ -38,14 +38,14 @@ impl RetainedState {
             enabled,
         } = args;
 
-        let default_selected = selected.unwrap_or(false);
+        let default_selected: bool = selected.unwrap_or(false);
 
         if selected == Some(true) {
             Self::clear_radio_group_selection(&mut self.widgets, &group);
         }
 
-        let group_for_update = group.clone();
-        let text_for_update = text.clone();
+        let group_for_update: String = group.clone();
+        let text_for_update: Option<String> = text.clone();
 
         self.upsert_widget_node(
             id,
@@ -109,8 +109,8 @@ impl RetainedState {
     }
 
     pub(crate) fn set_radio_button_selected(&mut self, id: impl AsRef<str>, selected: bool) {
-        let id_ref = id.as_ref();
-        let group = self.widgets.get(id_ref).and_then(|node| match node {
+        let id_ref: &str = id.as_ref();
+        let group: Option<String> = self.widgets.get(id_ref).and_then(|node| match node {
             WidgetNode::RadioButton(radio_button) => Some(radio_button.group.clone()),
             _ => None,
         });
@@ -132,7 +132,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_radio_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        let id_ref = id.as_ref();
+        let id_ref: &str = id.as_ref();
         let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
             return;
         };

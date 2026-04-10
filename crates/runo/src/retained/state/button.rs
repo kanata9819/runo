@@ -19,7 +19,7 @@ impl RetainedState {
         text_color: Color,
         enabled: bool,
     ) -> ButtonResponse {
-        let text_for_update = text.clone();
+        let text_for_update: Option<String> = text.clone();
         self.upsert_widget_node(
             id,
             || {
@@ -81,7 +81,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        let id_ref = id.as_ref();
+        let id_ref: &str = id.as_ref();
         let Some(WidgetNode::Button(button)) = self.widgets.get_mut(id_ref) else {
             return;
         };

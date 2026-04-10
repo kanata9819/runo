@@ -56,19 +56,19 @@ fn keyboard_actions(
         return KeyboardActions::default();
     }
 
-    let push_text = if !ime_active && !ctrl_pressed {
+    let push_text: Option<String> = if !ime_active && !ctrl_pressed {
         text.map(str::to_string)
     } else {
         None
     };
 
-    let named_key = if let Key::Named(named) = logical_key {
+    let named_key: Option<NamedKey> = if let Key::Named(named) = logical_key {
         Some(*named)
     } else {
         None
     };
 
-    let clipboard = if ctrl_pressed {
+    let clipboard: Option<ClipboardShortcut> = if ctrl_pressed {
         clipboard_shortcut(logical_key)
     } else {
         None
@@ -141,7 +141,8 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 self.request_redraw();
             }
             WindowEvent::CursorMoved { position, .. } => {
-                let logical_position = position.to_logical::<f64>(self.scale_factor());
+                let logical_position: winit::dpi::LogicalPosition<f64> =
+                    position.to_logical::<f64>(self.scale_factor());
                 self.update_input_and_request_redraw(|input| {
                     input.set_cursor_pos(logical_position.x, logical_position.y);
                 });
@@ -156,8 +157,8 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 });
             }
             WindowEvent::MouseWheel { delta, .. } => {
-                let (dx, dy) = scroll_delta_to_pixels(delta);
-                let scale_factor = self.scale_factor();
+                let (dx, dy): (f64, f64) = scroll_delta_to_pixels(delta);
+                let scale_factor: f64 = self.scale_factor();
                 self.update_input_and_request_redraw(|input| {
                     input.on_mouse_wheel(dx / scale_factor, dy / scale_factor);
                 });
@@ -166,7 +167,7 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                 self.request_redraw();
             }
             WindowEvent::KeyboardInput { event, .. } => {
-                let actions = keyboard_actions(
+                let actions: KeyboardActions = keyboard_actions(
                     &event.logical_key,
                     event.text.as_deref(),
                     event.state.is_pressed(),

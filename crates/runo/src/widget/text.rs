@@ -22,17 +22,18 @@ pub(crate) fn layout_text(
         };
 
         let charmap = font_ref.charmap();
-        let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
+        let glyph_metrics =
+            font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
 
         let mut total_advance = 0.0_f32;
-        let mut glyphs = Vec::new();
+        let mut glyphs: Vec<Glyph> = Vec::new();
 
         for ch in text.chars() {
             let Some(glyph_id) = charmap.map(ch) else {
                 continue;
             };
 
-            let advance = glyph_metrics
+            let advance: f32 = glyph_metrics
                 .advance_width(glyph_id)
                 .unwrap_or(font_size * 0.56);
             glyphs.push(Glyph {
@@ -66,5 +67,6 @@ pub(crate) fn draw_text_run(
 }
 
 pub(crate) fn estimate_text_width(text: &str, font_size: f32) -> f32 {
-    text.chars().count() as f32 * font_size * 0.56
+    let char_count: f32 = text.chars().count() as f32;
+    char_count * font_size * 0.56
 }

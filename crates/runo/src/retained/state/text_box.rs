@@ -41,11 +41,11 @@ impl RetainedState {
             overflow_x,
             overflow_y,
         } = args;
-        let initial_text = text.clone().unwrap_or_default();
-        let initial_text_advance = estimate_text_width(&initial_text, font_size) as f64;
-        let initial_caret_index = initial_text.chars().count();
-        let text_for_update = text;
-        let placeholder_for_update = placeholder.clone();
+        let initial_text: String = text.clone().unwrap_or_default();
+        let initial_text_advance: f64 = estimate_text_width(&initial_text, font_size) as f64;
+        let initial_caret_index: usize = initial_text.chars().count();
+        let text_for_update: Option<String> = text;
+        let placeholder_for_update: Option<String> = placeholder.clone();
 
         self.upsert_widget_node(
             id,
@@ -149,7 +149,7 @@ impl RetainedState {
     }
 
     pub(crate) fn set_text_box_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        let id_ref = id.as_ref();
+        let id_ref: &str = id.as_ref();
         let Some(WidgetNode::TextBox(text_box)) = self.widgets.get_mut(id_ref) else {
             return;
         };
@@ -168,8 +168,8 @@ impl RetainedState {
 }
 
 fn max_scroll_y(text_box: &TextBoxNode) -> f64 {
-    let line_count = text_box.text.split('\n').count().max(1) as f64;
-    let content_height = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
-    let inner_height = (text_box.rect.height() - 12.0).max(1.0);
+    let line_count: f64 = text_box.text.split('\n').count().max(1) as f64;
+    let content_height: f64 = line_count * (text_box.font_size as f64 * 1.35) + 12.0;
+    let inner_height: f64 = (text_box.rect.height() - 12.0).max(1.0);
     (content_height - inner_height).max(0.0)
 }

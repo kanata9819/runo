@@ -38,12 +38,12 @@ impl<'a> Ui<'a> {
             radius,
         } = args;
 
-        let origin = self.layout_stack.peek_next_position();
-        let effective_enabled = self.resolve_div_enabled(&id);
+        let origin: (f64, f64) = self.layout_stack.peek_next_position();
+        let effective_enabled: bool = self.resolve_div_enabled(&id);
 
         // Register the div before children so retained render order keeps the background
         // behind child widgets.
-        let initial_rect = Rect::new(origin.0, origin.1, origin.0, origin.1);
+        let initial_rect: Rect = Rect::new(origin.0, origin.1, origin.0, origin.1);
         self.retained.upsert_div(
             id.clone(),
             initial_rect,
@@ -53,7 +53,7 @@ impl<'a> Ui<'a> {
             border_width,
         );
 
-        let (result, content_w, content_h) = self.layout_div_children(
+        let (result, content_w, content_h): (R, f64, f64) = self.layout_div_children(
             origin,
             (padding_left, padding_top),
             direction,
@@ -62,10 +62,10 @@ impl<'a> Ui<'a> {
             f,
         );
 
-        let auto_w = content_w + padding_left + padding_right;
-        let auto_h = content_h + padding_top + padding_bottom;
-        let div_w = width.unwrap_or(auto_w);
-        let div_h = height.unwrap_or(auto_h);
+        let auto_w: f64 = content_w + padding_left + padding_right;
+        let auto_h: f64 = content_h + padding_top + padding_bottom;
+        let div_w: f64 = width.unwrap_or(auto_w);
+        let div_h: f64 = height.unwrap_or(auto_h);
 
         self.retained.upsert_div(
             id,
@@ -81,7 +81,7 @@ impl<'a> Ui<'a> {
     }
 
     fn resolve_div_enabled(&self, id: &str) -> bool {
-        let div_enabled = self.retained.div_enabled(id);
+        let div_enabled: bool = self.retained.div_enabled(id);
         self.resolve_enabled(div_enabled)
     }
 
@@ -94,11 +94,11 @@ impl<'a> Ui<'a> {
         effective_enabled: bool,
         f: impl FnOnce(&mut Ui<'a>) -> R,
     ) -> (R, f64, f64) {
-        let content_origin = (origin.0 + padding.0, origin.1 + padding.1);
+        let content_origin: (f64, f64) = (origin.0 + padding.0, origin.1 + padding.1);
         self.layout_stack
             .push_layout_at(content_origin, direction, gap);
         self.enabled_stack.push(effective_enabled);
-        let result = f(self);
+        let result: R = f(self);
         let _ = self.enabled_stack.pop();
         let (content_w, content_h) = self.layout_stack.pop_layout_consumed();
         (result, content_w, content_h)

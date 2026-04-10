@@ -1,3 +1,4 @@
+use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::ComboBoxResponse;
@@ -31,7 +32,7 @@ impl<'a> Ui<'a> {
             border_color,
             enabled: enabled_arg,
         } = args;
-        let rect = self.allocate_widget_rect(width, height);
+        let rect: Rect = self.allocate_widget_rect(width, height);
         self.retained.upsert_combo_box(UpsertComboBoxArgs {
             id,
             rect,

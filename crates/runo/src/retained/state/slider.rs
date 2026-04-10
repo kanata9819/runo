@@ -39,9 +39,9 @@ impl RetainedState {
             enabled,
         } = args;
 
-        let (min, max) = normalize_range(min, max);
-        let default_value = snap_and_clamp(value.unwrap_or(min), min, max, step);
-        let text_for_update = text.clone();
+        let (min, max): (f64, f64) = normalize_range(min, max);
+        let default_value: f64 = snap_and_clamp(value.unwrap_or(min), min, max, step);
+        let text_for_update: Option<String> = text.clone();
 
         self.upsert_widget_node(
             id,
@@ -114,13 +114,13 @@ impl RetainedState {
             return;
         };
 
-        let next = snap_and_clamp(value, slider.min, slider.max, slider.step);
+        let next: f64 = snap_and_clamp(value, slider.min, slider.max, slider.step);
         slider.changed = (slider.value - next).abs() > f64::EPSILON;
         slider.value = next;
     }
 
     pub(crate) fn set_slider_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
-        let id_ref = id.as_ref();
+        let id_ref: &str = id.as_ref();
         let Some(WidgetNode::Slider(slider)) = self.widgets.get_mut(id_ref) else {
             return;
         };

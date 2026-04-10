@@ -24,7 +24,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn surface_size(&self) -> Option<(u32, u32)> {
-        let surface = self.surface.as_ref()?;
+        let surface: &vello::util::RenderSurface<'static> = self.surface.as_ref()?;
         Some((surface.config.width, surface.config.height))
     }
 
@@ -45,17 +45,18 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         };
 
         let dev_id: usize = surface.dev_id;
-        let surface_texture = match Self::acquire_surface_texture(&mut self.render_cx, surface) {
-            Ok(Some(texture)) => texture,
-            Ok(None) => return false,
-            Err(crate::app::gpu::GpuFatalError::OutOfMemory) => {
-                eprintln!("fatal gpu error: surface out of memory");
-                return true;
-            }
-        };
+        let surface_texture: vello::wgpu::SurfaceTexture =
+            match Self::acquire_surface_texture(&mut self.render_cx, surface) {
+                Ok(Some(texture)) => texture,
+                Ok(None) => return false,
+                Err(crate::app::gpu::GpuFatalError::OutOfMemory) => {
+                    eprintln!("fatal gpu error: surface out of memory");
+                    return true;
+                }
+            };
 
-        let device = &self.render_cx.devices[dev_id].device;
-        let queue = &self.render_cx.devices[dev_id].queue;
+        let device: &vello::wgpu::Device = &self.render_cx.devices[dev_id].device;
+        let queue: &vello::wgpu::Queue = &self.render_cx.devices[dev_id].queue;
         let mut scaled_scene: Scene = Scene::new();
         scaled_scene.append(&self.scene, Some(Affine::scale(scale_factor)));
 

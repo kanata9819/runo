@@ -22,10 +22,9 @@ pub(crate) fn layout_text(
         };
 
         let charmap = font_ref.charmap();
-        let glyph_metrics =
-            font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
+        let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), LocationRef::default());
 
-        let mut total_advance = 0.0_f32;
+        let mut total_advance: f32 = 0.0_f32;
         let mut glyphs: Vec<Glyph> = Vec::new();
 
         for ch in text.chars() {

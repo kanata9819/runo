@@ -37,7 +37,7 @@ pub(crate) fn load_default_font() -> Option<FontData> {
 
 fn load_font_from_path(path: &str) -> Option<FontData> {
     let bytes: Vec<u8> = fs::read(path).ok()?;
-    let blob = Blob::new(Arc::new(bytes.into_boxed_slice()));
+    let blob: Blob<_> = Blob::new(Arc::new(bytes.into_boxed_slice()));
 
     Some(FontData::new(blob, 0))
 }

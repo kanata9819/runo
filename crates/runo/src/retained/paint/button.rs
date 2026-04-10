@@ -19,8 +19,8 @@ const TEXT_CENTER_RATIO: f64 = 0.5;
 
 /// Renders a button body and optional centered label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, button: &ButtonNode) {
-    let color = change_color(button);
-    let rounded = RoundedRect::from_rect(button.rect, BUTTON_CORNER_RADIUS);
+    let color: AlphaColor<Srgb> = change_color(button);
+    let rounded: RoundedRect = RoundedRect::from_rect(button.rect, BUTTON_CORNER_RADIUS);
 
     scene.fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);
 
@@ -56,10 +56,11 @@ fn draw_text_run(
     glyphs: Vec<Glyph>,
     total_advance: f32,
 ) {
-    let text_x = button.rect.x0 + (button.rect.width() - f64::from(total_advance)) * TEXT_CENTER_RATIO;
-    let text_y = text_baseline::centered(button.rect, button.font_size);
+    let text_x: f64 =
+        button.rect.x0 + (button.rect.width() - f64::from(total_advance)) * TEXT_CENTER_RATIO;
+    let text_y: f64 = text_baseline::centered(button.rect, button.font_size);
 
-    let color = if button.enabled {
+    let color: vello::peniko::Color = if button.enabled {
         button.text_color
     } else {
         color::Neutral::tone_178_184_192()

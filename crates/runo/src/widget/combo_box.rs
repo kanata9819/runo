@@ -163,7 +163,7 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> ComboBoxHandle {
-        let id = self.id;
+        let id: String = self.id;
         self.ui.show_combo_box(ShowComboBoxArgs {
             id: id.clone(),
             width: self.width,

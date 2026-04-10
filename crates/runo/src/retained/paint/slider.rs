@@ -24,12 +24,12 @@ const VALUE_DECIMALS: usize = 2;
 
 /// Renders slider track, active fill, thumb, optional label, and current numeric value.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, slider: &SliderNode) {
-    let track_h = TRACK_HEIGHT;
-    let pad_x = TRACK_HORIZONTAL_PADDING;
-    let track_x0 = slider.rect.x0 + pad_x;
-    let track_x1 = slider.rect.x1 - pad_x;
-    let track_y = slider.rect.y0 + slider.rect.height() * TRACK_VERTICAL_RATIO;
-    let track_rect = RoundedRect::new(
+    let track_h: f64 = TRACK_HEIGHT;
+    let pad_x: f64 = TRACK_HORIZONTAL_PADDING;
+    let track_x0: f64 = slider.rect.x0 + pad_x;
+    let track_x1: f64 = slider.rect.x1 - pad_x;
+    let track_y: f64 = slider.rect.y0 + slider.rect.height() * TRACK_VERTICAL_RATIO;
+    let track_rect: RoundedRect = RoundedRect::new(
         track_x0,
         track_y - track_h * HALF_RATIO,
         track_x1,
@@ -37,8 +37,8 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, slider: &Slider
         TRACK_CORNER_RADIUS,
     );
 
-    let ratio = value_ratio(slider.value, slider.min, slider.max);
-    let thumb_x = track_x0 + (track_x1 - track_x0) * ratio;
+    let ratio: f64 = value_ratio(slider.value, slider.min, slider.max);
+    let thumb_x: f64 = track_x0 + (track_x1 - track_x0) * ratio;
 
     draw_track(scene, slider, &track_rect);
     draw_active_fill(scene, slider, track_x0, track_y, track_h, thumb_x);
@@ -76,7 +76,7 @@ fn draw_active_fill(
     track_h: f64,
     thumb_x: f64,
 ) {
-    let active_rect = RoundedRect::new(
+    let active_rect: RoundedRect = RoundedRect::new(
         track_x0,
         track_y - track_h * HALF_RATIO,
         thumb_x,
@@ -95,7 +95,7 @@ fn draw_active_fill(
 
 /// Draws the slider thumb circle.
 fn draw_thumb(scene: &mut Scene, slider: &SliderNode, thumb_x: f64, track_y: f64) {
-    let thumb = Circle::new((thumb_x, track_y), THUMB_RADIUS);
+    let thumb: Circle = Circle::new((thumb_x, track_y), THUMB_RADIUS);
 
     scene.fill(
         Fill::NonZero,
@@ -123,7 +123,7 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
     if let Some(text) = slider.text.as_deref()
         && let Some((glyphs, _)) = text::layout_text(font, text, slider.font_size)
     {
-        let baseline_y = text_baseline::top_aligned(slider.rect, slider.font_size);
+        let baseline_y: f64 = text_baseline::top_aligned(slider.rect, slider.font_size);
 
         text::draw_text_run(
             scene,
@@ -143,10 +143,10 @@ fn draw_optional_label(scene: &mut Scene, font: &FontData, slider: &SliderNode, 
 
 /// Draws the right-aligned numeric value text.
 fn draw_value_text(scene: &mut Scene, font: &FontData, slider: &SliderNode, pad_x: f64) {
-    let value_text = format!("{:.*}", VALUE_DECIMALS, slider.value);
+    let value_text: String = format!("{:.*}", VALUE_DECIMALS, slider.value);
 
     if let Some((glyphs, w)) = text::layout_text(font, &value_text, slider.font_size) {
-        let baseline_y = text_baseline::top_aligned(slider.rect, slider.font_size);
+        let baseline_y: f64 = text_baseline::top_aligned(slider.rect, slider.font_size);
 
         text::draw_text_run(
             scene,
@@ -178,7 +178,7 @@ fn active_fill_color(slider: &SliderNode) -> AlphaColor<Srgb> {
 
 /// Converts slider value in `[min, max]` into a clamped ratio in `[0.0, 1.0]`.
 fn value_ratio(value: f64, min: f64, max: f64) -> f64 {
-    let span = (max - min).abs();
+    let span: f64 = (max - min).abs();
 
     if span <= f64::EPSILON {
         return 0.0;

@@ -139,7 +139,7 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> RadioButtonHandle {
-        let id = self.id;
+        let id: String = self.id;
         self.ui.show_radio_button(ShowRadioButtonArgs {
             id: id.clone(),
             group: self.group,

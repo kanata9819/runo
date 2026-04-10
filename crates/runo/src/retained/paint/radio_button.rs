@@ -25,13 +25,13 @@ const LABEL_TEXT_SPACING: f64 = 10.0;
 
 /// Renders radio button indicator, selected dot, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioButtonNode) {
-    let indicator_size = indicator_size(radio_button.rect.height());
-    let indicator_radius = indicator_size * OUTER_RADIUS_RATIO;
-    let center_x = radio_button.rect.x0 + INDICATOR_X_OFFSET + indicator_radius;
-    let center_y = radio_button.rect.y0 + radio_button.rect.height() * BASELINE_VERTICAL_RATIO;
-    let outer_circle = Circle::new((center_x, center_y), indicator_radius);
+    let indicator_size: f64 = indicator_size(radio_button.rect.height());
+    let indicator_radius: f64 = indicator_size * OUTER_RADIUS_RATIO;
+    let center_x: f64 = radio_button.rect.x0 + INDICATOR_X_OFFSET + indicator_radius;
+    let center_y: f64 = radio_button.rect.y0 + radio_button.rect.height() * BASELINE_VERTICAL_RATIO;
+    let outer_circle: Circle = Circle::new((center_x, center_y), indicator_radius);
 
-    let outer_bg = outer_bg_color(radio_button);
+    let outer_bg: AlphaColor<Srgb> = outer_bg_color(radio_button);
 
     scene.fill(
         Fill::NonZero,
@@ -54,8 +54,8 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
     );
 
     if radio_button.selected {
-        let inner_radius = indicator_radius * INNER_RADIUS_RATIO;
-        let inner_circle = Circle::new((center_x, center_y), inner_radius);
+        let inner_radius: f64 = indicator_radius * INNER_RADIUS_RATIO;
+        let inner_circle: Circle = Circle::new((center_x, center_y), inner_radius);
 
         scene.fill(
             Fill::NonZero,
@@ -82,8 +82,8 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &
         return;
     };
 
-    let text_x = center_x + indicator_radius + LABEL_TEXT_SPACING;
-    let baseline_y = text_baseline::centered(radio_button.rect, radio_button.font_size);
+    let text_x: f64 = center_x + indicator_radius + LABEL_TEXT_SPACING;
+    let baseline_y: f64 = text_baseline::centered(radio_button.rect, radio_button.font_size);
 
     text::draw_text_run(
         scene,

@@ -31,11 +31,11 @@ const INDICATOR_SIZE_MAX: f64 = 24.0;
 
 /// Renders checkbox indicator, optional check mark, and optional label text.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &CheckboxNode) {
-    let indicator_size = indicator_size(checkbox.rect.height());
-    let indicator_x = checkbox.rect.x0 + INDICATOR_X_OFFSET;
-    let indicator_y =
+    let indicator_size: f64 = indicator_size(checkbox.rect.height());
+    let indicator_x: f64 = checkbox.rect.x0 + INDICATOR_X_OFFSET;
+    let indicator_y: f64 =
         checkbox.rect.y0 + (checkbox.rect.height() - indicator_size) * BASELINE_VERTICAL_RATIO;
-    let indicator_rect = RoundedRect::new(
+    let indicator_rect: RoundedRect = RoundedRect::new(
         indicator_x,
         indicator_y,
         indicator_x + indicator_size,
@@ -43,7 +43,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         INDICATOR_CORNER_RADIUS,
     );
 
-    let bg_color = indicator_bg_color(checkbox);
+    let bg_color: AlphaColor<Srgb> = indicator_bg_color(checkbox);
 
     scene.fill(
         Fill::NonZero,
@@ -53,7 +53,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         &indicator_rect,
     );
 
-    let color = if checkbox.enabled {
+    let color: vello::peniko::Color = if checkbox.enabled {
         color::Neutral::tone_130_145_163()
     } else {
         color::Neutral::tone_88_94_102()
@@ -68,17 +68,17 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
     );
 
     if checkbox.checked {
-        let check_color = if checkbox.enabled {
+        let check_color: vello::peniko::Color = if checkbox.enabled {
             color::SoftWhite::tone_240_246_255()
         } else {
             color::Neutral::tone_167_173_181()
         };
-        let x0 = indicator_x + indicator_size * CHECK_X0_RATIO;
-        let y0 = indicator_y + indicator_size * CHECK_Y0_RATIO;
-        let x1 = indicator_x + indicator_size * CHECK_X1_RATIO;
-        let y1 = indicator_y + indicator_size * CHECK_Y1_RATIO;
-        let x2 = indicator_x + indicator_size * CHECK_X2_RATIO;
-        let y2 = indicator_y + indicator_size * CHECK_Y2_RATIO;
+        let x0: f64 = indicator_x + indicator_size * CHECK_X0_RATIO;
+        let y0: f64 = indicator_y + indicator_size * CHECK_Y0_RATIO;
+        let x1: f64 = indicator_x + indicator_size * CHECK_X1_RATIO;
+        let y1: f64 = indicator_y + indicator_size * CHECK_Y1_RATIO;
+        let x2: f64 = indicator_x + indicator_size * CHECK_X2_RATIO;
+        let y2: f64 = indicator_y + indicator_size * CHECK_Y2_RATIO;
 
         scene.stroke(
             &Stroke::new(CHECK_STROKE_WIDTH),
@@ -109,9 +109,9 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, checkbox: &Chec
         return;
     };
 
-    let text_x = indicator_x + indicator_size + LABEL_TEXT_SPACING;
-    let baseline_y = text_baseline::centered(checkbox.rect, checkbox.font_size);
-    let color = if checkbox.enabled {
+    let text_x: f64 = indicator_x + indicator_size + LABEL_TEXT_SPACING;
+    let baseline_y: f64 = text_baseline::centered(checkbox.rect, checkbox.font_size);
+    let color: vello::peniko::Color = if checkbox.enabled {
         checkbox.text_color
     } else {
         color::Neutral::tone_146_152_160()

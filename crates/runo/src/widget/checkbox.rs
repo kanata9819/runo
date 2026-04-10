@@ -132,7 +132,7 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> CheckboxHandle {
-        let id = self.id;
+        let id: String = self.id;
         self.ui.show_checkbox(ShowCheckboxArgs {
             id: id.clone(),
             width: self.width,

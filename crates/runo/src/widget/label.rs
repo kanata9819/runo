@@ -88,16 +88,19 @@ impl<'ui, 'a> LabelBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> LabelHandle {
-        let intrinsic_height = f64::from(self.font_size) * 1.35;
-        let intrinsic_width = if let Some(font) = self.ui.font.as_ref() {
-            layout_text(font, &self.text, self.font_size).map_or_else(|| estimate_text_width(&self.text, self.font_size), |(_, width)| width)
+        let intrinsic_height: f64 = f64::from(self.font_size) * 1.35;
+        let intrinsic_width: f32 = if let Some(font) = self.ui.font.as_ref() {
+            layout_text(font, &self.text, self.font_size).map_or_else(
+                || estimate_text_width(&self.text, self.font_size),
+                |(_, width)| width,
+            )
         } else {
             estimate_text_width(&self.text, self.font_size)
         };
 
-        let width = self.width.unwrap_or(f64::from(intrinsic_width));
-        let height = self.height.unwrap_or(intrinsic_height);
-        let id = self.id;
+        let width: f64 = self.width.unwrap_or(f64::from(intrinsic_width));
+        let height: f64 = self.height.unwrap_or(intrinsic_height);
+        let id: String = self.id;
 
         self.ui.show_label(ShowLabelArgs {
             id: id.clone(),

@@ -45,7 +45,7 @@ impl DivConfig {
     }
 
     fn set_padding_all(&mut self, px: u32) {
-        let px = f64::from(px);
+        let px: f64 = f64::from(px);
         self.padding_left = px;
         self.padding_top = px;
         self.padding_right = px;
@@ -53,13 +53,13 @@ impl DivConfig {
     }
 
     fn set_padding_x(&mut self, px: u32) {
-        let px = f64::from(px);
+        let px: f64 = f64::from(px);
         self.padding_left = px;
         self.padding_right = px;
     }
 
     fn set_padding_y(&mut self, px: u32) {
-        let px = f64::from(px);
+        let px: f64 = f64::from(px);
         self.padding_top = px;
         self.padding_bottom = px;
     }
@@ -199,8 +199,8 @@ impl<'ui, 'a> DivBuilder<'ui, 'a> {
     }
 
     pub fn show_with_handle<R>(self, f: impl FnOnce(&mut Ui<'a>) -> R) -> (DivHandle, R) {
-        let handle = DivHandle::new(self.config.id.clone());
-        let result = self.ui.show_div(self.config.into_show_args(), f);
+        let handle: DivHandle = DivHandle::new(self.config.id.clone());
+        let result: R = self.ui.show_div(self.config.into_show_args(), f);
         (handle, result)
     }
 }

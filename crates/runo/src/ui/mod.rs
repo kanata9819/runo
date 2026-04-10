@@ -127,8 +127,8 @@ impl<'a> Ui<'a> {
         self.key_scope_stack.push(key.into());
         self.auto_id_counter_stack.push(0);
         let result: R = f(self);
-        let _ = self.auto_id_counter_stack.pop();
-        let _ = self.key_scope_stack.pop();
+        let _popped_auto_id_counter: Option<u64> = self.auto_id_counter_stack.pop();
+        let _popped_key_scope: Option<String> = self.key_scope_stack.pop();
 
         result
     }

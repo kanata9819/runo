@@ -184,7 +184,7 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> TextBoxHandle {
-        let id = self.id;
+        let id: String = self.id;
         self.ui.show_text_box(ShowTextBoxArgs {
             id: id.clone(),
             width: self.width,

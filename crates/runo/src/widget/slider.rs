@@ -149,7 +149,7 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> SliderHandle {
-        let id = self.id;
+        let id: String = self.id;
         self.ui.show_slider(ShowSliderArgs {
             id: id.clone(),
             width: self.width,

@@ -125,7 +125,7 @@ impl<'ui, 'a> ButtonBuilder<'ui, 'a> {
     }
 
     pub fn show(self) -> ButtonHandle {
-        let id = self.id;
+        let id: String = self.id;
         self.ui.show_button(ShowButtonArgs {
             id: id.clone(),
             width: self.width,

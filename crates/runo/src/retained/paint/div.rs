@@ -10,7 +10,7 @@ pub(super) fn render(scene: &mut Scene, div: &DivNode) {
         return;
     }
 
-    let rounded = RoundedRect::from_rect(div.rect, div.radius);
+    let rounded: RoundedRect = RoundedRect::from_rect(div.rect, div.radius);
 
     if let Some(color) = div.bg_color {
         scene.fill(Fill::NonZero, Affine::IDENTITY, color, None, &rounded);

@@ -35,7 +35,7 @@ pub struct EventBindingsBuilder<E> {
 }
 
 impl<A> ActionBindings<A> {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             button: HashMap::new(),
@@ -73,12 +73,12 @@ impl<A> ActionBindings<A> {
 }
 
 impl<E> EventBindings<E> {
-    #[must_use] 
+    #[must_use]
     pub fn builder() -> EventBindingsBuilder<E> {
         EventBindingsBuilder::new()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             button: HashMap::new(),
@@ -131,7 +131,7 @@ impl<E> EventBindings<E> {
 }
 
 impl<E> EventBindingsBuilder<E> {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             bindings: EventBindings::new(),
@@ -184,7 +184,7 @@ impl<E> EventBindingsBuilder<E> {
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn extend(mut self, other: EventBindings<E>) -> Self {
         self.bindings.button.extend(other.button);
         self.bindings.checkbox.extend(other.checkbox);
@@ -195,7 +195,7 @@ impl<E> EventBindingsBuilder<E> {
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn build(self) -> EventBindings<E> {
         self.bindings
     }
@@ -307,7 +307,7 @@ impl<'a> UiEvents<'_, 'a> {
     }
 
     pub fn on_text_box_changed(&mut self, handle: &TextBoxHandle, f: impl FnOnce(String)) {
-        let changed = self.take_text_box_changed(handle);
+        let changed: Option<String> = self.take_text_box_changed(handle);
         self.on_some(changed, f);
     }
 
@@ -320,12 +320,12 @@ impl<'a> UiEvents<'_, 'a> {
         handle: &TextBoxHandle,
         f: impl FnOnce(&mut Ui<'a>, String),
     ) {
-        let changed = self.take_text_box_changed(handle);
+        let changed: Option<String> = self.take_text_box_changed(handle);
         self.on_some_with_ui(changed, f);
     }
 
     pub fn on_checkbox_changed(&mut self, handle: &CheckboxHandle, f: impl FnOnce(bool)) {
-        let changed = self.take_checkbox_changed(handle);
+        let changed: Option<bool> = self.take_checkbox_changed(handle);
         self.on_some(changed, f);
     }
 
@@ -338,12 +338,12 @@ impl<'a> UiEvents<'_, 'a> {
         handle: &CheckboxHandle,
         f: impl FnOnce(&mut Ui<'a>, bool),
     ) {
-        let changed = self.take_checkbox_changed(handle);
+        let changed: Option<bool> = self.take_checkbox_changed(handle);
         self.on_some_with_ui(changed, f);
     }
 
     pub fn on_slider_changed(&mut self, handle: &SliderHandle, f: impl FnOnce(f64)) {
-        let changed = self.take_slider_changed(handle);
+        let changed: Option<f64> = self.take_slider_changed(handle);
         self.on_some(changed, f);
     }
 
@@ -356,12 +356,12 @@ impl<'a> UiEvents<'_, 'a> {
         handle: &SliderHandle,
         f: impl FnOnce(&mut Ui<'a>, f64),
     ) {
-        let changed = self.take_slider_changed(handle);
+        let changed: Option<f64> = self.take_slider_changed(handle);
         self.on_some_with_ui(changed, f);
     }
 
     pub fn on_radio_button_changed(&mut self, handle: &RadioButtonHandle, f: impl FnOnce(bool)) {
-        let changed = self.take_radio_button_changed(handle);
+        let changed: Option<bool> = self.take_radio_button_changed(handle);
         self.on_some(changed, f);
     }
 
@@ -374,7 +374,7 @@ impl<'a> UiEvents<'_, 'a> {
         handle: &RadioButtonHandle,
         f: impl FnOnce(&mut Ui<'a>, bool),
     ) {
-        let changed = self.take_radio_button_changed(handle);
+        let changed: Option<bool> = self.take_radio_button_changed(handle);
         self.on_some_with_ui(changed, f);
     }
 

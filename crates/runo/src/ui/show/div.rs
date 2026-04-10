@@ -99,7 +99,7 @@ impl<'a> Ui<'a> {
             .push_layout_at(content_origin, direction, gap);
         self.enabled_stack.push(effective_enabled);
         let result: R = f(self);
-        let _ = self.enabled_stack.pop();
+        let _popped_enabled: Option<bool> = self.enabled_stack.pop();
         let (content_w, content_h) = self.layout_stack.pop_layout_consumed();
         (result, content_w, content_h)
     }

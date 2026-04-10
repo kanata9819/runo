@@ -104,14 +104,12 @@ impl RetainedState {
                         continue;
                     }
                     combo_box.hovered = contains(combo_box.rect, cursor_pos.0, cursor_pos.1);
-                    combo_box.hovered_item = if open_overlay_id
-                        .as_ref()
-                        .is_some_and(|active| active == id)
-                    {
-                        combo_item_index_at(combo_box, cursor_pos.0, cursor_pos.1)
-                    } else {
-                        None
-                    };
+                    combo_box.hovered_item =
+                        if open_overlay_id.as_ref().is_some_and(|active| active == id) {
+                            combo_item_index_at(combo_box, cursor_pos.0, cursor_pos.1)
+                        } else {
+                            None
+                        };
                 }
                 WidgetNode::Label(_) => {}
             }
@@ -198,7 +196,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = is_active_id(active_checkbox.as_ref(), id);
+                let is_active: bool = is_active_id(active_checkbox.as_ref(), id);
 
                 checkbox.pressed = mouse_down && is_active;
 
@@ -236,7 +234,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = is_active_id(active_radio_button.as_ref(), id);
+                let is_active: bool = is_active_id(active_radio_button.as_ref(), id);
 
                 radio_button.pressed = mouse_down && is_active;
 
@@ -252,7 +250,7 @@ impl RetainedState {
                 if let WidgetNode::RadioButton(radio_button) = node
                     && radio_button.group == selected_group
                 {
-                    let next_selected = id == &selected_id;
+                    let next_selected: bool = id == &selected_id;
                     radio_button.changed = radio_button.selected != next_selected;
                     radio_button.selected = next_selected;
                 }
@@ -288,7 +286,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = is_active_id(active_slider.as_ref(), id);
+                let is_active: bool = is_active_id(active_slider.as_ref(), id);
 
                 slider.pressed = mouse_down && is_active;
 
@@ -326,7 +324,7 @@ impl RetainedState {
                     continue;
                 }
 
-                let is_active = is_active_id(active_combo_box.as_ref(), id);
+                let is_active: bool = is_active_id(active_combo_box.as_ref(), id);
 
                 combo_box.pressed = mouse_down && is_active;
 

@@ -96,12 +96,12 @@ impl UiButtonState<'_, '_> {
         self.response(id).clicked
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn response_handle(&self, handle: &ButtonHandle) -> ButtonResponse {
         self.response(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn clicked_handle(&self, handle: &ButtonHandle) -> bool {
         self.clicked(handle.id())
     }
@@ -132,12 +132,12 @@ impl UiTextBoxState<'_, '_> {
         self.response(id).text
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn response_handle(&self, handle: &TextBoxHandle) -> TextBoxResponse {
         self.response(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn text_handle(&self, handle: &TextBoxHandle) -> String {
         self.text(handle.id())
     }
@@ -168,12 +168,12 @@ impl UiCheckboxState<'_, '_> {
         self.response(id).checked
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn response_handle(&self, handle: &CheckboxHandle) -> CheckboxResponse {
         self.response(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn checked_handle(&self, handle: &CheckboxHandle) -> bool {
         self.checked(handle.id())
     }
@@ -204,12 +204,12 @@ impl UiRadioButtonState<'_, '_> {
         self.response(id).selected
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn response_handle(&self, handle: &RadioButtonHandle) -> RadioButtonResponse {
         self.response(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn selected_handle(&self, handle: &RadioButtonHandle) -> bool {
         self.selected(handle.id())
     }
@@ -240,12 +240,12 @@ impl UiSliderState<'_, '_> {
         self.response(id).value
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn response_handle(&self, handle: &SliderHandle) -> SliderResponse {
         self.response(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn value_handle(&self, handle: &SliderHandle) -> f64 {
         self.value(handle.id())
     }
@@ -280,17 +280,17 @@ impl UiComboBoxState<'_, '_> {
         self.response(id).selected_index
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn response_handle(&self, handle: &ComboBoxHandle) -> ComboBoxResponse {
         self.response(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn selected_text_handle(&self, handle: &ComboBoxHandle) -> String {
         self.selected_text(handle.id())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn selected_index_handle(&self, handle: &ComboBoxHandle) -> usize {
         self.selected_index(handle.id())
     }

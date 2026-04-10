@@ -62,8 +62,9 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     pub(super) fn logical_surface_size(&self) -> Option<(f64, f64)> {
-        let window = self.window.as_ref()?;
-        let logical_size = window.inner_size().to_logical::<f64>(window.scale_factor());
+        let window: &Arc<Window> = self.window.as_ref()?;
+        let logical_size: LogicalSize<f64> =
+            window.inner_size().to_logical::<f64>(window.scale_factor());
         Some((logical_size.width.max(1.0), logical_size.height.max(1.0)))
     }
 
@@ -91,18 +92,18 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     pub(super) fn init_window_and_gpu(&mut self, event_loop: &ActiveEventLoop) {
-        let attributes = window_attributes_from_options(&self.window_options);
+        let attributes: WindowAttributes = window_attributes_from_options(&self.window_options);
 
-        let window = Arc::new(
+        let window: Arc<Window> = Arc::new(
             event_loop
                 .create_window(attributes)
                 .expect("failed to create window"),
         );
 
         window.set_ime_allowed(true);
-        let size = window.inner_size();
+        let size: winit::dpi::PhysicalSize<u32> = window.inner_size();
 
-        let surface = pollster::block_on(self.render_cx.create_surface(
+        let surface: RenderSurface<'static> = pollster::block_on(self.render_cx.create_surface(
             window.clone(),
             size.width,
             size.height,
@@ -110,8 +111,8 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         ))
         .expect("failed to create surface");
 
-        let device = &self.render_cx.devices[surface.dev_id].device;
-        let renderer = Renderer::new(
+        let device: &wgpu::Device = &self.render_cx.devices[surface.dev_id].device;
+        let renderer: Renderer = Renderer::new(
             device,
             RendererOptions {
                 pipeline_cache: None,

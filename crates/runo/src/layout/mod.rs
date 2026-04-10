@@ -47,7 +47,7 @@ impl LayoutNode {
     }
 
     pub(crate) fn consumed_size(&self) -> (f64, f64) {
-        let main = if self.cursor > 0.0 {
+        let main: f64 = if self.cursor > 0.0 {
             self.cursor - self.spacing
         } else {
             0.0

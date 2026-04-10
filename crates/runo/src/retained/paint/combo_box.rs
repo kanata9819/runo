@@ -75,8 +75,8 @@ fn draw_text_run<'a>(
     glyphs: Vec<Glyph>,
     combo_box: &'a ComboBoxNode,
 ) {
-    let text_x = combo_box.rect.x0 + TEXT_HORIZONTAL_PADDING;
-    let color = if combo_box.enabled {
+    let text_x: f64 = combo_box.rect.x0 + TEXT_HORIZONTAL_PADDING;
+    let color: AlphaColor<Srgb> = if combo_box.enabled {
         combo_box.text_color
     } else {
         color::Neutral::tone_147_153_161()
@@ -95,7 +95,7 @@ fn draw_text_run<'a>(
 
 /// Renders the closed combo box body, border, selected text, and open/close arrow.
 pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &ComboBoxNode) {
-    let bg = RoundedRect::from_rect(combo_box.rect, COMBO_BOX_CORNER_RADIUS);
+    let bg: RoundedRect = RoundedRect::from_rect(combo_box.rect, COMBO_BOX_CORNER_RADIUS);
 
     scene.fill(
         Fill::NonZero,
@@ -109,7 +109,7 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
         &bg,
     );
 
-    let border_color = indicator_bg_color(combo_box);
+    let border_color: AlphaColor<Srgb> = indicator_bg_color(combo_box);
     scene.stroke(
         &vello::kurbo::Stroke::new(BORDER_STROKE_WIDTH),
         Affine::IDENTITY,
@@ -122,17 +122,17 @@ pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, combo_box: &Com
         return;
     };
 
-    let selected_text = get_selected_text(combo_box);
+    let selected_text: &str = get_selected_text(combo_box);
     if let Some((glyphs, _)) = text::layout_text(font, selected_text, combo_box.font_size) {
         draw_text_run(scene, font, glyphs, combo_box);
     }
 
-    let arrow = if combo_box.is_open { "^" } else { "v" };
+    let arrow: &str = if combo_box.is_open { "^" } else { "v" };
     if let Some((glyphs, arrow_w)) =
         text::layout_text(font, arrow, combo_box.font_size * ARROW_FONT_SCALE)
     {
-        let arrow_x = combo_box.rect.x1 - f64::from(arrow_w) - TEXT_HORIZONTAL_PADDING;
-        let color = if combo_box.enabled {
+        let arrow_x: f64 = combo_box.rect.x1 - f64::from(arrow_w) - TEXT_HORIZONTAL_PADDING;
+        let color: AlphaColor<Srgb> = if combo_box.enabled {
             color::SoftWhite::tone_186_196_210()
         } else {
             color::Neutral::tone_141_147_154()
@@ -164,13 +164,13 @@ pub(super) fn render_dropdown_overlay(
         return;
     };
 
-    let item_height = combo_box.rect.height();
+    let item_height: f64 = combo_box.rect.height();
     for (index, item) in combo_box.items.iter().enumerate() {
-        let y0 = combo_box.rect.y1 + item_height * index as f64;
-        let item_rect = Rect::new(combo_box.rect.x0, y0, combo_box.rect.x1, y0 + item_height);
-        let item_bg = RoundedRect::from_rect(item_rect, ITEM_CORNER_RADIUS);
+        let y0: f64 = combo_box.rect.y1 + item_height * index as f64;
+        let item_rect: Rect = Rect::new(combo_box.rect.x0, y0, combo_box.rect.x1, y0 + item_height);
+        let item_bg: RoundedRect = RoundedRect::from_rect(item_rect, ITEM_CORNER_RADIUS);
 
-        let bg_color = if combo_box.hovered_item == Some(index) {
+        let bg_color: AlphaColor<Srgb> = if combo_box.hovered_item == Some(index) {
             color::Neutral::tone_63_80_102()
         } else if combo_box.selected_index == index {
             color::Neutral::tone_46_64_86()
@@ -188,8 +188,8 @@ pub(super) fn render_dropdown_overlay(
         );
 
         if let Some((glyphs, _)) = text::layout_text(font, item, combo_box.font_size) {
-            let text_x = item_rect.x0 + TEXT_HORIZONTAL_PADDING;
-            let baseline_y = baseline_y(item_rect, combo_box.font_size);
+            let text_x: f64 = item_rect.x0 + TEXT_HORIZONTAL_PADDING;
+            let baseline_y: f64 = baseline_y(item_rect, combo_box.font_size);
             text::draw_text_run(
                 scene,
                 font,

@@ -58,7 +58,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
             label: Some("runo surface blit"),
         });
 
-        let surface_view = surface_texture
+        let surface_view: wgpu::TextureView = surface_texture
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
 

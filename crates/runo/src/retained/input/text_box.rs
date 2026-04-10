@@ -82,7 +82,7 @@ impl RetainedState {
                 text_box.caret_index = text_box.caret_index.saturating_sub(1);
             }
             if input.arrow_right_pressed {
-                let max = text_box.text.chars().count();
+                let max: usize = text_box.text.chars().count();
                 text_box.caret_index = (text_box.caret_index + 1).min(max);
             }
             if input.arrow_up_pressed {
@@ -111,7 +111,8 @@ impl RetainedState {
             }
 
             if input.paste_pressed {
-                let pasted = read_system_clipboard().unwrap_or_else(|| self.text_clipboard.clone());
+                let pasted: String =
+                    read_system_clipboard().unwrap_or_else(|| self.text_clipboard.clone());
                 if !pasted.is_empty() {
                     insert_text_at_caret(&mut text_box.text, &mut text_box.caret_index, &pasted);
                     text_box.changed = true;
@@ -179,7 +180,7 @@ impl RetainedState {
             if self.active_text_box_scrollbar.as_deref() == Some(target_id.as_str()) {
                 text_box.scroll_x = text_box.scroll_x.clamp(0.0, Self::max_scroll_x(text_box));
             } else {
-                let wheel_x = if input.scroll_x.abs() > input.scroll_y.abs() * 0.5 {
+                let wheel_x: f64 = if input.scroll_x.abs() > input.scroll_y.abs() * 0.5 {
                     -input.scroll_x
                 } else {
                     input.scroll_y
@@ -290,7 +291,7 @@ fn sync_text_box_text_advance(
 
 fn write_system_clipboard(text: &str) {
     if let Ok(mut clipboard) = arboard::Clipboard::new() {
-        let _ = clipboard.set_text(text.to_string());
+        let _set_result: Result<(), arboard::Error> = clipboard.set_text(text.to_string());
     }
 }
 
@@ -306,7 +307,7 @@ fn char_to_byte_index(s: &str, char_index: usize) -> usize {
 }
 
 fn insert_text_at_caret(text: &mut String, caret_index: &mut usize, insert: &str) {
-    let byte = char_to_byte_index(text, *caret_index);
+    let byte: usize = char_to_byte_index(text, *caret_index);
     text.insert_str(byte, insert);
     *caret_index += insert.chars().count();
 }
@@ -315,9 +316,9 @@ fn remove_char_before_caret(text: &mut String, caret_index: &mut usize) -> bool 
     if *caret_index == 0 {
         return false;
     }
-    let remove_char = *caret_index - 1;
-    let start = char_to_byte_index(text, remove_char);
-    let end = char_to_byte_index(text, *caret_index);
+    let remove_char: usize = *caret_index - 1;
+    let start: usize = char_to_byte_index(text, remove_char);
+    let end: usize = char_to_byte_index(text, *caret_index);
     text.replace_range(start..end, "");
     *caret_index -= 1;
 

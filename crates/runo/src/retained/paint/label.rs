@@ -32,9 +32,9 @@ fn layout_for_label<'a>(
     font: Option<&'a FontData>,
     label: &LabelNode,
 ) -> Option<(&'a FontData, Vec<Glyph>, f64)> {
-    let font = font?;
+    let font: &'a FontData = font?;
     let (glyphs, _) = text::layout_text(font, &label.text, label.font_size)?;
-    let baseline_y = text_baseline::top_aligned(label.rect, label.font_size);
+    let baseline_y: f64 = text_baseline::top_aligned(label.rect, label.font_size);
 
     Some((font, glyphs, baseline_y))
 }

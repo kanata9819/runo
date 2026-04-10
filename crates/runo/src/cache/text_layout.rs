@@ -30,7 +30,7 @@ pub(crate) fn get_or_insert_layout(
     font_size: f32,
     compute: impl FnOnce() -> Option<(Vec<Glyph>, f32)>,
 ) -> Option<(Vec<Glyph>, f32)> {
-    let key = TextLayoutCacheKey {
+    let key: TextLayoutCacheKey = TextLayoutCacheKey {
         font_ptr: font.data.as_ref().as_ptr() as usize,
         font_len: font.data.as_ref().len(),
         font_index: font.index,
@@ -44,7 +44,7 @@ pub(crate) fn get_or_insert_layout(
         return Some(hit.clone());
     }
 
-    let value = compute()?;
+    let value: (Vec<Glyph>, f32) = compute()?;
     if let Ok(mut cache) = TEXT_LAYOUT_CACHE.lock() {
         if cache.len() >= MAX_TEXT_LAYOUT_CACHE_ENTRIES {
             cache.clear();

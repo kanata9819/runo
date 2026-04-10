@@ -17,42 +17,42 @@ pub struct UiWidgets<'ui, 'a> {
 }
 
 impl<'ui, 'a> UiWidgets<'ui, 'a> {
-    #[must_use] 
+    #[must_use]
     pub fn button(self) -> ButtonBuilder<'ui, 'a> {
         self.ui.button()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn label(self) -> LabelBuilder<'ui, 'a> {
         self.ui.label()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn checkbox(self) -> CheckboxBuilder<'ui, 'a> {
         self.ui.checkbox()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn text_box(self) -> TextBoxBuilder<'ui, 'a> {
         self.ui.text_box()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn combo_box(self) -> ComboBoxBuilder<'ui, 'a> {
         self.ui.combo_box()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn radio_button(self) -> RadioButtonBuilder<'ui, 'a> {
         self.ui.radio_button()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn slider(self) -> SliderBuilder<'ui, 'a> {
         self.ui.slider()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn div(self) -> DivBuilder<'ui, 'a> {
         self.ui.div()
     }

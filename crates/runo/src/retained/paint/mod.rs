@@ -41,7 +41,7 @@ impl RetainedState {
                 }
                 WidgetNode::Slider(slider) => slider::render(scene, font, slider),
                 WidgetNode::Label(label) => label::render(scene, font, label),
-                WidgetNode::TextBox(text_box) => text_box::render(scene, font, text_box),
+                WidgetNode::TextBox(text_box) => text_box::core::render(scene, font, text_box),
                 WidgetNode::ComboBox(combo_box) => combo_box::render(scene, font, combo_box),
             }
         }

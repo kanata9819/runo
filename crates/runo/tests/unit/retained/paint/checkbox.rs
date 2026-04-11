@@ -58,6 +58,29 @@ fn indicator_bg_color_uses_disabled_color() {
 }
 
 #[test]
+/// Uses checked default color when enabled and checked without interaction.
+fn indicator_bg_color_uses_checked_default_color() {
+    let mut checkbox = sample_checkbox();
+    checkbox.checked = true;
+    assert_eq!(
+        colors::indicator_background(&checkbox),
+        Color::from_rgb8(50, 144, 229)
+    );
+}
+
+#[test]
+/// Computes indicator geometry from widget rect with centered vertical alignment.
+fn indicator_geometry_is_derived_from_rect_and_size() {
+    let checkbox = sample_checkbox();
+    let geometry = indicator::indicator_geometry(checkbox.rect);
+    assert_eq!(geometry.size, 16.0);
+    assert_eq!(geometry.x, 2.0);
+    assert_eq!(geometry.y, 4.0);
+    assert_eq!(geometry.rect.width(), 16.0);
+    assert_eq!(geometry.rect.height(), 16.0);
+}
+
+#[test]
 fn render_runs_for_checked_and_unchecked_states() {
     let mut scene = Scene::new();
     let mut checkbox = sample_checkbox();

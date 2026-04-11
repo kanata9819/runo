@@ -46,6 +46,14 @@ fn change_color_uses_disabled_color() {
 }
 
 #[test]
+/// Uses hovered color when enabled and not pressed.
+fn change_color_uses_hovered_color() {
+    let mut button = sample_button();
+    button.hovered = true;
+    assert_eq!(colors::background(&button), Color::from_rgb8(69, 160, 242));
+}
+
+#[test]
 fn render_runs_with_and_without_font() {
     let mut scene = Scene::new();
     let button = sample_button();

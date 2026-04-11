@@ -58,12 +58,43 @@ fn change_color_uses_disabled_color_when_disabled() {
 }
 
 #[test]
+/// Verifies hovered color is selected when enabled and not pressed.
+fn change_color_uses_hovered_color_when_hovered_only() {
+    let mut combo_box = sample_combo_box();
+    combo_box.hovered = true;
+    assert_eq!(colors::border(&combo_box), Color::from_rgb8(124, 177, 230));
+}
+
+#[test]
 /// Verifies baseline y-coordinate formula output for a fixed input.
 fn baseline_y_matches_expected_formula() {
     let rect = Rect::new(10.0, 20.0, 210.0, 60.0);
     let font_size = 20.0;
     let y = layout::baseline_y(rect, font_size);
     assert_eq!(y, 47.0);
+}
+
+#[test]
+/// Highlights hovered dropdown item over selected/default backgrounds.
+fn dropdown_item_bg_prioritizes_hovered_item() {
+    let mut combo_box = sample_combo_box();
+    combo_box.hovered_item = Some(1);
+    combo_box.selected_index = 1;
+    assert_eq!(
+        colors::dropdown_item_bg(&combo_box, 1),
+        Color::from_rgb8(63, 80, 102)
+    );
+}
+
+#[test]
+/// Uses selected background when not hovered.
+fn dropdown_item_bg_uses_selected_color() {
+    let mut combo_box = sample_combo_box();
+    combo_box.selected_index = 0;
+    assert_eq!(
+        colors::dropdown_item_bg(&combo_box, 0),
+        Color::from_rgb8(46, 64, 86)
+    );
 }
 
 #[test]

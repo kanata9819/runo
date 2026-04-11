@@ -1,6 +1,8 @@
 use super::super::text_content::TextContentPainter;
 use super::*;
 use crate::font::load_default_font;
+use crate::theme::color;
+use crate::widget::text;
 use crate::widget::text_box::Overflow;
 use vello::Glyph;
 use vello::kurbo::Rect;
@@ -132,4 +134,72 @@ fn horizontal_scrollbar_draws_only_when_scrollable() {
 fn line_intersects_vertical_clip_detects_visibility() {
     assert!(Caret::line_intersects_vertical_clip(20.0, 16.0, 8.0, 24.0));
     assert!(!Caret::line_intersects_vertical_clip(60.0, 16.0, 8.0, 24.0));
+}
+
+#[test]
+fn resolve_text_color_uses_disabled_color_first() {
+    let mut text_box = sample_text_box();
+    text_box.enabled = false;
+    text_box.text.clear();
+    assert_eq!(
+        CorePainter::resolve_text_color(&text_box),
+        color::Neutral::tone_147_153_161()
+    );
+}
+
+#[test]
+fn resolve_text_color_uses_placeholder_tone_for_empty_enabled_text() {
+    let mut text_box = sample_text_box();
+    text_box.text.clear();
+    assert_eq!(
+        CorePainter::resolve_text_color(&text_box),
+        color::Neutral::tone_142_151_163()
+    );
+}
+
+#[test]
+fn text_metrics_apply_padding_and_scroll_offsets() {
+    let mut text_box = sample_text_box();
+    text_box.scroll_x = 3.0;
+    text_box.scroll_y = 4.0;
+    let metrics = TextMetrics::new(&text_box);
+    assert_eq!(metrics.inner_left, 12.0);
+    assert_eq!(metrics.inner_right, 228.0);
+    assert_eq!(metrics.inner_top, 12.0);
+    assert_eq!(metrics.inner_bottom, 32.0);
+    assert_eq!(metrics.text_x, 9.0);
+    assert_eq!(metrics.first_line_baseline, 24.0);
+}
+
+#[test]
+fn draw_text_content_sets_text_advance_zero_for_empty_input() {
+    let Some(font) = load_default_font() else {
+        return;
+    };
+    let mut scene = Scene::new();
+    let mut text_box = sample_text_box();
+    text_box.text.clear();
+    text_box.text_advance = 777.0;
+    let text_color = text_box.text_color;
+    let metrics = TextMetrics::new(&text_box);
+    TextContentPainter::draw_text_content(&mut scene, &font, &mut text_box, text_color, metrics);
+    assert_eq!(text_box.text_advance, 0.0);
+}
+
+#[test]
+fn draw_text_content_stores_max_line_advance_for_multiline_text() {
+    let Some(font) = load_default_font() else {
+        return;
+    };
+    let mut scene = Scene::new();
+    let mut text_box = sample_text_box();
+    text_box.text = "short\nlonger line".to_string();
+    text_box.overflow_y = Overflow::Visible;
+    let expected = text::layout_text(&font, "longer line", text_box.font_size)
+        .map(|(_, advance)| f64::from(advance))
+        .unwrap_or(0.0);
+    let text_color = text_box.text_color;
+    let metrics = TextMetrics::new(&text_box);
+    TextContentPainter::draw_text_content(&mut scene, &font, &mut text_box, text_color, metrics);
+    assert!((text_box.text_advance - expected).abs() < 1e-6);
 }

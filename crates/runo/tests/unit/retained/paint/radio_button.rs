@@ -57,6 +57,28 @@ fn outer_bg_color_uses_disabled_color() {
 }
 
 #[test]
+/// Uses hovered color when enabled and not pressed.
+fn outer_bg_color_uses_hovered_color() {
+    let mut radio_button = sample_radio_button();
+    radio_button.hovered = true;
+    assert_eq!(
+        colors::outer_background(&radio_button),
+        Color::from_rgb8(53, 141, 221)
+    );
+}
+
+#[test]
+/// Computes indicator center/radius from control rect.
+fn indicator_geometry_matches_expected_circle() {
+    let radio_button = sample_radio_button();
+    let geometry = indicator::indicator_geometry(radio_button.rect);
+    assert_eq!(geometry.radius, 8.0);
+    assert_eq!(geometry.center_x, 10.0);
+    assert_eq!(geometry.center_y, 12.0);
+    assert_eq!(geometry.outer_circle.radius, 8.0);
+}
+
+#[test]
 fn render_runs_for_selected_and_unselected_states() {
     let mut scene = Scene::new();
     let mut radio = sample_radio_button();

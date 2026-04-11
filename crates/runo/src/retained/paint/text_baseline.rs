@@ -3,6 +3,10 @@ use vello::kurbo::Rect;
 const CENTER_RATIO: f64 = 0.5;
 const BASELINE_FONT_OFFSET_RATIO: f64 = 0.35;
 
+#[cfg(test)]
+#[path = "../../../tests/unit/retained/paint/text_baseline.rs"]
+mod tests;
+
 /// Baseline for vertically centered control labels (button/checkbox/radio/combo).
 #[inline]
 pub(super) fn centered(rect: Rect, font_size: f32) -> f64 {

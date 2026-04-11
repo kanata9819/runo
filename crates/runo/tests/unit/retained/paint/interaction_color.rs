@@ -30,3 +30,33 @@ fn resolve_interaction_color_prefers_pressed() {
     );
     assert_eq!(c, Color::from_rgb8(4, 5, 6));
 }
+
+#[test]
+/// Returns hovered color when enabled and not pressed.
+fn resolve_interaction_color_prefers_hovered_over_default() {
+    let c = resolve_interaction_color(
+        true,
+        false,
+        true,
+        Color::from_rgb8(1, 2, 3),
+        Color::from_rgb8(4, 5, 6),
+        Color::from_rgb8(7, 8, 9),
+        Color::from_rgb8(10, 11, 12),
+    );
+    assert_eq!(c, Color::from_rgb8(7, 8, 9));
+}
+
+#[test]
+/// Returns default color when no interaction flag is active.
+fn resolve_interaction_color_falls_back_to_default() {
+    let c = resolve_interaction_color(
+        true,
+        false,
+        false,
+        Color::from_rgb8(1, 2, 3),
+        Color::from_rgb8(4, 5, 6),
+        Color::from_rgb8(7, 8, 9),
+        Color::from_rgb8(10, 11, 12),
+    );
+    assert_eq!(c, Color::from_rgb8(10, 11, 12));
+}

@@ -46,6 +46,24 @@ fn value_ratio_returns_zero_for_degenerate_range() {
 }
 
 #[test]
+/// Handles reversed ranges and still returns midpoint ratio.
+fn value_ratio_handles_reversed_min_max_range() {
+    assert_eq!(layout::value_ratio(5.0, 10.0, 0.0), 0.5);
+}
+
+#[test]
+/// Computes track and thumb geometry from slider rect/value.
+fn geometry_matches_expected_values() {
+    let slider = sample_slider();
+    let geometry = layout::geometry(&slider);
+    assert_eq!(geometry.pad_x, 12.0);
+    assert_eq!(geometry.track_x0, 12.0);
+    assert!((geometry.track_y - 29.76).abs() < 1e-6);
+    assert_eq!(geometry.track_height, 6.0);
+    assert_eq!(geometry.thumb_x, 110.0);
+}
+
+#[test]
 fn render_and_internal_draw_helpers_are_callable() {
     let mut scene = Scene::new();
     let slider = sample_slider();

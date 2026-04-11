@@ -1,6 +1,8 @@
+use super::super::text_content::TextContentPainter;
 use super::*;
 use crate::font::load_default_font;
 use crate::widget::text_box::Overflow;
+use vello::Glyph;
 use vello::kurbo::Rect;
 
 /// Builds a minimal text box fixture for helper-function tests.
@@ -48,7 +50,7 @@ fn clip_glyphs_horizontally_filters_outside_glyphs() {
         },
     ];
 
-    let visible = clip_glyphs_horizontally(glyphs, 30.0, 0.0, 8.0, 18.0);
+    let visible = TextContentPainter::clip_glyphs_horizontally(glyphs, 30.0, 0.0, 8.0, 18.0);
     assert_eq!(visible.len(), 2);
     assert_eq!(visible[0].id, 1);
     assert_eq!(visible[1].id, 2);
@@ -62,7 +64,7 @@ fn clip_glyphs_horizontally_returns_empty_for_invalid_clip_region() {
         x: 0.0,
         y: 0.0,
     }];
-    let visible = clip_glyphs_horizontally(glyphs, 10.0, 0.0, 10.0, 10.0);
+    let visible = TextContentPainter::clip_glyphs_horizontally(glyphs, 10.0, 0.0, 10.0, 10.0);
     assert!(visible.is_empty());
 }
 
@@ -93,17 +95,17 @@ fn render_and_internal_helpers_are_callable() {
     let mut scene = Scene::new();
     let mut text_box = sample_text_box();
     render(&mut scene, None, &mut text_box);
-    draw_background_and_border(&mut scene, &text_box);
+    CorePainter::draw_background_and_border(&mut scene, &text_box);
     let metrics = TextMetrics::new(&text_box);
     assert!(metrics.inner_right > metrics.inner_left);
-    let _ = resolve_text_color(&text_box);
+    let _ = CorePainter::resolve_text_color(&text_box);
     let mut scrollbar = ScrollBar::new(&mut scene, &text_box);
     scrollbar.render_horizontal_scrollbar();
 
     if let Some(font) = load_default_font() {
         let color = text_box.text_color;
         let metrics = TextMetrics::new(&text_box);
-        draw_text_content(&mut scene, &font, &mut text_box, color, metrics);
+        TextContentPainter::draw_text_content(&mut scene, &font, &mut text_box, color, metrics);
         text_box.focused = true;
         let mut caret = Caret::new(&mut scene, &font, &text_box, TextMetrics::new(&text_box));
         caret.draw_caret();

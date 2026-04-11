@@ -1,3 +1,19 @@
+//! Horizontal scrollbar painter for `TextBox`.
+//!
+//! Terminology used in this module:
+//! - `inner`: Content area inside the text box after applying inner padding.
+//!   Text layout and scrollbar geometry are both computed in this area.
+//! - `track`: Scrollbar rail drawn at the bottom of the `inner` area.
+//!   This is the background strip that represents the full scroll range.
+//! - `thumb`: Draggable indicator drawn on top of the `track`.
+//!   Its width represents visible ratio, and its x-position represents
+//!   current horizontal scroll offset.
+//!
+//! Flow:
+//! 1. Compute `inner` bounds and scrollable range.
+//! 2. Draw `track` if horizontal scrolling is applicable.
+//! 3. Draw `thumb` based on content/view ratio and current scroll position.
+
 use super::metrics::TextMetrics;
 use crate::retained::node::TextBoxNode;
 use crate::theme::color;

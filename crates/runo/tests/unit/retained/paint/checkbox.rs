@@ -21,13 +21,13 @@ fn sample_checkbox() -> CheckboxNode {
 #[test]
 /// Clamps indicator size to minimum when control is short.
 fn indicator_size_clamps_to_min() {
-    assert_eq!(indicator_size(10.0), 14.0);
+    assert_eq!(indicator::indicator_size(10.0), 14.0);
 }
 
 #[test]
 /// Clamps indicator size to maximum when control is tall.
 fn indicator_size_clamps_to_max() {
-    assert_eq!(indicator_size(100.0), 24.0);
+    assert_eq!(indicator::indicator_size(100.0), 24.0);
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn indicator_bg_color_prefers_pressed() {
     checkbox.hovered = true;
     checkbox.checked = true;
     assert_eq!(
-        indicator_bg_color(&checkbox),
+        colors::indicator_background(&checkbox),
         Color::from_rgb8(45, 129, 205)
     );
 }
@@ -51,7 +51,10 @@ fn indicator_bg_color_uses_disabled_color() {
     checkbox.pressed = true;
     checkbox.hovered = true;
     checkbox.checked = true;
-    assert_eq!(indicator_bg_color(&checkbox), Color::from_rgb8(43, 47, 53));
+    assert_eq!(
+        colors::indicator_background(&checkbox),
+        Color::from_rgb8(43, 47, 53)
+    );
 }
 
 #[test]

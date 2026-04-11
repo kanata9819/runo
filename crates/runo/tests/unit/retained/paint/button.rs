@@ -1,5 +1,6 @@
 use super::*;
 use crate::font::load_default_font;
+use vello::Glyph;
 use vello::kurbo::Rect;
 use vello::peniko::Color;
 
@@ -22,7 +23,7 @@ fn sample_button() -> ButtonNode {
 /// Uses default enabled color when no interaction state is active.
 fn change_color_uses_default_enabled_color() {
     let button = sample_button();
-    assert_eq!(change_color(&button), Color::from_rgb8(50, 144, 229));
+    assert_eq!(colors::background(&button), Color::from_rgb8(50, 144, 229));
 }
 
 #[test]
@@ -31,7 +32,7 @@ fn change_color_prefers_pressed() {
     let mut button = sample_button();
     button.pressed = true;
     button.hovered = true;
-    assert_eq!(change_color(&button), Color::from_rgb8(31, 122, 205));
+    assert_eq!(colors::background(&button), Color::from_rgb8(31, 122, 205));
 }
 
 #[test]
@@ -41,7 +42,7 @@ fn change_color_uses_disabled_color() {
     button.enabled = false;
     button.pressed = true;
     button.hovered = true;
-    assert_eq!(change_color(&button), Color::from_rgb8(83, 90, 100));
+    assert_eq!(colors::background(&button), Color::from_rgb8(83, 90, 100));
 }
 
 #[test]
@@ -62,7 +63,7 @@ fn draw_text_run_is_callable() {
     };
     let mut scene = Scene::new();
     let button = sample_button();
-    draw_text_run(
+    text::draw_centered_text(
         &mut scene,
         &button,
         &font,

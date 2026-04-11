@@ -1,0 +1,9 @@
+pub(super) const INDICATOR_X_OFFSET: f64 = 2.0;
+pub(super) const INDICATOR_BORDER_WIDTH: f64 = 1.0;
+pub(super) const INDICATOR_SIZE_OFFSET: f64 = 8.0;
+pub(super) const INDICATOR_SIZE_MIN: f64 = 14.0;
+pub(super) const INDICATOR_SIZE_MAX: f64 = 24.0;
+pub(super) const OUTER_RADIUS_RATIO: f64 = 0.5;
+pub(super) const INNER_RADIUS_RATIO: f64 = 0.45;
+pub(super) const BASELINE_VERTICAL_RATIO: f64 = 0.5;
+pub(super) const LABEL_TEXT_SPACING: f64 = 10.0;

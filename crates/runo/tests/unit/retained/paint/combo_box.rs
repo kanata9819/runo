@@ -1,5 +1,7 @@
 use super::*;
 use crate::font::load_default_font;
+use vello::Glyph;
+use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 /// Creates a reusable combo box fixture for paint helper tests.
@@ -25,7 +27,7 @@ fn sample_combo_box() -> ComboBoxNode {
 /// Verifies that selected_index resolves to the expected item text.
 fn get_selected_text_returns_selected_item() {
     let combo_box = sample_combo_box();
-    assert_eq!(get_selected_text(&combo_box), "second");
+    assert_eq!(layout::selected_text(&combo_box), "second");
 }
 
 #[test]
@@ -33,7 +35,7 @@ fn get_selected_text_returns_selected_item() {
 fn get_selected_text_returns_empty_when_out_of_bounds() {
     let mut combo_box = sample_combo_box();
     combo_box.selected_index = 99;
-    assert_eq!(get_selected_text(&combo_box), "");
+    assert_eq!(layout::selected_text(&combo_box), "");
 }
 
 #[test]
@@ -42,10 +44,7 @@ fn change_color_prefers_pressed_over_hovered() {
     let mut combo_box = sample_combo_box();
     combo_box.pressed = true;
     combo_box.hovered = true;
-    assert_eq!(
-        indicator_bg_color(&combo_box),
-        Color::from_rgb8(89, 176, 255)
-    );
+    assert_eq!(colors::border(&combo_box), Color::from_rgb8(89, 176, 255));
 }
 
 #[test]
@@ -55,10 +54,7 @@ fn change_color_uses_disabled_color_when_disabled() {
     combo_box.enabled = false;
     combo_box.pressed = true;
     combo_box.hovered = true;
-    assert_eq!(
-        indicator_bg_color(&combo_box),
-        Color::from_rgb8(86, 92, 101)
-    );
+    assert_eq!(colors::border(&combo_box), Color::from_rgb8(86, 92, 101));
 }
 
 #[test]
@@ -66,7 +62,7 @@ fn change_color_uses_disabled_color_when_disabled() {
 fn baseline_y_matches_expected_formula() {
     let rect = Rect::new(10.0, 20.0, 210.0, 60.0);
     let font_size = 20.0;
-    let y = baseline_y(rect, font_size);
+    let y = layout::baseline_y(rect, font_size);
     assert_eq!(y, 47.0);
 }
 
@@ -92,7 +88,7 @@ fn draw_text_helpers_are_callable() {
     };
     let mut scene = Scene::new();
     let combo_box = sample_combo_box();
-    draw_text_run_at(
+    text::draw_text_run_at(
         &mut scene,
         &font,
         vec![Glyph {
@@ -105,7 +101,7 @@ fn draw_text_helpers_are_callable() {
         combo_box.font_size,
         Color::from_rgb8(255, 255, 255),
     );
-    draw_text_run(
+    text::draw_selected_text(
         &mut scene,
         &font,
         vec![Glyph {

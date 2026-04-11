@@ -22,13 +22,13 @@ fn sample_radio_button() -> RadioButtonNode {
 #[test]
 /// Clamps indicator size to minimum when control is short.
 fn indicator_size_clamps_to_min() {
-    assert_eq!(indicator_size(10.0), 14.0);
+    assert_eq!(indicator::indicator_size(10.0), 14.0);
 }
 
 #[test]
 /// Clamps indicator size to maximum when control is tall.
 fn indicator_size_clamps_to_max() {
-    assert_eq!(indicator_size(100.0), 24.0);
+    assert_eq!(indicator::indicator_size(100.0), 24.0);
 }
 
 #[test]
@@ -38,7 +38,7 @@ fn outer_bg_color_prefers_pressed() {
     radio_button.pressed = true;
     radio_button.hovered = true;
     assert_eq!(
-        outer_bg_color(&radio_button),
+        colors::outer_background(&radio_button),
         Color::from_rgb8(45, 129, 205)
     );
 }
@@ -50,7 +50,10 @@ fn outer_bg_color_uses_disabled_color() {
     radio_button.enabled = false;
     radio_button.pressed = true;
     radio_button.hovered = true;
-    assert_eq!(outer_bg_color(&radio_button), Color::from_rgb8(43, 47, 53));
+    assert_eq!(
+        colors::outer_background(&radio_button),
+        Color::from_rgb8(43, 47, 53)
+    );
 }
 
 #[test]

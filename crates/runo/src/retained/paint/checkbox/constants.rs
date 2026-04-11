@@ -1,0 +1,15 @@
+pub(super) const INDICATOR_X_OFFSET: f64 = 2.0;
+pub(super) const INDICATOR_CORNER_RADIUS: f64 = 4.0;
+pub(super) const INDICATOR_BORDER_WIDTH: f64 = 1.0;
+pub(super) const CHECK_STROKE_WIDTH: f64 = 2.2;
+pub(super) const CHECK_X0_RATIO: f64 = 0.22;
+pub(super) const CHECK_Y0_RATIO: f64 = 0.56;
+pub(super) const CHECK_X1_RATIO: f64 = 0.44;
+pub(super) const CHECK_Y1_RATIO: f64 = 0.76;
+pub(super) const CHECK_X2_RATIO: f64 = 0.80;
+pub(super) const CHECK_Y2_RATIO: f64 = 0.28;
+pub(super) const LABEL_TEXT_SPACING: f64 = 10.0;
+pub(super) const BASELINE_VERTICAL_RATIO: f64 = 0.5;
+pub(super) const INDICATOR_SIZE_OFFSET: f64 = 8.0;
+pub(super) const INDICATOR_SIZE_MIN: f64 = 14.0;
+pub(super) const INDICATOR_SIZE_MAX: f64 = 24.0;

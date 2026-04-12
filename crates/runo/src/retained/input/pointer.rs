@@ -63,7 +63,7 @@ impl RetainedState {
                         cursor_pos.1,
                     );
                 }
-                WidgetNode::RadioButton(radio_button) => {
+                WidgetNode::Radio(radio_button) => {
                     radio_button.changed = false;
                     radio_button.hovered = hovered_when_enabled(
                         radio_button.enabled,
@@ -127,7 +127,7 @@ impl RetainedState {
             );
 
             self.active_radio_button = self.find_topmost_widget_id(
-                |node| matches!(node, WidgetNode::RadioButton(radio_button) if radio_button.enabled && radio_button.hovered),
+                |node| matches!(node, WidgetNode::Radio(radio_button) if radio_button.enabled && radio_button.hovered),
             );
 
             self.active_slider = self.find_topmost_widget_id(
@@ -226,7 +226,7 @@ impl RetainedState {
         let mut selected_group: String = String::new();
 
         for (id, node) in &mut self.widgets {
-            if let WidgetNode::RadioButton(radio_button) = node {
+            if let WidgetNode::Radio(radio_button) = node {
                 if !radio_button.enabled {
                     radio_button.hovered = false;
                     radio_button.pressed = false;
@@ -247,7 +247,7 @@ impl RetainedState {
 
         if let Some(selected_id) = selected_id {
             for (id, node) in &mut self.widgets {
-                if let WidgetNode::RadioButton(radio_button) = node
+                if let WidgetNode::Radio(radio_button) = node
                     && radio_button.group == selected_group
                 {
                     let next_selected: bool = id == &selected_id;

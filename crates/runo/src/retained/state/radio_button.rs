@@ -4,7 +4,7 @@ use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 use crate::RadioButtonResponse;
-use crate::retained::node::{RadioButtonNode, WidgetNode};
+use crate::retained::node::{RadioNode, WidgetNode};
 use crate::retained::state::{RetainedState, clear_slot_if_matches};
 
 #[cfg(test)]
@@ -50,7 +50,7 @@ impl RetainedState {
         self.upsert_widget_node(
             id,
             || {
-                WidgetNode::RadioButton(RadioButtonNode {
+                WidgetNode::Radio(RadioNode {
                     rect,
                     group: group.clone(),
                     text: text.clone(),
@@ -64,7 +64,7 @@ impl RetainedState {
                 })
             },
             |entry| match entry {
-                WidgetNode::RadioButton(radio_button) => {
+                WidgetNode::Radio(radio_button) => {
                     radio_button.rect = rect;
                     radio_button.group = group_for_update;
                     radio_button.text = text_for_update;
@@ -96,7 +96,7 @@ impl RetainedState {
     }
 
     pub(crate) fn radio_button_response(&self, id: impl AsRef<str>) -> RadioButtonResponse {
-        let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get(id.as_ref()) else {
+        let Some(WidgetNode::Radio(radio_button)) = self.widgets.get(id.as_ref()) else {
             return RadioButtonResponse::default();
         };
 
@@ -111,7 +111,7 @@ impl RetainedState {
     pub(crate) fn set_radio_button_selected(&mut self, id: impl AsRef<str>, selected: bool) {
         let id_ref: &str = id.as_ref();
         let group: Option<String> = self.widgets.get(id_ref).and_then(|node| match node {
-            WidgetNode::RadioButton(radio_button) => Some(radio_button.group.clone()),
+            WidgetNode::Radio(radio_button) => Some(radio_button.group.clone()),
             _ => None,
         });
 
@@ -123,7 +123,7 @@ impl RetainedState {
             Self::clear_radio_group_selection(&mut self.widgets, &group);
         }
 
-        let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
+        let Some(WidgetNode::Radio(radio_button)) = self.widgets.get_mut(id_ref) else {
             return;
         };
 
@@ -133,7 +133,7 @@ impl RetainedState {
 
     pub(crate) fn set_radio_button_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
         let id_ref: &str = id.as_ref();
-        let Some(WidgetNode::RadioButton(radio_button)) = self.widgets.get_mut(id_ref) else {
+        let Some(WidgetNode::Radio(radio_button)) = self.widgets.get_mut(id_ref) else {
             return;
         };
 
@@ -149,7 +149,7 @@ impl RetainedState {
 
     fn clear_radio_group_selection(widgets: &mut HashMap<String, WidgetNode>, group: &str) {
         for node in widgets.values_mut() {
-            if let WidgetNode::RadioButton(radio_button) = node
+            if let WidgetNode::Radio(radio_button) = node
                 && radio_button.group == group
             {
                 radio_button.selected = false;

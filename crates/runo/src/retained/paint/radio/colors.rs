@@ -1,9 +1,9 @@
 use vello::peniko::color::{AlphaColor, Srgb};
 
-use crate::retained::node::RadioButtonNode;
+use crate::retained::node::RadioNode;
 use crate::theme::color;
 
-pub(super) fn outer_background(radio_button: &RadioButtonNode) -> AlphaColor<Srgb> {
+pub(super) fn outer_background(radio_button: &RadioNode) -> AlphaColor<Srgb> {
     super::super::interaction_color::resolve_interaction_color(
         radio_button.enabled,
         radio_button.pressed,
@@ -15,7 +15,7 @@ pub(super) fn outer_background(radio_button: &RadioButtonNode) -> AlphaColor<Srg
     )
 }
 
-pub(super) fn border(radio_button: &RadioButtonNode) -> vello::peniko::Color {
+pub(super) fn border(radio_button: &RadioNode) -> vello::peniko::Color {
     if radio_button.enabled {
         color::Neutral::tone_130_145_163()
     } else {
@@ -23,7 +23,7 @@ pub(super) fn border(radio_button: &RadioButtonNode) -> vello::peniko::Color {
     }
 }
 
-pub(super) fn inner_dot(radio_button: &RadioButtonNode) -> vello::peniko::Color {
+pub(super) fn inner_dot(radio_button: &RadioNode) -> vello::peniko::Color {
     if radio_button.enabled {
         color::SoftWhite::tone_240_246_255()
     } else {
@@ -31,7 +31,7 @@ pub(super) fn inner_dot(radio_button: &RadioButtonNode) -> vello::peniko::Color 
     }
 }
 
-pub(super) fn label_text(radio_button: &RadioButtonNode) -> vello::peniko::Color {
+pub(super) fn label_text(radio_button: &RadioNode) -> vello::peniko::Color {
     if radio_button.enabled {
         radio_button.text_color
     } else {

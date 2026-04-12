@@ -4,8 +4,8 @@ use vello::kurbo::Rect;
 use vello::peniko::Color;
 
 /// Creates a reusable radio button fixture for helper-function tests.
-fn sample_radio_button() -> RadioButtonNode {
-    RadioButtonNode {
+fn sample_radio_button() -> RadioNode {
+    RadioNode {
         rect: Rect::new(0.0, 0.0, 180.0, 24.0),
         group: "group".to_string(),
         text: Some("Radio".to_string()),

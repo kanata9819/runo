@@ -7,14 +7,14 @@ use vello::Scene;
 use vello::kurbo::{Affine, Stroke};
 use vello::peniko::{Fill, FontData};
 
-use crate::retained::node::RadioButtonNode;
+use crate::retained::node::RadioNode;
 
 #[cfg(test)]
 #[path = "../../../../tests/unit/retained/paint/radio_button.rs"]
 mod tests;
 
 /// Renders radio button indicator, selected dot, and optional label text.
-pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioButtonNode) {
+pub(super) fn render(scene: &mut Scene, font: Option<&FontData>, radio_button: &RadioNode) {
     let geometry: indicator::IndicatorGeometry = indicator::indicator_geometry(radio_button.rect);
 
     scene.fill(

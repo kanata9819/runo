@@ -33,7 +33,7 @@ pub(super) fn indicator_geometry(rect: vello::kurbo::Rect) -> IndicatorGeometry 
 
 pub(super) fn draw_selected_dot(
     scene: &mut Scene,
-    radio_button: &crate::retained::node::RadioButtonNode,
+    radio_button: &crate::retained::node::RadioNode,
     geometry: &IndicatorGeometry,
 ) {
     let inner_radius: f64 = geometry.radius * constants::INNER_RADIUS_RATIO;

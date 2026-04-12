@@ -9,7 +9,7 @@ mod combo_box;
 mod div;
 mod interaction_color;
 mod label;
-mod radio_button;
+mod radio;
 mod slider;
 mod text_baseline;
 mod text_box;
@@ -36,9 +36,7 @@ impl RetainedState {
                 WidgetNode::Div(div_node) => div::render(scene, div_node),
                 WidgetNode::Button(button) => button::render(scene, font, button),
                 WidgetNode::Checkbox(checkbox) => checkbox::render(scene, font, checkbox),
-                WidgetNode::RadioButton(radio_button) => {
-                    radio_button::render(scene, font, radio_button);
-                }
+                WidgetNode::Radio(radio) => radio::render(scene, font, radio),
                 WidgetNode::Slider(slider) => slider::render(scene, font, slider),
                 WidgetNode::Label(label) => label::render(scene, font, label),
                 WidgetNode::TextBox(text_box) => text_box::core::render(scene, font, text_box),
@@ -57,7 +55,7 @@ impl RetainedState {
                 WidgetNode::Div(_)
                 | WidgetNode::Button(_)
                 | WidgetNode::Checkbox(_)
-                | WidgetNode::RadioButton(_)
+                | WidgetNode::Radio(_)
                 | WidgetNode::Slider(_)
                 | WidgetNode::Label(_)
                 | WidgetNode::TextBox(_) => {}

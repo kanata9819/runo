@@ -7,7 +7,7 @@ pub(super) enum WidgetNode {
     Div(DivNode),
     Button(ButtonNode),
     Checkbox(CheckboxNode),
-    RadioButton(RadioButtonNode),
+    Radio(RadioNode),
     Slider(SliderNode),
     Label(LabelNode),
     TextBox(TextBoxNode),
@@ -56,7 +56,7 @@ pub(super) struct CheckboxNode {
     pub(super) changed: bool,
 }
 
-pub(super) struct RadioButtonNode {
+pub(super) struct RadioNode {
     pub(super) rect: Rect,
     pub(super) group: String,
     pub(super) text: Option<String>,

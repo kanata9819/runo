@@ -1,12 +1,12 @@
 use vello::Scene;
 
-use crate::retained::node::RadioButtonNode;
+use crate::retained::node::RadioNode;
 use crate::widget::text;
 
 pub(super) fn draw_label(
     scene: &mut Scene,
     font: &vello::peniko::FontData,
-    radio_button: &RadioButtonNode,
+    radio_button: &RadioNode,
     center_x: f64,
     indicator_radius: f64,
 ) {

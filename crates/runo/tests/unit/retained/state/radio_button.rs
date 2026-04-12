@@ -53,14 +53,14 @@ fn set_radio_button_enabled_false_clears_flags_and_active_id() {
         enabled: true,
     });
     state.active_radio_button = Some("r1".to_string());
-    if let Some(WidgetNode::RadioButton(r)) = state.widgets.get_mut("r1") {
+    if let Some(WidgetNode::Radio(r)) = state.widgets.get_mut("r1") {
         r.hovered = true;
         r.pressed = true;
         r.changed = true;
     }
 
     state.set_radio_button_enabled("r1", false);
-    if let Some(WidgetNode::RadioButton(r)) = state.widgets.get("r1") {
+    if let Some(WidgetNode::Radio(r)) = state.widgets.get("r1") {
         assert!(!r.enabled);
         assert!(!r.hovered);
         assert!(!r.pressed);
@@ -118,7 +118,7 @@ fn upsert_radio_button_updates_existing_entry_fields() {
         enabled: false,
     });
     assert!(response.selected);
-    if let Some(WidgetNode::RadioButton(rb)) = state.widgets.get("r1") {
+    if let Some(WidgetNode::Radio(rb)) = state.widgets.get("r1") {
         assert_eq!(rb.group, "g2");
         assert_eq!(rb.text.as_deref(), Some("b"));
         assert_eq!(rb.rect, new_rect);

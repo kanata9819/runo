@@ -18,6 +18,7 @@ mod retained;
 mod theme;
 mod ui;
 mod widget;
+mod widget_model;
 
 pub use app::{RunOptions, RunoApplication, run};
 pub use event::UiEvent;

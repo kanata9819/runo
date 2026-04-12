@@ -1,25 +1,15 @@
 use vello::kurbo::Rect;
-use vello::peniko::Color;
 
 use crate::retained::UpsertTextBoxArgs;
 use crate::ui::Ui;
-use crate::widget::text_box::{Overflow, TextBoxResponse};
+use crate::widget::text_box::TextBoxResponse;
+use crate::widget_model::text_box::TextBoxCommon;
 
 pub(crate) struct ShowTextBoxArgs {
     pub(crate) id: String,
     pub(crate) width: f64,
     pub(crate) height: f64,
-    pub(crate) text: Option<String>,
-    pub(crate) placeholder: Option<String>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) bg_color: Color,
-    pub(crate) border_color: Color,
-    pub(crate) disable_border: bool,
-    pub(crate) enabled: bool,
-    pub(crate) read_only: bool,
-    pub(crate) overflow_x: Overflow,
-    pub(crate) overflow_y: Overflow,
+    pub(crate) common: TextBoxCommon,
 }
 
 impl Ui<'_> {
@@ -28,6 +18,11 @@ impl Ui<'_> {
             id,
             width,
             height,
+            mut common,
+        } = args;
+        let rect: Rect = self.allocate_widget_rect(width, height);
+        common.enabled = self.resolve_enabled(common.enabled);
+        let TextBoxCommon {
             text,
             placeholder,
             font_size,
@@ -35,12 +30,11 @@ impl Ui<'_> {
             bg_color,
             border_color,
             disable_border,
-            enabled: enabled_arg,
+            enabled,
             read_only,
             overflow_x,
             overflow_y,
-        } = args;
-        let rect: Rect = self.allocate_widget_rect(width, height);
+        } = common;
         self.retained.upsert_text_box(UpsertTextBoxArgs {
             id,
             rect,
@@ -51,7 +45,7 @@ impl Ui<'_> {
             bg_color,
             border_color,
             disable_border,
-            enabled: self.resolve_enabled(enabled_arg),
+            enabled,
             read_only,
             overflow_x,
             overflow_y,

@@ -1,22 +1,15 @@
 use vello::kurbo::Rect;
 
-use crate::Color;
 use crate::SliderResponse;
 use crate::retained::UpsertSliderArgs;
 use crate::ui::Ui;
+use crate::widget_model::slider::SliderCommon;
 
 pub(crate) struct ShowSliderArgs {
     pub(crate) id: String,
     pub(crate) width: f64,
     pub(crate) height: f64,
-    pub(crate) min: f64,
-    pub(crate) max: f64,
-    pub(crate) value: Option<f64>,
-    pub(crate) step: Option<f64>,
-    pub(crate) text: Option<String>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
+    pub(crate) common: SliderCommon,
 }
 
 impl Ui<'_> {
@@ -25,6 +18,11 @@ impl Ui<'_> {
             id,
             width,
             height,
+            mut common,
+        } = args;
+        let rect: Rect = self.allocate_widget_rect(width, height);
+        common.enabled = self.resolve_enabled(common.enabled);
+        let SliderCommon {
             min,
             max,
             value,
@@ -33,8 +31,7 @@ impl Ui<'_> {
             font_size,
             text_color,
             enabled,
-        } = args;
-        let rect: Rect = self.allocate_widget_rect(width, height);
+        } = common;
         self.retained.upsert_slider(UpsertSliderArgs {
             id,
             rect,
@@ -45,7 +42,7 @@ impl Ui<'_> {
             text,
             font_size,
             text_color,
-            enabled: self.resolve_enabled(enabled),
+            enabled,
         })
     }
 }

@@ -3,6 +3,7 @@ use vello::peniko::Color;
 use crate::Ui;
 use crate::ui::ShowSliderArgs;
 use crate::ui::UiEvents;
+use crate::widget_model::slider::SliderCommon;
 
 #[cfg(test)]
 #[path = "../../tests/unit/widget/slider.rs"]
@@ -21,14 +22,7 @@ pub struct SliderBuilder<'ui, 'a> {
     id: String,
     width: f64,
     height: f64,
-    min: f64,
-    max: f64,
-    value: Option<f64>,
-    step: Option<f64>,
-    text: Option<String>,
-    font_size: f32,
-    text_color: Color,
-    enabled: bool,
+    common: SliderCommon,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -85,14 +79,7 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
             id,
             width: 320.0,
             height: 40.0,
-            min: 0.0,
-            max: 100.0,
-            value: None,
-            step: None,
-            text: None,
-            font_size: 16.0,
-            text_color: Color::from_rgb8(236, 241, 247),
-            enabled: true,
+            common: SliderCommon::default(),
         }
     }
 
@@ -112,39 +99,39 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
     }
 
     pub fn range(mut self, min: f64, max: f64) -> Self {
-        self.min = min;
-        self.max = max;
+        self.common.min = min;
+        self.common.max = max;
         self
     }
 
     pub fn value(mut self, value: f64) -> Self {
         // Initial value at first creation.
-        self.value = Some(value);
+        self.common.value = Some(value);
         self
     }
 
     pub fn step(mut self, step: f64) -> Self {
-        self.step = Some(step);
+        self.common.step = Some(step);
         self
     }
 
     pub fn text(mut self, text: impl Into<String>) -> Self {
-        self.text = Some(text.into());
+        self.common.text = Some(text.into());
         self
     }
 
     pub fn font_size(mut self, px: u32) -> Self {
-        self.font_size = px as f32;
+        self.common.font_size = px as f32;
         self
     }
 
     pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = color;
+        self.common.text_color = color;
         self
     }
 
     pub fn enabled(mut self, value: bool) -> Self {
-        self.enabled = value;
+        self.common.enabled = value;
         self
     }
 
@@ -154,14 +141,7 @@ impl<'ui, 'a> SliderBuilder<'ui, 'a> {
             id: id.clone(),
             width: self.width,
             height: self.height,
-            min: self.min,
-            max: self.max,
-            value: self.value,
-            step: self.step,
-            text: self.text,
-            font_size: self.font_size,
-            text_color: self.text_color,
-            enabled: self.enabled,
+            common: self.common,
         });
 
         SliderHandle::new(id)

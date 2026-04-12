@@ -1,45 +1,44 @@
 use vello::kurbo::Rect;
 
-use crate::Color;
 use crate::RadioButtonResponse;
 use crate::retained::UpsertRadioButtonArgs;
 use crate::ui::Ui;
+use crate::widget_model::radio_button::RadioButtonCommon;
 
 pub(crate) struct ShowRadioButtonArgs {
     pub(crate) id: String,
-    pub(crate) group: String,
     pub(crate) width: f64,
     pub(crate) height: f64,
-    pub(crate) text: Option<String>,
-    pub(crate) selected: Option<bool>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) enabled: bool,
+    pub(crate) common: RadioButtonCommon,
 }
 
 impl Ui<'_> {
     pub(crate) fn show_radio_button(&mut self, args: ShowRadioButtonArgs) -> RadioButtonResponse {
         let ShowRadioButtonArgs {
             id,
-            group,
             width,
             height,
+            mut common,
+        } = args;
+        let rect: Rect = self.allocate_widget_rect(width, height);
+        common.enabled = self.resolve_enabled(common.enabled);
+        let RadioButtonCommon {
+            group,
             text,
             selected,
             font_size,
             text_color,
             enabled,
-        } = args;
-        let rect: Rect = self.allocate_widget_rect(width, height);
+        } = common;
         self.retained.upsert_radio_button(UpsertRadioButtonArgs {
             id,
-            group,
             rect,
+            group,
             text,
             selected,
             font_size,
             text_color,
-            enabled: self.resolve_enabled(enabled),
+            enabled,
         })
     }
 }

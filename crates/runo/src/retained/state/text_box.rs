@@ -4,7 +4,8 @@ use vello::peniko::Color;
 use crate::retained::node::{TextBoxNode, WidgetNode};
 use crate::retained::state::{RetainedState, clear_slot_if_matches};
 use crate::widget::text::estimate_text_width;
-use crate::widget::text_box::{Overflow, TextBoxResponse};
+use crate::widget::text_box::TextBoxResponse;
+use crate::widget::text_box::Overflow;
 
 #[cfg(test)]
 #[path = "../../../tests/unit/retained/state/text_box.rs"]
@@ -96,6 +97,7 @@ impl RetainedState {
                     text_box.text_color = text_color;
                     text_box.bg_color = bg_color;
                     text_box.border_color = border_color;
+                    text_box.disable_border = disable_border;
                     text_box.enabled = enabled;
                     text_box.read_only = read_only;
                     text_box.overflow_x = overflow_x;

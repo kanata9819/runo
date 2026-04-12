@@ -1,21 +1,15 @@
 use vello::kurbo::Rect;
-use vello::peniko::Color;
 
 use crate::ComboBoxResponse;
 use crate::retained::UpsertComboBoxArgs;
 use crate::ui::Ui;
+use crate::widget_model::combo_box::ComboBoxCommon;
 
 pub(crate) struct ShowComboBoxArgs {
     pub(crate) id: String,
     pub(crate) width: f64,
     pub(crate) height: f64,
-    pub(crate) items: Vec<String>,
-    pub(crate) selected_index: Option<usize>,
-    pub(crate) font_size: f32,
-    pub(crate) text_color: Color,
-    pub(crate) bg_color: Color,
-    pub(crate) border_color: Color,
-    pub(crate) enabled: bool,
+    pub(crate) common: ComboBoxCommon,
 }
 
 impl Ui<'_> {
@@ -24,15 +18,19 @@ impl Ui<'_> {
             id,
             width,
             height,
+            mut common,
+        } = args;
+        let rect: Rect = self.allocate_widget_rect(width, height);
+        common.enabled = self.resolve_enabled(common.enabled);
+        let ComboBoxCommon {
             items,
             selected_index,
             font_size,
             text_color,
             bg_color,
             border_color,
-            enabled: enabled_arg,
-        } = args;
-        let rect: Rect = self.allocate_widget_rect(width, height);
+            enabled,
+        } = common;
         self.retained.upsert_combo_box(UpsertComboBoxArgs {
             id,
             rect,
@@ -42,7 +40,7 @@ impl Ui<'_> {
             text_color,
             bg_color,
             border_color,
-            enabled: self.resolve_enabled(enabled_arg),
+            enabled,
         })
     }
 }

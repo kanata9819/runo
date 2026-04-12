@@ -3,6 +3,7 @@ use vello::peniko::Color;
 use crate::Ui;
 use crate::ui::ShowComboBoxArgs;
 use crate::ui::UiEvents;
+use crate::widget_model::combo_box::ComboBoxCommon;
 
 #[cfg(test)]
 #[path = "../../tests/unit/widget/combo_box.rs"]
@@ -23,13 +24,7 @@ pub struct ComboBoxBuilder<'ui, 'a> {
     id: String,
     width: f64,
     height: f64,
-    items: Vec<String>,
-    selected_index: Option<usize>,
-    font_size: f32,
-    text_color: Color,
-    bg_color: Color,
-    border_color: Color,
-    enabled: bool,
+    common: ComboBoxCommon,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -98,13 +93,7 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
             id,
             width: 280.0,
             height: 44.0,
-            items: Vec::new(),
-            selected_index: None,
-            font_size: 18.0,
-            text_color: Color::from_rgb8(236, 241, 247),
-            bg_color: Color::from_rgb8(33, 38, 46),
-            border_color: Color::from_rgb8(78, 89, 104),
-            enabled: true,
+            common: ComboBoxCommon::default(),
         }
     }
 
@@ -128,37 +117,37 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
         I: IntoIterator<Item = T>,
         T: Into<String>,
     {
-        self.items = items.into_iter().map(Into::into).collect();
+        self.common.items = items.into_iter().map(Into::into).collect();
         self
     }
 
     pub fn selected_index(mut self, index: usize) -> Self {
-        self.selected_index = Some(index);
+        self.common.selected_index = Some(index);
         self
     }
 
     pub fn font_size(mut self, px: u32) -> Self {
-        self.font_size = px as f32;
+        self.common.font_size = px as f32;
         self
     }
 
     pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = color;
+        self.common.text_color = color;
         self
     }
 
     pub fn bg_color(mut self, color: Color) -> Self {
-        self.bg_color = color;
+        self.common.bg_color = color;
         self
     }
 
     pub fn border_color(mut self, color: Color) -> Self {
-        self.border_color = color;
+        self.common.border_color = color;
         self
     }
 
     pub fn enabled(mut self, value: bool) -> Self {
-        self.enabled = value;
+        self.common.enabled = value;
         self
     }
 
@@ -168,13 +157,7 @@ impl<'ui, 'a> ComboBoxBuilder<'ui, 'a> {
             id: id.clone(),
             width: self.width,
             height: self.height,
-            items: self.items,
-            selected_index: self.selected_index,
-            font_size: self.font_size,
-            text_color: self.text_color,
-            bg_color: self.bg_color,
-            border_color: self.border_color,
-            enabled: self.enabled,
+            common: self.common,
         });
 
         ComboBoxHandle::new(id)

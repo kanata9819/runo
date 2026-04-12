@@ -3,6 +3,7 @@ use vello::peniko::Color;
 use crate::Ui;
 use crate::ui::ShowRadioButtonArgs;
 use crate::ui::UiEvents;
+use crate::widget_model::radio_button::RadioButtonCommon;
 
 #[cfg(test)]
 #[path = "../../tests/unit/widget/radio_button.rs"]
@@ -19,14 +20,9 @@ pub struct RadioButtonResponse {
 pub struct RadioButtonBuilder<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
     id: String,
-    group: String,
     width: f64,
     height: f64,
-    text: Option<String>,
-    selected: Option<bool>,
-    font_size: f32,
-    text_color: Color,
-    enabled: bool,
+    common: RadioButtonCommon,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -81,14 +77,9 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
         Self {
             ui,
             id,
-            group: "default".to_string(),
             width: 260.0,
             height: 36.0,
-            text: None,
-            selected: None,
-            font_size: 18.0,
-            text_color: Color::from_rgb8(236, 241, 247),
-            enabled: true,
+            common: RadioButtonCommon::default(),
         }
     }
 
@@ -98,7 +89,7 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
     }
 
     pub fn group(mut self, group: impl Into<String>) -> Self {
-        self.group = group.into();
+        self.common.group = group.into();
         self
     }
 
@@ -113,28 +104,28 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
     }
 
     pub fn text(mut self, text: impl Into<String>) -> Self {
-        self.text = Some(text.into());
+        self.common.text = Some(text.into());
         self
     }
 
     pub fn selected(mut self, selected: bool) -> Self {
         // Initial selected state at first creation.
-        self.selected = Some(selected);
+        self.common.selected = Some(selected);
         self
     }
 
     pub fn font_size(mut self, px: u32) -> Self {
-        self.font_size = px as f32;
+        self.common.font_size = px as f32;
         self
     }
 
     pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = color;
+        self.common.text_color = color;
         self
     }
 
     pub fn enabled(mut self, value: bool) -> Self {
-        self.enabled = value;
+        self.common.enabled = value;
         self
     }
 
@@ -142,14 +133,9 @@ impl<'ui, 'a> RadioButtonBuilder<'ui, 'a> {
         let id: String = self.id;
         self.ui.show_radio_button(ShowRadioButtonArgs {
             id: id.clone(),
-            group: self.group,
             width: self.width,
             height: self.height,
-            text: self.text,
-            selected: self.selected,
-            font_size: self.font_size,
-            text_color: self.text_color,
-            enabled: self.enabled,
+            common: self.common,
         });
 
         RadioButtonHandle::new(id)

@@ -3,6 +3,7 @@ use vello::peniko::Color;
 use crate::Ui;
 use crate::ui::ShowCheckboxArgs;
 use crate::ui::UiEvents;
+use crate::widget_model::checkbox::CheckboxCommon;
 
 #[cfg(test)]
 #[path = "../../tests/unit/widget/checkbox.rs"]
@@ -21,11 +22,7 @@ pub struct CheckboxBuilder<'ui, 'a> {
     id: String,
     width: f64,
     height: f64,
-    text: Option<String>,
-    checked: Option<bool>,
-    font_size: f32,
-    text_color: Color,
-    enabled: bool,
+    common: CheckboxCommon,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -82,11 +79,7 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
             id,
             width: 260.0,
             height: 36.0,
-            text: None,
-            checked: None,
-            font_size: 18.0,
-            text_color: Color::from_rgb8(236, 241, 247),
-            enabled: true,
+            common: CheckboxCommon::default(),
         }
     }
 
@@ -106,28 +99,28 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
     }
 
     pub fn text(mut self, text: impl Into<String>) -> Self {
-        self.text = Some(text.into());
+        self.common.text = Some(text.into());
         self
     }
 
     pub fn checked(mut self, checked: bool) -> Self {
         // Initial checked state at first creation.
-        self.checked = Some(checked);
+        self.common.checked = Some(checked);
         self
     }
 
     pub fn font_size(mut self, px: u32) -> Self {
-        self.font_size = px as f32;
+        self.common.font_size = px as f32;
         self
     }
 
     pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = color;
+        self.common.text_color = color;
         self
     }
 
     pub fn enabled(mut self, value: bool) -> Self {
-        self.enabled = value;
+        self.common.enabled = value;
         self
     }
 
@@ -137,11 +130,7 @@ impl<'ui, 'a> CheckboxBuilder<'ui, 'a> {
             id: id.clone(),
             width: self.width,
             height: self.height,
-            text: self.text,
-            checked: self.checked,
-            font_size: self.font_size,
-            text_color: self.text_color,
-            enabled: self.enabled,
+            common: self.common,
         });
 
         CheckboxHandle::new(id)

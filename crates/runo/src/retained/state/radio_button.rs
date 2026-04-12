@@ -13,8 +13,8 @@ mod tests;
 
 pub(crate) struct UpsertRadioButtonArgs {
     pub(crate) id: String,
-    pub(crate) group: String,
     pub(crate) rect: Rect,
+    pub(crate) group: String,
     pub(crate) text: Option<String>,
     pub(crate) selected: Option<bool>,
     pub(crate) font_size: f32,
@@ -29,8 +29,8 @@ impl RetainedState {
     ) -> RadioButtonResponse {
         let UpsertRadioButtonArgs {
             id,
-            group,
             rect,
+            group,
             text,
             selected,
             font_size,

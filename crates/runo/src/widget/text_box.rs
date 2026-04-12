@@ -3,6 +3,7 @@ use vello::peniko::Color;
 use crate::Ui;
 use crate::ui::ShowTextBoxArgs;
 use crate::ui::UiEvents;
+use crate::widget_model::text_box::TextBoxCommon;
 
 #[cfg(test)]
 #[path = "../../tests/unit/widget/text_box.rs"]
@@ -39,17 +40,7 @@ pub struct TextBoxBuilder<'ui, 'a> {
     id: String,
     width: f64,
     height: f64,
-    text: Option<String>,
-    placeholder: Option<String>,
-    font_size: f32,
-    text_color: Color,
-    bg_color: Color,
-    border_color: Color,
-    disable_border: bool,
-    enabled: bool,
-    read_only: bool,
-    overflow_x: Overflow,
-    overflow_y: Overflow,
+    common: TextBoxCommon,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -106,17 +97,7 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             id,
             width: 280.0,
             height: 44.0,
-            text: None,
-            placeholder: None,
-            font_size: 18.0,
-            text_color: Color::from_rgb8(236, 241, 247),
-            bg_color: Color::from_rgb8(33, 38, 46),
-            border_color: Color::from_rgb8(78, 89, 104),
-            disable_border: false,
-            enabled: true,
-            read_only: false,
-            overflow_x: Overflow::Auto,
-            overflow_y: Overflow::Hidden,
+            common: TextBoxCommon::default(),
         }
     }
 
@@ -136,57 +117,57 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
     }
 
     pub fn text(mut self, text: impl Into<String>) -> Self {
-        self.text = Some(text.into());
+        self.common.text = Some(text.into());
         self
     }
 
     pub fn placeholder(mut self, text: impl Into<String>) -> Self {
-        self.placeholder = Some(text.into());
+        self.common.placeholder = Some(text.into());
         self
     }
 
     pub fn font_size(mut self, px: u32) -> Self {
-        self.font_size = px as f32;
+        self.common.font_size = px as f32;
         self
     }
 
     pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = color;
+        self.common.text_color = color;
         self
     }
 
     pub fn bg_color(mut self, color: Color) -> Self {
-        self.bg_color = color;
+        self.common.bg_color = color;
         self
     }
 
     pub fn border_color(mut self, color: Color) -> Self {
-        self.border_color = color;
+        self.common.border_color = color;
         self
     }
 
     pub fn disable_border(mut self, value: bool) -> Self {
-        self.disable_border = value;
+        self.common.disable_border = value;
         self
     }
 
     pub fn enabled(mut self, value: bool) -> Self {
-        self.enabled = value;
+        self.common.enabled = value;
         self
     }
 
     pub fn read_only(mut self, value: bool) -> Self {
-        self.read_only = value;
+        self.common.read_only = value;
         self
     }
 
     pub fn overflow_x(mut self, overflow: Overflow) -> Self {
-        self.overflow_x = overflow;
+        self.common.overflow_x = overflow;
         self
     }
 
     pub fn overflow_y(mut self, overflow: Overflow) -> Self {
-        self.overflow_y = overflow;
+        self.common.overflow_y = overflow;
         self
     }
 
@@ -196,17 +177,7 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             id: id.clone(),
             width: self.width,
             height: self.height,
-            text: self.text,
-            placeholder: self.placeholder,
-            font_size: self.font_size,
-            text_color: self.text_color,
-            bg_color: self.bg_color,
-            border_color: self.border_color,
-            disable_border: self.disable_border,
-            enabled: self.enabled,
-            read_only: self.read_only,
-            overflow_x: self.overflow_x,
-            overflow_y: self.overflow_y,
+            common: self.common,
         });
 
         TextBoxHandle::new(id)

@@ -67,7 +67,7 @@ impl CorePainter {
 
         let border_color: Color = if !text_box.enabled {
             color::Neutral::tone_86_92_101()
-        } else if text_box.focused && !text_box.read_only {
+        } else if text_box.focused && !text_box.read_only && !text_box.disable_border {
             color::AccentBlue::tone_89_176_255()
         } else {
             text_box.border_color

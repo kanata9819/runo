@@ -90,6 +90,7 @@ fn begin_frame_input_applies_text_to_newly_focused_text_box() {
         text_color: Color::from_rgb8(240, 240, 240),
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: Color::from_rgb8(80, 80, 80),
+        disable_border: false,
         enabled: true,
         read_only: false,
         overflow_x: Overflow::Auto,
@@ -143,3 +144,5 @@ fn begin_frame_input_updates_slider_value_while_dragging() {
         |event| matches!(event, UiEvent::SliderChanged { slider, .. } if slider.id() == "slider")
     ));
 }
+
+

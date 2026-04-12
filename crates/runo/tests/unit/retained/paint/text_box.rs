@@ -17,6 +17,7 @@ fn sample_text_box() -> TextBoxNode {
         text_color: Color::from_rgb8(230, 230, 230),
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: Color::from_rgb8(80, 80, 80),
+        disable_border: false,
         enabled: true,
         read_only: false,
         overflow_x: Overflow::Auto,
@@ -203,3 +204,5 @@ fn draw_text_content_stores_max_line_advance_for_multiline_text() {
     TextContentPainter::draw_text_content(&mut scene, &font, &mut text_box, text_color, metrics);
     assert!((text_box.text_advance - expected).abs() < 1e-6);
 }
+
+

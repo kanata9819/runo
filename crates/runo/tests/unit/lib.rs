@@ -161,6 +161,7 @@ fn retained_text_box_set_text_updates_response() {
         text_color: white(),
         bg_color: Color::from_rgb8(20, 20, 20),
         border_color: white(),
+        disable_border: false,
         enabled: true,
         read_only: false,
         overflow_x: Overflow::Auto,
@@ -246,3 +247,6 @@ fn ui_use_state_persists_across_ui_instances_with_frame_lifecycle() {
     }
     states.end_frame();
 }
+
+
+

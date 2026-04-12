@@ -18,6 +18,7 @@ fn sample_text_box(text: &str) -> TextBoxNode {
         text_color: Color::from_rgb8(255, 255, 255),
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: Color::from_rgb8(60, 60, 60),
+        disable_border: false,
         enabled: true,
         read_only: false,
         overflow_x: Overflow::Auto,
@@ -139,6 +140,7 @@ fn state_with_text_box(id: &str, text: &str) -> RetainedState {
         text_color: Color::from_rgb8(240, 240, 240),
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: Color::from_rgb8(80, 80, 80),
+        disable_border: false,
         enabled: true,
         read_only: false,
         overflow_x: Overflow::Auto,
@@ -235,3 +237,5 @@ fn apply_text_box_scroll_allows_disabled_scrollable_text_box() {
         panic!("textbox missing");
     }
 }
+
+

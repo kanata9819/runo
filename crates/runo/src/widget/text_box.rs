@@ -45,6 +45,7 @@ pub struct TextBoxBuilder<'ui, 'a> {
     text_color: Color,
     bg_color: Color,
     border_color: Color,
+    disable_border: bool,
     enabled: bool,
     read_only: bool,
     overflow_x: Overflow,
@@ -111,6 +112,7 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             text_color: Color::from_rgb8(236, 241, 247),
             bg_color: Color::from_rgb8(33, 38, 46),
             border_color: Color::from_rgb8(78, 89, 104),
+            disable_border: false,
             enabled: true,
             read_only: false,
             overflow_x: Overflow::Auto,
@@ -163,6 +165,11 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
         self
     }
 
+    pub fn disable_border(mut self, value: bool) -> Self {
+        self.disable_border = value;
+        self
+    }
+
     pub fn enabled(mut self, value: bool) -> Self {
         self.enabled = value;
         self
@@ -195,6 +202,7 @@ impl<'ui, 'a> TextBoxBuilder<'ui, 'a> {
             text_color: self.text_color,
             bg_color: self.bg_color,
             border_color: self.border_color,
+            disable_border: self.disable_border,
             enabled: self.enabled,
             read_only: self.read_only,
             overflow_x: self.overflow_x,

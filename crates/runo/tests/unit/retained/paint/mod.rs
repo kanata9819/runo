@@ -79,6 +79,7 @@ fn render_visits_base_and_overlay_passes() {
         text_color: color,
         bg_color: Color::from_rgb8(30, 30, 30),
         border_color: color,
+        disable_border: false,
         enabled: true,
         read_only: false,
         overflow_x: Overflow::Auto,
@@ -101,3 +102,6 @@ fn render_visits_base_and_overlay_passes() {
         state.render(&mut scene, Some(&font));
     }
 }
+
+
+

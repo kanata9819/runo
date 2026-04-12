@@ -1,4 +1,4 @@
-use super::super::text_content::TextContentPainter;
+use super::text_content::TextContentPainter;
 use super::*;
 use crate::font::load_default_font;
 use crate::theme::color;

@@ -247,6 +247,3 @@ fn ui_use_state_persists_across_ui_instances_with_frame_lifecycle() {
     }
     states.end_frame();
 }
-
-
-

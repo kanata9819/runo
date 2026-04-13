@@ -10,9 +10,10 @@ mod widgets;
 use std::marker::PhantomData;
 
 pub use events::{ActionBindings, EventBindings, EventBindingsBuilder, UiEvents};
+#[allow(unused_imports)]
 pub use state::{
     UiButtonState, UiCheckboxState, UiComboBoxState, UiDivState, UiLabelState, UiRadioButtonState,
-    UiSliderState, UiState, UiTextBoxState,
+    UiSliderState, UiState, UiTerminalViewState, UiTextBoxState,
 };
 pub use widgets::UiWidgets;
 
@@ -27,6 +28,7 @@ pub(crate) use show::div::ShowDivArgs;
 pub(crate) use show::label::ShowLabelArgs;
 pub(crate) use show::radio_button::ShowRadioButtonArgs;
 pub(crate) use show::slider::ShowSliderArgs;
+pub(crate) use show::terminal_view::ShowTerminalViewArgs;
 pub(crate) use show::text_box::ShowTextBoxArgs;
 
 use vello::Scene;
@@ -36,6 +38,7 @@ use vello::peniko::{Fill, FontData};
 use crate::Color;
 use crate::hooks::use_effect::{EffectCleanup, EffectStore};
 use crate::hooks::use_state::StateStore;
+use crate::input::UiInputSnapshot;
 use crate::layout::LayoutDirection;
 use crate::layout::stack::LayoutStack;
 use crate::retained::RetainedState;
@@ -43,6 +46,7 @@ use crate::retained::RetainedState;
 pub struct Ui<'a> {
     pub(crate) scene: &'a mut Scene,
     pub(crate) font: Option<FontData>,
+    input: UiInputSnapshot,
     effects: &'a mut EffectStore,
     states: &'a mut StateStore,
     retained: &'a mut RetainedState,
@@ -76,6 +80,7 @@ where
 }
 
 impl<'a> Ui<'a> {
+    #[allow(dead_code)]
     pub(crate) fn new(
         scene: &'a mut Scene,
         font: Option<FontData>,
@@ -83,9 +88,28 @@ impl<'a> Ui<'a> {
         states: &'a mut StateStore,
         retained: &'a mut RetainedState,
     ) -> Self {
+        Self::with_input(
+            scene,
+            font,
+            UiInputSnapshot::default(),
+            effects,
+            states,
+            retained,
+        )
+    }
+
+    pub(crate) fn with_input(
+        scene: &'a mut Scene,
+        font: Option<FontData>,
+        input: UiInputSnapshot,
+        effects: &'a mut EffectStore,
+        states: &'a mut StateStore,
+        retained: &'a mut RetainedState,
+    ) -> Self {
         Self {
             scene,
             font,
+            input,
             effects,
             states,
             retained,
@@ -106,6 +130,10 @@ impl<'a> Ui<'a> {
 
     pub fn events(&mut self) -> UiEvents<'_, 'a> {
         UiEvents { ui: self }
+    }
+
+    pub fn input(&self) -> &UiInputSnapshot {
+        &self.input
     }
 
     pub fn drain_bound_events<E>(&mut self, bindings: &EventBindings<E>) -> Vec<E> {
@@ -182,6 +210,13 @@ impl<'a> Ui<'a> {
     pub(crate) fn text_box(&mut self) -> crate::widget::text_box::TextBoxBuilder<'_, 'a> {
         let id: String = self.next_auto_id("text_box");
         crate::widget::text_box::TextBoxBuilder::new(self, id)
+    }
+
+    pub(crate) fn terminal_view(
+        &mut self,
+    ) -> crate::widget::terminal_view::TerminalViewBuilder<'_, 'a> {
+        let id: String = self.next_auto_id("terminal_view");
+        crate::widget::terminal_view::TerminalViewBuilder::new(self, id)
     }
 
     pub(crate) fn combo_box(&mut self) -> crate::widget::combo_box::ComboBoxBuilder<'_, 'a> {

@@ -25,6 +25,79 @@ pub(crate) struct InputFrame {
     pub(crate) scroll_y: f64,
 }
 
+#[derive(Clone, Debug, Default)]
+pub struct UiInputSnapshot {
+    text_input: String,
+    backspace_pressed: bool,
+    delete_pressed: bool,
+    enter_pressed: bool,
+    arrow_left_pressed: bool,
+    arrow_right_pressed: bool,
+    arrow_up_pressed: bool,
+    arrow_down_pressed: bool,
+    scroll_x: f64,
+    scroll_y: f64,
+}
+
+impl UiInputSnapshot {
+    pub fn text_input(&self) -> &str {
+        &self.text_input
+    }
+
+    pub fn backspace_pressed(&self) -> bool {
+        self.backspace_pressed
+    }
+
+    pub fn delete_pressed(&self) -> bool {
+        self.delete_pressed
+    }
+
+    pub fn enter_pressed(&self) -> bool {
+        self.enter_pressed
+    }
+
+    pub fn arrow_left_pressed(&self) -> bool {
+        self.arrow_left_pressed
+    }
+
+    pub fn arrow_right_pressed(&self) -> bool {
+        self.arrow_right_pressed
+    }
+
+    pub fn arrow_up_pressed(&self) -> bool {
+        self.arrow_up_pressed
+    }
+
+    pub fn arrow_down_pressed(&self) -> bool {
+        self.arrow_down_pressed
+    }
+
+    pub fn scroll_x(&self) -> f64 {
+        self.scroll_x
+    }
+
+    pub fn scroll_y(&self) -> f64 {
+        self.scroll_y
+    }
+}
+
+impl From<&InputFrame> for UiInputSnapshot {
+    fn from(input: &InputFrame) -> Self {
+        Self {
+            text_input: input.text_input.clone(),
+            backspace_pressed: input.backspace_pressed,
+            delete_pressed: input.delete_pressed,
+            enter_pressed: input.enter_pressed,
+            arrow_left_pressed: input.arrow_left_pressed,
+            arrow_right_pressed: input.arrow_right_pressed,
+            arrow_up_pressed: input.arrow_up_pressed,
+            arrow_down_pressed: input.arrow_down_pressed,
+            scroll_x: input.scroll_x,
+            scroll_y: input.scroll_y,
+        }
+    }
+}
+
 #[derive(Default)]
 pub(crate) struct InputState {
     cursor_pos: (f64, f64),

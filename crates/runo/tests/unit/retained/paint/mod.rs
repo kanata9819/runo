@@ -102,6 +102,3 @@ fn render_visits_base_and_overlay_passes() {
         state.render(&mut scene, Some(&font));
     }
 }
-
-
-

@@ -6,6 +6,7 @@ use crate::widget::combo_box::ComboBoxBuilder;
 use crate::widget::label::LabelBuilder;
 use crate::widget::radio_button::RadioButtonBuilder;
 use crate::widget::slider::SliderBuilder;
+use crate::widget::terminal_view::TerminalViewBuilder;
 use crate::widget::text_box::TextBoxBuilder;
 
 #[cfg(test)]
@@ -35,6 +36,11 @@ impl<'ui, 'a> UiWidgets<'ui, 'a> {
     #[must_use]
     pub fn text_box(self) -> TextBoxBuilder<'ui, 'a> {
         self.ui.text_box()
+    }
+
+    #[must_use]
+    pub fn terminal_view(self) -> TerminalViewBuilder<'ui, 'a> {
+        self.ui.terminal_view()
     }
 
     #[must_use]

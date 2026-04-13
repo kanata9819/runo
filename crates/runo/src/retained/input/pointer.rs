@@ -94,6 +94,15 @@ impl RetainedState {
                         cursor_pos.1,
                     );
                 }
+                WidgetNode::TerminalView(terminal_view) => {
+                    terminal_view.hovered = hovered_when_enabled(
+                        terminal_view.enabled,
+                        overlay_blocks_other_widgets,
+                        terminal_view.rect,
+                        cursor_pos.0,
+                        cursor_pos.1,
+                    );
+                }
                 WidgetNode::ComboBox(combo_box) => {
                     combo_box.changed = false;
                     if !combo_box.enabled {

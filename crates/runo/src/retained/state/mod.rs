@@ -8,6 +8,7 @@ mod combo_box;
 mod core;
 mod radio_button;
 mod slider;
+mod terminal_view;
 mod text_box;
 
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -21,6 +22,7 @@ pub(crate) use checkbox::UpsertCheckboxArgs;
 pub(crate) use combo_box::UpsertComboBoxArgs;
 pub(crate) use radio_button::UpsertRadioButtonArgs;
 pub(crate) use slider::UpsertSliderArgs;
+pub(crate) use terminal_view::UpsertTerminalViewArgs;
 pub(crate) use text_box::UpsertTextBoxArgs;
 
 #[cfg(test)]

@@ -204,5 +204,3 @@ fn draw_text_content_stores_max_line_advance_for_multiline_text() {
     TextContentPainter::draw_text_content(&mut scene, &font, &mut text_box, text_color, metrics);
     assert!((text_box.text_advance - expected).abs() < 1e-6);
 }
-
-

@@ -23,6 +23,7 @@ mod widget_model;
 pub use app::{RunOptions, RunoApplication, run};
 pub use event::UiEvent;
 pub use hooks::use_effect::EffectCleanup;
+pub use input::UiInputSnapshot;
 pub use layout::div::DivHandle;
 pub use theme::color as colors;
 pub use ui::{
@@ -45,5 +46,8 @@ pub use widget::radio_button::RadioButtonHandle;
 pub use widget::radio_button::RadioButtonResponse;
 pub use widget::slider::SliderHandle;
 pub use widget::slider::SliderResponse;
+pub use widget::terminal_view::{
+    TerminalBuffer, TerminalCell, TerminalViewHandle, TerminalViewResponse,
+};
 pub use widget::text_box::TextBoxHandle;
 pub use widget::text_box::{Overflow, TextBoxResponse};

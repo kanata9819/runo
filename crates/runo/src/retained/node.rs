@@ -1,6 +1,7 @@
 use vello::kurbo::Rect;
 use vello::peniko::Color;
 
+use crate::widget::terminal_view::TerminalBuffer;
 use crate::widget::text_box::Overflow;
 
 pub(super) enum WidgetNode {
@@ -11,6 +12,7 @@ pub(super) enum WidgetNode {
     Slider(SliderNode),
     Label(LabelNode),
     TextBox(TextBoxNode),
+    TerminalView(TerminalViewNode),
     ComboBox(ComboBoxNode),
 }
 
@@ -104,6 +106,19 @@ pub(super) struct TextBoxNode {
     pub(super) hovered: bool,
     pub(super) focused: bool,
     pub(super) changed: bool,
+}
+
+pub(super) struct TerminalViewNode {
+    pub(super) rect: Rect,
+    pub(super) buffer: TerminalBuffer,
+    pub(super) font_size: f32,
+    pub(super) text_color: Color,
+    pub(super) bg_color: Color,
+    pub(super) border_color: Color,
+    pub(super) disable_border: bool,
+    pub(super) enabled: bool,
+    pub(super) scroll_y: f64,
+    pub(super) hovered: bool,
 }
 
 pub(super) struct ComboBoxNode {

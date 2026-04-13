@@ -4,5 +4,6 @@ pub mod combo_box;
 pub mod label;
 pub mod radio_button;
 pub mod slider;
+pub mod terminal_view;
 pub mod text;
 pub mod text_box;

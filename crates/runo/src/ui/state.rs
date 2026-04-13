@@ -9,6 +9,9 @@ use crate::widget::radio_button::RadioButtonHandle;
 use crate::widget::radio_button::RadioButtonResponse;
 use crate::widget::slider::SliderHandle;
 use crate::widget::slider::SliderResponse;
+use crate::widget::terminal_view::TerminalBuffer;
+use crate::widget::terminal_view::TerminalViewHandle;
+use crate::widget::terminal_view::TerminalViewResponse;
 use crate::widget::text_box::TextBoxHandle;
 use crate::widget::text_box::TextBoxResponse;
 use crate::{ButtonResponse, ComboBoxResponse};
@@ -30,6 +33,10 @@ pub struct UiTextBoxState<'ui, 'a> {
 }
 
 pub struct UiCheckboxState<'ui, 'a> {
+    ui: &'ui mut Ui<'a>,
+}
+
+pub struct UiTerminalViewState<'ui, 'a> {
     ui: &'ui mut Ui<'a>,
 }
 
@@ -64,6 +71,10 @@ impl<'a> UiState<'_, 'a> {
 
     pub fn checkbox(&mut self) -> UiCheckboxState<'_, 'a> {
         UiCheckboxState { ui: &mut *self.ui }
+    }
+
+    pub fn terminal_view(&mut self) -> UiTerminalViewState<'_, 'a> {
+        UiTerminalViewState { ui: &mut *self.ui }
     }
 
     pub fn radio_button(&mut self) -> UiRadioButtonState<'_, 'a> {
@@ -191,6 +202,33 @@ impl UiCheckboxState<'_, '_> {
     }
 
     pub fn set_enabled_handle(&mut self, handle: &CheckboxHandle, enabled: bool) {
+        self.set_enabled(handle.id(), enabled);
+    }
+}
+
+impl UiTerminalViewState<'_, '_> {
+    pub fn response(&self, id: impl AsRef<str>) -> TerminalViewResponse {
+        self.ui.retained.terminal_view_response(id)
+    }
+
+    #[must_use]
+    pub fn response_handle(&self, handle: &TerminalViewHandle) -> TerminalViewResponse {
+        self.response(handle.id())
+    }
+
+    pub fn set_buffer(&mut self, id: impl AsRef<str>, buffer: TerminalBuffer) {
+        self.ui.retained.set_terminal_view_buffer(id, buffer);
+    }
+
+    pub fn set_buffer_handle(&mut self, handle: &TerminalViewHandle, buffer: TerminalBuffer) {
+        self.set_buffer(handle.id(), buffer);
+    }
+
+    pub fn set_enabled(&mut self, id: impl AsRef<str>, enabled: bool) {
+        self.ui.retained.set_terminal_view_enabled(id, enabled);
+    }
+
+    pub fn set_enabled_handle(&mut self, handle: &TerminalViewHandle, enabled: bool) {
         self.set_enabled(handle.id(), enabled);
     }
 }

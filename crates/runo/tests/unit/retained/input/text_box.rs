@@ -237,5 +237,3 @@ fn apply_text_box_scroll_allows_disabled_scrollable_text_box() {
         panic!("textbox missing");
     }
 }
-
-

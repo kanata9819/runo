@@ -37,6 +37,7 @@ impl RetainedState {
         self.update_combo_box_states(input.mouse_down, input.mouse_released);
         self.update_text_box_focus();
         self.apply_text_box_scroll(&input);
+        self.apply_terminal_view_scroll(&input);
         self.apply_text_input(&input, font);
     }
 }

@@ -11,6 +11,7 @@ mod interaction_color;
 mod label;
 mod radio;
 mod slider;
+mod terminal_view;
 mod text_baseline;
 mod text_box;
 
@@ -40,6 +41,9 @@ impl RetainedState {
                 WidgetNode::Slider(slider) => slider::render(scene, font, slider),
                 WidgetNode::Label(label) => label::render(scene, font, label),
                 WidgetNode::TextBox(text_box) => text_box::render(scene, font, text_box),
+                WidgetNode::TerminalView(terminal_view) => {
+                    terminal_view::render(scene, font, terminal_view)
+                }
                 WidgetNode::ComboBox(combo_box) => combo_box::render(scene, font, combo_box),
             }
         }
@@ -58,7 +62,8 @@ impl RetainedState {
                 | WidgetNode::Radio(_)
                 | WidgetNode::Slider(_)
                 | WidgetNode::Label(_)
-                | WidgetNode::TextBox(_) => {}
+                | WidgetNode::TextBox(_)
+                | WidgetNode::TerminalView(_) => {}
             }
         }
     }

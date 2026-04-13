@@ -88,6 +88,3 @@ fn set_text_box_enabled_false_clears_focus_and_active_scrollbar() {
     assert!(state.focused_text_box.is_none());
     assert!(state.active_text_box_scrollbar.is_none());
 }
-
-
-

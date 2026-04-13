@@ -10,5 +10,5 @@ mod state;
 
 pub(crate) use state::{
     RetainedState, UpsertCheckboxArgs, UpsertComboBoxArgs, UpsertRadioButtonArgs, UpsertSliderArgs,
-    UpsertTextBoxArgs,
+    UpsertTerminalViewArgs, UpsertTextBoxArgs,
 };

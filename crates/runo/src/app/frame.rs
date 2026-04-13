@@ -108,9 +108,11 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.retained.begin_build_pass();
 
         let bindings: crate::ui::EventBindings<A::Event> = {
-            let mut ui = Ui::new(
+            let input = crate::input::UiInputSnapshot::from(&self.input.snapshot());
+            let mut ui = Ui::with_input(
                 &mut self.scene,
                 self.font.clone(),
+                input,
                 &mut self.effects,
                 &mut self.states,
                 &mut self.retained,
@@ -127,9 +129,11 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 
     fn run_app_update(&mut self) -> bool {
-        let mut ui = Ui::new(
+        let input = crate::input::UiInputSnapshot::from(&self.input.snapshot());
+        let mut ui = Ui::with_input(
             &mut self.scene,
             self.font.clone(),
+            input,
             &mut self.effects,
             &mut self.states,
             &mut self.retained,
@@ -141,9 +145,11 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     fn dispatch_bound_events(&mut self) -> bool {
         let mut request_remount: bool = false;
         {
-            let mut ui = Ui::new(
+            let input = crate::input::UiInputSnapshot::from(&self.input.snapshot());
+            let mut ui = Ui::with_input(
                 &mut self.scene,
                 self.font.clone(),
+                input,
                 &mut self.effects,
                 &mut self.states,
                 &mut self.retained,

@@ -9,4 +9,5 @@ pub(crate) mod div;
 pub(crate) mod label;
 pub(crate) mod radio_button;
 pub(crate) mod slider;
+pub(crate) mod terminal_view;
 pub(crate) mod text_box;

@@ -144,5 +144,3 @@ fn begin_frame_input_updates_slider_value_while_dragging() {
         |event| matches!(event, UiEvent::SliderChanged { slider, .. } if slider.id() == "slider")
     ));
 }
-
-

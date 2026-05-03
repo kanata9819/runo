@@ -202,35 +202,19 @@ impl RunoApplication<Event> for MyApp {
                 });
             self.main_panel = Some(main_panel);
         });
-        let mut builder = runo::EventBindings::builder();
-        if let Some(input_name) = &self.input_name {
-            builder = builder.text_box(input_name.clone(), Event::NameChanged);
-        }
-        if let Some(role_combo) = &self.role_combo {
-            builder = builder.combo_box(role_combo.clone(), |index, text| Event::RoleChanged {
+        runo::EventBindings::builder()
+            .text_box(self.input_name.clone(), Event::NameChanged)
+            .combo_box(self.role_combo.clone(), |index, text| Event::RoleChanged {
                 index,
                 text,
-            });
-        }
-        if let Some(newsletter_checkbox) = &self.newsletter_checkbox {
-            builder = builder.checkbox(newsletter_checkbox.clone(), Event::NewsletterChanged);
-        }
-        if let Some(channel_email) = &self.channel_email {
-            builder = builder.radio_button(channel_email.clone(), Event::ChannelEmailChanged);
-        }
-        if let Some(channel_sms) = &self.channel_sms {
-            builder = builder.radio_button(channel_sms.clone(), Event::ChannelSmsChanged);
-        }
-        if let Some(channel_push) = &self.channel_push {
-            builder = builder.radio_button(channel_push.clone(), Event::ChannelPushChanged);
-        }
-        if let Some(volume_slider) = &self.volume_slider {
-            builder = builder.slider(volume_slider.clone(), Event::VolumeChanged);
-        }
-        if let Some(toggle_button) = &self.toggle_button {
-            builder = builder.button(toggle_button.clone(), Event::ToggleClicked);
-        }
-        builder.build()
+            })
+            .checkbox(self.newsletter_checkbox.clone(), Event::NewsletterChanged)
+            .radio_button(self.channel_email.clone(), Event::ChannelEmailChanged)
+            .radio_button(self.channel_sms.clone(), Event::ChannelSmsChanged)
+            .radio_button(self.channel_push.clone(), Event::ChannelPushChanged)
+            .slider(self.volume_slider.clone(), Event::VolumeChanged)
+            .button(self.toggle_button.clone(), Event::ToggleClicked)
+            .build()
     }
 
     fn on_event(&mut self, ui: &mut Ui<'_>, event: Event) -> bool {

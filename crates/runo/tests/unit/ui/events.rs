@@ -148,6 +148,28 @@ fn event_bindings_builder_extend_merges_bindings() {
 }
 
 #[test]
+fn event_bindings_skip_absent_optional_handles() {
+    let mut scene = Scene::new();
+    let mut effects = EffectStore::new();
+    let mut states = StateStore::new();
+    let mut retained = RetainedState::new();
+    let mut ui = Ui::new(&mut scene, None, &mut effects, &mut states, &mut retained);
+
+    let button = ButtonHandle::new("btn".to_string());
+    ui.retained.push_event(UiEvent::ButtonClicked {
+        button: button.clone(),
+    });
+
+    let bindings = EventBindings::builder()
+        .button(None::<ButtonHandle>, "missing".to_string())
+        .button(Some(button), "clicked".to_string())
+        .build();
+
+    let events = ui.events().drain_bound_events(&bindings);
+    assert_eq!(events, vec!["clicked".to_string()]);
+}
+
+#[test]
 fn ui_events_callback_helpers_consume_matching_events() {
     let mut scene = Scene::new();
     let mut effects = EffectStore::new();

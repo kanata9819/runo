@@ -42,27 +42,45 @@ impl<A> ActionBindings<A> {
         }
     }
 
-    pub fn bind_button(&mut self, handle: ButtonHandle, action: A) {
+    pub fn bind_button(&mut self, handle: impl Into<Option<ButtonHandle>>, action: A) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.button.insert(handle, action);
     }
 
-    pub fn bind_checkbox(&mut self, handle: CheckboxHandle, action: A) {
+    pub fn bind_checkbox(&mut self, handle: impl Into<Option<CheckboxHandle>>, action: A) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.checkbox.insert(handle, action);
     }
 
-    pub fn bind_radio_button(&mut self, handle: RadioButtonHandle, action: A) {
+    pub fn bind_radio_button(&mut self, handle: impl Into<Option<RadioButtonHandle>>, action: A) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.radio_button.insert(handle, action);
     }
 
-    pub fn bind_slider(&mut self, handle: SliderHandle, action: A) {
+    pub fn bind_slider(&mut self, handle: impl Into<Option<SliderHandle>>, action: A) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.slider.insert(handle, action);
     }
 
-    pub fn bind_text_box(&mut self, handle: TextBoxHandle, action: A) {
+    pub fn bind_text_box(&mut self, handle: impl Into<Option<TextBoxHandle>>, action: A) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.text_box.insert(handle, action);
     }
 
-    pub fn bind_combo_box(&mut self, handle: ComboBoxHandle, action: A) {
+    pub fn bind_combo_box(&mut self, handle: impl Into<Option<ComboBoxHandle>>, action: A) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.combo_box.insert(handle, action);
     }
 }
@@ -85,42 +103,79 @@ impl<E> EventBindings<E> {
         }
     }
 
-    pub fn bind_button(&mut self, handle: ButtonHandle, event: E)
+    pub fn bind_button(&mut self, handle: impl Into<Option<ButtonHandle>>, event: E)
     where
         E: Clone + 'static,
     {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.bind_button_with(handle, move || event.clone());
     }
 
-    pub fn bind_button_with(&mut self, handle: ButtonHandle, f: impl Fn() -> E + 'static) {
+    pub fn bind_button_with(
+        &mut self,
+        handle: impl Into<Option<ButtonHandle>>,
+        f: impl Fn() -> E + 'static,
+    ) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.button.insert(handle, Box::new(f));
     }
 
-    pub fn bind_checkbox(&mut self, handle: CheckboxHandle, f: impl Fn(bool) -> E + 'static) {
+    pub fn bind_checkbox(
+        &mut self,
+        handle: impl Into<Option<CheckboxHandle>>,
+        f: impl Fn(bool) -> E + 'static,
+    ) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.checkbox.insert(handle, Box::new(f));
     }
 
     pub fn bind_radio_button(
         &mut self,
-        handle: RadioButtonHandle,
+        handle: impl Into<Option<RadioButtonHandle>>,
         f: impl Fn(bool) -> E + 'static,
     ) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.radio_button.insert(handle, Box::new(f));
     }
 
-    pub fn bind_slider(&mut self, handle: SliderHandle, f: impl Fn(f64) -> E + 'static) {
+    pub fn bind_slider(
+        &mut self,
+        handle: impl Into<Option<SliderHandle>>,
+        f: impl Fn(f64) -> E + 'static,
+    ) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.slider.insert(handle, Box::new(f));
     }
 
-    pub fn bind_text_box(&mut self, handle: TextBoxHandle, f: impl Fn(String) -> E + 'static) {
+    pub fn bind_text_box(
+        &mut self,
+        handle: impl Into<Option<TextBoxHandle>>,
+        f: impl Fn(String) -> E + 'static,
+    ) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.text_box.insert(handle, Box::new(f));
     }
 
     pub fn bind_combo_box(
         &mut self,
-        handle: ComboBoxHandle,
+        handle: impl Into<Option<ComboBoxHandle>>,
         f: impl Fn(usize, String) -> E + 'static,
     ) {
+        let Some(handle) = handle.into() else {
+            return;
+        };
         self.combo_box.insert(handle, Box::new(f));
     }
 }
@@ -133,7 +188,7 @@ impl<E> EventBindingsBuilder<E> {
         }
     }
 
-    pub fn button(mut self, handle: ButtonHandle, event: E) -> Self
+    pub fn button(mut self, handle: impl Into<Option<ButtonHandle>>, event: E) -> Self
     where
         E: Clone + 'static,
     {
@@ -141,38 +196,54 @@ impl<E> EventBindingsBuilder<E> {
         self
     }
 
-    pub fn button_with(mut self, handle: ButtonHandle, f: impl Fn() -> E + 'static) -> Self {
+    pub fn button_with(
+        mut self,
+        handle: impl Into<Option<ButtonHandle>>,
+        f: impl Fn() -> E + 'static,
+    ) -> Self {
         self.bindings.bind_button_with(handle, f);
         self
     }
 
-    pub fn checkbox(mut self, handle: CheckboxHandle, f: impl Fn(bool) -> E + 'static) -> Self {
+    pub fn checkbox(
+        mut self,
+        handle: impl Into<Option<CheckboxHandle>>,
+        f: impl Fn(bool) -> E + 'static,
+    ) -> Self {
         self.bindings.bind_checkbox(handle, f);
         self
     }
 
     pub fn radio_button(
         mut self,
-        handle: RadioButtonHandle,
+        handle: impl Into<Option<RadioButtonHandle>>,
         f: impl Fn(bool) -> E + 'static,
     ) -> Self {
         self.bindings.bind_radio_button(handle, f);
         self
     }
 
-    pub fn slider(mut self, handle: SliderHandle, f: impl Fn(f64) -> E + 'static) -> Self {
+    pub fn slider(
+        mut self,
+        handle: impl Into<Option<SliderHandle>>,
+        f: impl Fn(f64) -> E + 'static,
+    ) -> Self {
         self.bindings.bind_slider(handle, f);
         self
     }
 
-    pub fn text_box(mut self, handle: TextBoxHandle, f: impl Fn(String) -> E + 'static) -> Self {
+    pub fn text_box(
+        mut self,
+        handle: impl Into<Option<TextBoxHandle>>,
+        f: impl Fn(String) -> E + 'static,
+    ) -> Self {
         self.bindings.bind_text_box(handle, f);
         self
     }
 
     pub fn combo_box(
         mut self,
-        handle: ComboBoxHandle,
+        handle: impl Into<Option<ComboBoxHandle>>,
         f: impl Fn(usize, String) -> E + 'static,
     ) -> Self {
         self.bindings.bind_combo_box(handle, f);

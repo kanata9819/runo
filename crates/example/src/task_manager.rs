@@ -65,18 +65,10 @@ impl TaskApp {
     }
 
     fn build_event_bindings(&self) -> EventBindings<Event> {
-        let mut builder = EventBindings::builder();
-        if let Some(button) = &self.add_button {
-            builder = builder.button(button.clone(), Event::AddClicked);
-        }
-
-        if let Some(button) = &self.clear_done_button {
-            builder = builder.button(button.clone(), Event::ClearDoneClicked);
-        }
-
-        if let Some(text_box) = &self.input {
-            builder = builder.text_box(text_box.clone(), Event::DraftChanged);
-        }
+        let mut builder = EventBindings::builder()
+            .button(self.add_button.clone(), Event::AddClicked)
+            .button(self.clear_done_button.clone(), Event::ClearDoneClicked)
+            .text_box(self.input.clone(), Event::DraftChanged);
 
         for row in &self.task_rows {
             let task_id = row.task_id;

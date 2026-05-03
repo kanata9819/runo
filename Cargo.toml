@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/runo", "crates/example"]
+members = ["crates/runo", "crates/example", "crates/runo-studio"]
 exclude = ["vendor/winit"]
 resolver = "3"
 

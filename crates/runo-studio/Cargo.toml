@@ -1,0 +1,12 @@
+[package]
+name = "runo-studio"
+version = "0.1.0"
+edition = "2024"
+description = "Visual UI builder for the runo GUI framework."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/kanata9819/runo"
+homepage = "https://github.com/kanata9819/runo"
+
+[dependencies]
+runo = { path = "../runo", version = "0.1.0" }

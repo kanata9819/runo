@@ -27,6 +27,10 @@ pub(crate) struct InputFrame {
 
 #[derive(Clone, Debug, Default)]
 pub struct UiInputSnapshot {
+    cursor_pos: (f64, f64),
+    mouse_down: bool,
+    mouse_pressed: bool,
+    mouse_released: bool,
     text_input: String,
     backspace_pressed: bool,
     delete_pressed: bool,
@@ -40,6 +44,22 @@ pub struct UiInputSnapshot {
 }
 
 impl UiInputSnapshot {
+    pub fn cursor_pos(&self) -> (f64, f64) {
+        self.cursor_pos
+    }
+
+    pub fn mouse_down(&self) -> bool {
+        self.mouse_down
+    }
+
+    pub fn mouse_pressed(&self) -> bool {
+        self.mouse_pressed
+    }
+
+    pub fn mouse_released(&self) -> bool {
+        self.mouse_released
+    }
+
     pub fn text_input(&self) -> &str {
         &self.text_input
     }
@@ -84,6 +104,10 @@ impl UiInputSnapshot {
 impl From<&InputFrame> for UiInputSnapshot {
     fn from(input: &InputFrame) -> Self {
         Self {
+            cursor_pos: input.cursor_pos,
+            mouse_down: input.mouse_down,
+            mouse_pressed: input.mouse_pressed,
+            mouse_released: input.mouse_released,
             text_input: input.text_input.clone(),
             backspace_pressed: input.backspace_pressed,
             delete_pressed: input.delete_pressed,

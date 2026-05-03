@@ -20,6 +20,8 @@
   Core GUI framework implementation
 - `crates/example`
   Example app that demonstrates how to build and update UI
+- `crates/runo-studio`
+  Visual builder MVP for designing Runo UIs and generating Rust code
 
 ## Quick Start
 
@@ -31,6 +33,12 @@ Run example app:
 
 ```bash
 cargo run -p example
+```
+
+Run Runo Studio:
+
+```bash
+cargo run -p runo-studio
 ```
 
 Run CI-equivalent local checks:

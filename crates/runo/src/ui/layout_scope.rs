@@ -25,6 +25,14 @@ impl Ui<'_> {
         result
     }
 
+    pub fn at<R>(&mut self, x: f64, y: f64, f: impl FnOnce(&mut Self) -> R) -> R {
+        self.layout_stack
+            .push_layout_at((x, y), LayoutDirection::Vertical, 0.0);
+        let result = f(self);
+        let _consumed = self.layout_stack.pop_layout_consumed();
+        result
+    }
+
     fn with_layout<R>(
         &mut self,
         direction: LayoutDirection,

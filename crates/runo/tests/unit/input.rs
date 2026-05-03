@@ -59,3 +59,17 @@ fn mouse_wheel_values_accumulate_until_end_frame() {
     assert_eq!(frame.scroll_x, 0.0);
     assert_eq!(frame.scroll_y, 0.0);
 }
+
+#[test]
+fn ui_input_snapshot_exposes_pointer_state() {
+    let mut input = InputState::default();
+
+    input.set_cursor_pos(12.0, 34.0);
+    input.on_mouse_input(ElementState::Pressed);
+    let snapshot = UiInputSnapshot::from(&input.snapshot());
+
+    assert_eq!(snapshot.cursor_pos(), (12.0, 34.0));
+    assert!(snapshot.mouse_down());
+    assert!(snapshot.mouse_pressed());
+    assert!(!snapshot.mouse_released());
+}

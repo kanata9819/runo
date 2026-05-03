@@ -28,6 +28,9 @@ fn ui_layout_helpers_and_fill_rect_are_callable() {
         ui.widgets().label().id("h1").text("h1").show();
         ui.widgets().label().id("h2").text("h2").show();
     });
+    ui.at(120.0, 80.0, |ui| {
+        ui.widgets().label().id("abs").text("absolute").show();
+    });
 }
 
 #[test]

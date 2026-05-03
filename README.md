@@ -52,11 +52,10 @@ enum AppEvent {
 struct MyApp {
     count: u32,
     counter: Option<ButtonHandle>,
-    bindings: EventBindings<AppEvent>,
 }
 
-impl RunoApplication for MyApp {
-    fn build(&mut self, ui: &mut Ui<'_>) {
+impl RunoApplication<AppEvent> for MyApp {
+    fn build(&mut self, ui: &mut Ui<'_>) -> EventBindings<AppEvent> {
         let counter = ui
             .widgets()
             .button()
@@ -65,23 +64,23 @@ impl RunoApplication for MyApp {
             .height(56)
             .text(format!("Clicked: {}", self.count))
             .show();
-        self.bindings = EventBindings::builder()
+        let bindings = EventBindings::builder()
             .button(counter.clone(), AppEvent::CounterClicked)
             .build();
         self.counter = Some(counter);
+        bindings
     }
 
-    fn update(&mut self, ui: &mut Ui<'_>) {
-        for event in ui.drain_bound_events(&self.bindings) {
-            match event {
-                AppEvent::CounterClicked => {
-                    self.count += 1;
-                    if let Some(counter) = &self.counter {
-                        counter.set_text(ui, format!("Clicked: {}", self.count));
-                    }
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: AppEvent) -> bool {
+        match event {
+            AppEvent::CounterClicked => {
+                self.count += 1;
+                if let Some(counter) = &self.counter {
+                    counter.set_text(ui, format!("Clicked: {}", self.count));
                 }
             }
         }
+        false
     }
 }
 
@@ -89,7 +88,6 @@ fn main() {
     run(MyApp {
         count: 0,
         counter: None,
-        bindings: EventBindings::new(),
     });
 }
 ```

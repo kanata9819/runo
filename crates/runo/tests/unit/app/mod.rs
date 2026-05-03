@@ -1,9 +1,7 @@
 use super::*;
 
 struct App;
-impl RunoApplication for App {
-    type Event = ();
-}
+impl RunoApplication for App {}
 
 #[test]
 fn run_options_default_values() {
@@ -24,8 +22,6 @@ fn application_default_options_delegate_to_run_options_default() {
 
 struct CustomApp;
 impl RunoApplication for CustomApp {
-    type Event = ();
-
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "custom".to_string(),
@@ -64,7 +60,7 @@ fn build_runner_uses_application_options() {
 
 #[test]
 fn run_symbol_points_to_runtime_run() {
-    let run_fn: fn(App) = run::<App>;
-    let runtime_fn: fn(App) = runtime::run::<App>;
+    let run_fn: fn(App) = run::<App, ()>;
+    let runtime_fn: fn(App) = runtime::run::<App, ()>;
     let _ = (run_fn, runtime_fn);
 }

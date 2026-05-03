@@ -34,18 +34,19 @@ impl Default for RunOptions {
     }
 }
 
-pub trait RunoApplication {
-    type Event: 'static;
-
+pub trait RunoApplication<Event = ()>
+where
+    Event: 'static,
+{
     fn update(&mut self, _ui: &mut Ui<'_>) -> bool {
         false
     }
 
-    fn build(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+    fn build(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Event> {
         EventBindings::new()
     }
 
-    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Event) -> bool {
         false
     }
 
@@ -54,7 +55,11 @@ pub trait RunoApplication {
     }
 }
 
-pub(crate) fn build_runner<A: RunoApplication + 'static>(application: A) -> AppRunner<A> {
+pub(crate) fn build_runner<A, Event>(application: A) -> AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     let options: RunOptions = application.options();
     AppRunner::new(application, options)
 }

@@ -2,9 +2,7 @@ use super::*;
 use crate::app::RunOptions;
 
 struct DummyApp;
-impl RunoApplication for DummyApp {
-    type Event = ();
-}
+impl RunoApplication for DummyApp {}
 
 #[test]
 fn sanitize_window_size_never_returns_zero() {

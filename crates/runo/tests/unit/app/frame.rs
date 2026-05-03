@@ -8,14 +8,12 @@ struct DummyApp {
 }
 
 impl RunoApplication for DummyApp {
-    type Event = ();
-
-    fn build(&mut self, _ui: &mut Ui<'_>) -> crate::EventBindings<Self::Event> {
+    fn build(&mut self, _ui: &mut Ui<'_>) -> crate::EventBindings<()> {
         self.mount_calls += 1;
         crate::EventBindings::new()
     }
 
-    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: ()) -> bool {
         self.event_calls += 1;
         false
     }

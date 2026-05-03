@@ -4,15 +4,11 @@ use runo::{
 
 struct DefaultOptionsApp;
 
-impl RunoApplication for DefaultOptionsApp {
-    type Event = ();
-}
+impl RunoApplication for DefaultOptionsApp {}
 
 struct CustomOptionsApp;
 
 impl RunoApplication for CustomOptionsApp {
-    type Event = ();
-
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "custom".to_string(),

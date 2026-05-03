@@ -5,7 +5,11 @@ use vello::{Renderer, Scene};
 use crate::app::gpu::{GpuFatalError, SurfaceAcquireAction, map_surface_error, render_params};
 use crate::app::{AppRunner, RunoApplication};
 
-impl<A: RunoApplication + 'static> AppRunner<A> {
+impl<A, Event> AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     pub(super) fn acquire_surface_texture(
         render_cx: &mut RenderContext,
         surface: &mut RenderSurface<'static>,

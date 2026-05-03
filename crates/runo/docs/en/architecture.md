@@ -32,11 +32,14 @@ Current built-in widgets:
 ## 3. RunoApplication lifecycle
 
 ```rust
-pub trait RunoApplication {
-    fn mount(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+pub trait RunoApplication<Event = ()>
+where
+    Event: 'static,
+{
+    fn build(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Event> {
         EventBindings::new()
     }
-    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Event) -> bool {
         false
     }
     fn options(&self) -> RunOptions {
@@ -45,7 +48,7 @@ pub trait RunoApplication {
 }
 ```
 
-1. `mount`: initial UI construction and event binding setup
+1. `build`: initial UI construction and event binding setup
 2. `on_event`: event-driven state updates; return `true` when remount is required
 
 ## 4. Frame flow

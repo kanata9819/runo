@@ -94,9 +94,7 @@ impl TaskApp {
     }
 }
 
-impl RunoApplication for TaskApp {
-    type Event = Event;
-
+impl RunoApplication<Event> for TaskApp {
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "runo task manager example".to_string(),
@@ -107,7 +105,7 @@ impl RunoApplication for TaskApp {
         }
     }
 
-    fn build(&mut self, ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+    fn build(&mut self, ui: &mut Ui<'_>) -> EventBindings<Event> {
         ui.vertical(|ui| {
             ui.widgets()
                 .label()
@@ -219,7 +217,7 @@ impl RunoApplication for TaskApp {
         self.build_event_bindings()
     }
 
-    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) -> bool {
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: Event) -> bool {
         let mut clear_input = false;
         let mut remount = false;
         match event {

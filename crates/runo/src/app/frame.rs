@@ -10,7 +10,11 @@ use crate::ui::Ui;
 #[path = "../../tests/unit/app/frame.rs"]
 mod tests;
 
-impl<A: RunoApplication + 'static> AppRunner<A> {
+impl<A, Event> AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     pub(super) fn render(&mut self) -> bool {
         let Some((physical_width, physical_height)) = self.surface_size() else {
             return false;
@@ -107,7 +111,7 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
         self.states.begin_frame();
         self.retained.begin_build_pass();
 
-        let bindings: crate::ui::EventBindings<A::Event> = {
+        let bindings: crate::ui::EventBindings<Event> = {
             let input = crate::input::UiInputSnapshot::from(&self.input.snapshot());
             let mut ui = Ui::with_input(
                 &mut self.scene,

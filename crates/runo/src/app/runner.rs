@@ -36,7 +36,11 @@ fn window_attributes_from_options(options: &RunOptions) -> WindowAttributes {
         .with_resizable(options.window_resizable)
 }
 
-pub(crate) struct AppRunner<A: RunoApplication + 'static> {
+pub(crate) struct AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     pub(super) user_app: A,
     pub(super) window: Option<Arc<Window>>,
     pub(super) window_id: Option<WindowId>,
@@ -49,12 +53,16 @@ pub(crate) struct AppRunner<A: RunoApplication + 'static> {
     pub(super) effects: EffectStore,
     pub(super) states: StateStore,
     pub(super) retained: RetainedState,
-    pub(super) bindings: EventBindings<A::Event>,
+    pub(super) bindings: EventBindings<Event>,
     pub(super) mount_required: bool,
     pub(super) window_options: RunOptions,
 }
 
-impl<A: RunoApplication + 'static> AppRunner<A> {
+impl<A, Event> AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     pub(super) fn scale_factor(&self) -> f64 {
         self.window
             .as_ref()

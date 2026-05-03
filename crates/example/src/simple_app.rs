@@ -166,9 +166,7 @@ impl MyApp {
     }
 }
 
-impl RunoApplication for MyApp {
-    type Event = Event;
-
+impl RunoApplication<Event> for MyApp {
     fn options(&self) -> RunOptions {
         RunOptions {
             window_title: "runo example".to_string(),
@@ -179,7 +177,7 @@ impl RunoApplication for MyApp {
         }
     }
 
-    fn build(&mut self, ui: &mut Ui<'_>) -> runo::EventBindings<Self::Event> {
+    fn build(&mut self, ui: &mut Ui<'_>) -> runo::EventBindings<Event> {
         ui.vertical(|ui| {
             Self::build_title(ui);
             let (main_panel, _) = ui
@@ -235,7 +233,7 @@ impl RunoApplication for MyApp {
         builder.build()
     }
 
-    fn on_event(&mut self, ui: &mut Ui<'_>, event: Self::Event) -> bool {
+    fn on_event(&mut self, ui: &mut Ui<'_>, event: Event) -> bool {
         match event {
             Event::NameChanged(text) => {
                 self.input_text = text;

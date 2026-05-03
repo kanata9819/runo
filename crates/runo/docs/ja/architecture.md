@@ -32,11 +32,14 @@ GUI フレームワークは主に次を行います。
 ## 3. RunoApplication ライフサイクル
 
 ```rust
-pub trait RunoApplication {
-    fn mount(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Self::Event> {
+pub trait RunoApplication<Event = ()>
+where
+    Event: 'static,
+{
+    fn build(&mut self, _ui: &mut Ui<'_>) -> EventBindings<Event> {
         EventBindings::new()
     }
-    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Self::Event) -> bool {
+    fn on_event(&mut self, _ui: &mut Ui<'_>, _event: Event) -> bool {
         false
     }
     fn options(&self) -> RunOptions {
@@ -45,7 +48,7 @@ pub trait RunoApplication {
 }
 ```
 
-1. `mount`
+1. `build`
    初期 UI 構築とイベントバインディングを行うフェーズ
 2. `on_event`
    入力イベント駆動で状態更新し、再構築が必要なら `true` を返す

@@ -82,10 +82,11 @@ fn keyboard_actions(
     }
 }
 
-fn apply_keyboard_actions<A: RunoApplication + 'static>(
-    runner: &mut AppRunner<A>,
-    actions: KeyboardActions,
-) {
+fn apply_keyboard_actions<A, Event>(runner: &mut AppRunner<A, Event>, actions: KeyboardActions)
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     if let Some(text) = actions.push_text.as_deref() {
         runner.input.push_text_input(text);
     }
@@ -106,7 +107,11 @@ fn apply_keyboard_actions<A: RunoApplication + 'static>(
     }
 }
 
-impl<A: RunoApplication + 'static> AppRunner<A> {
+impl<A, Event> AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     fn update_input_and_request_redraw(
         &mut self,
         update: impl FnOnce(&mut crate::input::InputState),
@@ -116,7 +121,11 @@ impl<A: RunoApplication + 'static> AppRunner<A> {
     }
 }
 
-impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
+impl<A, Event> ApplicationHandler for AppRunner<A, Event>
+where
+    A: RunoApplication<Event> + 'static,
+    Event: 'static,
+{
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         if self.window.is_none() {
             self.init_window_and_gpu(event_loop);
@@ -190,11 +199,8 @@ impl<A: RunoApplication + 'static> ApplicationHandler for AppRunner<A> {
                     input.push_text_input(&text);
                 });
             }
-            WindowEvent::RedrawRequested => {
-                if self.render() {
-                    event_loop.exit();
-                }
-            }
+            WindowEvent::RedrawRequested if self.render() => event_loop.exit(),
+            WindowEvent::RedrawRequested => {}
             _ => {}
         }
     }

@@ -9,6 +9,19 @@
 3. `ui/`: ユーザー向け API（widgets/state/events/layout/effect）
 4. `widget/`: 各ウィジェットのビルダー
 
+## 読む順番
+
+1. `lib.rs`: 公開 API と全体フロー
+2. `ui/mod.rs`: ユーザー向け API の目次
+3. `ui/core.rs`: `Ui` の保持データと基本アクセサ
+4. `ui/widget_factories.rs` と `ui/widgets.rs`: `ui.widgets().button().show()` への入口
+5. `ui/show/*`: ビルダー引数を `retained/state` に渡す変換層
+6. `retained/state/*`: 保持されるウィジェット状態
+7. `retained/input/*`: 入力から状態と `UiEvent` を作る処理
+8. `retained/paint/*`: 描画処理
+
+`ui/events.rs` はイベントを読む処理、`ui/events/bindings.rs` はイベントとアプリ独自型の対応付けです。
+
 ## 現在の主要 API
 
 1. ウィジェット生成: `ui.widgets().button()/label()/text_box()/combo_box()/checkbox()/radio_button()/slider()/div()`
